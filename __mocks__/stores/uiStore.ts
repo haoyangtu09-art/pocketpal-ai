@@ -24,11 +24,13 @@ export const mockUiStore = {
   language: 'en',
   supportedLanguages: [...supportedLanguages],
   l10n: l10n.en,
+  defaultSystemPrompt: '',
   setValue: jest.fn(),
   displayMemUsage: false,
   setAutoNavigateToChat: jest.fn(),
   setColorScheme: jest.fn(),
   setDisplayMemUsage: jest.fn(),
+  setDefaultSystemPrompt: jest.fn(),
   setBenchmarkShareDialogPreference: jest.fn(),
   showError: jest.fn(),
 };

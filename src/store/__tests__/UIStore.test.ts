@@ -60,6 +60,7 @@ describe('UIStore', () => {
 
   describe('language', () => {
     it('should default to en', () => {
+      // beforeEach resets language to 'en'; verifying the setter works correctly
       expect(uiStore.language).toBe('en');
     });
 
