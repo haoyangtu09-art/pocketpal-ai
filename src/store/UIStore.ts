@@ -1,5 +1,3 @@
-import {Appearance} from 'react-native';
-
 import {makePersistable} from 'mobx-persist-store';
 import {makeAutoObservable, runInAction} from 'mobx';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -28,12 +26,10 @@ export class UIStore {
   // This is a flag to auto-navigate to the chat page after loading a model
   autoNavigatetoChat = true;
 
-  //colorScheme = useColorScheme();
-  colorScheme: 'light' | 'dark' =
-    Appearance.getColorScheme() === 'dark' ? 'dark' : 'light';
+  colorScheme: 'light' | 'dark' = 'dark';
 
-  // Current selected language (default to English)
-  _language: AvailableLanguage = 'en';
+  // Current selected language (default to Chinese)
+  _language: AvailableLanguage = 'zh';
 
   // List of supported languages (derived from locales registry)
   get supportedLanguages(): readonly AvailableLanguage[] {
@@ -41,6 +37,10 @@ export class UIStore {
   }
 
   displayMemUsage = false;
+
+  // Default system prompt used when no Pal is active and model has no built-in prompt
+  defaultSystemPrompt =
+    'You are a warm, non-judgmental companion. Your role is to listen deeply and reflect back what you hear. Ask gentle, open-ended questions to help the user explore their thoughts and feelings. Never advise, judge, or rush. Hold space with curiosity and care.';
 
   iOSBackgroundDownloading = true;
 
@@ -77,6 +77,7 @@ export class UIStore {
         'colorScheme',
         'autoNavigatetoChat',
         'displayMemUsage',
+        'defaultSystemPrompt',
         'benchmarkShareDialog',
         '_language',
       ],
@@ -131,6 +132,12 @@ export class UIStore {
   setDisplayMemUsage(value: boolean) {
     runInAction(() => {
       this.displayMemUsage = value;
+    });
+  }
+
+  setDefaultSystemPrompt(value: string) {
+    runInAction(() => {
+      this.defaultSystemPrompt = value;
     });
   }
 

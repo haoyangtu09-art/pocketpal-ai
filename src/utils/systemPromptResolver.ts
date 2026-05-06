@@ -5,18 +5,20 @@ import {generateFinalSystemPrompt} from './palshub-template-parser';
 export interface SystemPromptDependencies {
   pal?: Pal | null;
   model?: Model | null;
+  globalDefault?: string;
 }
 
 /**
  * Resolves the system prompt based on priority:
  * 1. Pal's system prompt (with parameter rendering if needed)
  * 2. Fallback to model's chat template system prompt
- * 3. Empty string if neither exists
+ * 3. Global default system prompt (from UIStore)
+ * 4. Empty string if none exists
  */
 export function resolveSystemPrompt(
   dependencies: SystemPromptDependencies,
 ): string {
-  const {pal, model} = dependencies;
+  const {pal, model, globalDefault} = dependencies;
 
   // Priority 1: Pal's system prompt
   if (pal?.systemPrompt) {
@@ -33,7 +35,12 @@ export function resolveSystemPrompt(
     return model.chatTemplate.systemPrompt;
   }
 
-  // Priority 3: Empty string
+  // Priority 3: Global default system prompt
+  if (globalDefault?.trim()) {
+    return globalDefault;
+  }
+
+  // Priority 4: Empty string
   return '';
 }
 

@@ -253,6 +253,7 @@ export const useChatSession = (
     const systemMessages = resolveSystemMessages({
       pal,
       model: modelStore.activeModel,
+      globalDefault: uiStore.defaultSystemPrompt,
     });
 
     // Prepare completion parameters and create message record

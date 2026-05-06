@@ -970,6 +970,36 @@ export const SettingsScreen: React.FC = observer(() => {
                     </View>
                   </>
                 )}
+
+                {/* Default System Prompt */}
+                <Divider />
+                <View style={styles.settingItemContainer}>
+                  <Text variant="titleMedium" style={styles.textLabel}>
+                    {l10n.settings.defaultSystemPrompt}
+                  </Text>
+                  <Text variant="labelSmall" style={styles.textDescription}>
+                    {l10n.settings.defaultSystemPromptDescription}
+                  </Text>
+                  <RNTextInput
+                    testID="default-system-prompt-input"
+                    style={[
+                      styles.textInput,
+                      {
+                        height: 120,
+                        textAlignVertical: 'top',
+                        paddingTop: 8,
+                        color: theme.colors.onSurface,
+                      },
+                    ]}
+                    multiline
+                    value={uiStore.defaultSystemPrompt}
+                    onChangeText={value =>
+                      uiStore.setDefaultSystemPrompt(value)
+                    }
+                    placeholder={l10n.settings.defaultSystemPromptPlaceholder}
+                    placeholderTextColor={theme.colors.onSurfaceDisabled}
+                  />
+                </View>
               </View>
             </Card.Content>
           </Card>

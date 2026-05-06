@@ -25,7 +25,6 @@ import {ROUTES} from './src/utils/navigationConstants';
 import {
   SidebarContent,
   ModelsHeaderRight,
-  PalHeaderRight,
   HeaderLeft,
   AppWithMigration,
   TTSSetupSheet,
@@ -41,7 +40,6 @@ import {
   // Dev tools screen. Only available in debug mode.
   DevToolsScreen,
 } from './src/screens';
-import PalsScreen from './src/screens/PalsScreen';
 
 // Check if app is in debug mode
 const isDebugMode = __DEV__;
@@ -102,15 +100,6 @@ const App = observer(() => {
                       component={gestureHandlerRootHOC(ChatScreen)}
                       options={{
                         headerShown: false,
-                      }}
-                    />
-                    <Drawer.Screen
-                      name={ROUTES.PALS}
-                      component={gestureHandlerRootHOC(PalsScreen)}
-                      options={{
-                        headerRight: () => <PalHeaderRight />,
-                        headerStyle: styles.headerWithoutDivider,
-                        title: currentL10n.screenTitles.pals,
                       }}
                     />
                     <Drawer.Screen
