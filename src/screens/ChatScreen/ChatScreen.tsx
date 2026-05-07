@@ -167,12 +167,13 @@ export const ChatScreen: React.FC = observer(() => {
   // Otherwise, show the regular chat view
   return (
     <View style={styles.container}>
-      <Image
-        source={require('../../assets/background.png')}
-        style={styles.backgroundImage}
-        resizeMode="contain"
-        pointerEvents="none"
-      />
+      <View pointerEvents="none" style={styles.backgroundImageWrapper}>
+        <Image
+          source={require('../../assets/background.png')}
+          style={styles.backgroundImage}
+          resizeMode="contain"
+        />
+      </View>
       <ChatView
         renderBubble={renderBubble}
         messages={chatSessionStore.currentSessionMessages}
@@ -235,13 +236,17 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  backgroundImage: {
+  backgroundImageWrapper: {
     position: 'absolute',
     right: 0,
     top: '15%',
     height: '70%',
     width: undefined,
+  },
+  backgroundImage: {
+    height: '100%',
+    width: undefined,
     opacity: 0.15,
-    pointerEvents: 'none',
+  },
   },
 });
