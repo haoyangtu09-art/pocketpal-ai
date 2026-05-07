@@ -105,59 +105,58 @@ const App = observer(() => {
                       },
                       headerTintColor: theme.colors.onBackground,
                       headerTitleStyle: styles.headerTitle,
-                      // @ts-ignore sceneStyle / sceneContainerStyle exist at runtime
-                      sceneContainerStyle: styles.transparent,
+                      // @ts-ignore sceneStyle exists at runtime in drawer v7
                       sceneStyle: styles.transparent,
                     }}
                     drawerContent={props => <SidebarContent {...props} />}>
                     <Drawer.Screen
                       name={ROUTES.CHAT}
                       component={gestureHandlerRootHOC(ChatScreen)}
-                      // @ts-ignore contentStyle exists at runtime
+                      // @ts-ignore sceneStyle exists at runtime
                       options={{
                         headerShown: false,
-                        contentStyle: styles.transparent,
+                        sceneStyle: styles.transparent,
                       }}
                     />
                     <Drawer.Screen
                       name={ROUTES.MODELS}
                       component={gestureHandlerRootHOC(ModelsScreen)}
-                      // @ts-ignore contentStyle exists at runtime
+                      // @ts-ignore sceneStyle exists at runtime
                       options={{
                         headerRight: () => <ModelsHeaderRight />,
                         headerStyle: styles.headerWithoutDivider,
                         title: currentL10n.screenTitles.models,
-                        contentStyle: styles.transparent,
+                        sceneStyle: styles.transparent,
                       }}
                     />
                     <Drawer.Screen
                       name={ROUTES.BENCHMARK}
                       component={gestureHandlerRootHOC(BenchmarkScreen)}
-                      // @ts-ignore contentStyle exists at runtime
+                      // @ts-ignore sceneStyle exists at runtime
                       options={{
                         headerStyle: styles.headerWithoutDivider,
                         title: currentL10n.screenTitles.benchmark,
-                        contentStyle: styles.transparent,
+                        sceneStyle: styles.transparent,
                       }}
                     />
                     <Drawer.Screen
                       name={ROUTES.SETTINGS}
                       component={gestureHandlerRootHOC(SettingsScreen)}
-                      // @ts-ignore contentStyle exists at runtime
+                      // @ts-ignore sceneStyle exists at runtime
                       options={{
                         headerStyle: styles.headerWithoutDivider,
                         title: currentL10n.screenTitles.settings,
-                        contentStyle: styles.transparent,
+                        sceneStyle: styles.transparent,
                       }}
                     />
                     <Drawer.Screen
                       name={ROUTES.APP_INFO}
                       component={gestureHandlerRootHOC(AboutScreen)}
-                      // @ts-ignore contentStyle exists at runtime
+                      // @ts-ignore sceneStyle exists at runtime
                       options={{
                         headerStyle: styles.headerWithoutDivider,
                         title: currentL10n.screenTitles.appInfo,
-                        contentStyle: styles.transparent,
+                        sceneStyle: styles.transparent,
                       }}
                     />
 
@@ -166,11 +165,11 @@ const App = observer(() => {
                       <Drawer.Screen
                         name={ROUTES.DEV_TOOLS}
                         component={gestureHandlerRootHOC(DevToolsScreen)}
-                        // @ts-ignore contentStyle exists at runtime
+                        // @ts-ignore sceneStyle exists at runtime
                         options={{
                           headerStyle: styles.headerWithoutDivider,
                           title: 'Dev Tools',
-                          contentStyle: styles.transparent,
+                          sceneStyle: styles.transparent,
                         }}
                       />
                     )}
@@ -187,12 +186,12 @@ const App = observer(() => {
                       <Drawer.Screen
                         name={ROUTES.BENCHMARK_RUNNER}
                         component={gestureHandlerRootHOC(BenchmarkRunnerScreen)}
-                        // @ts-ignore contentStyle exists at runtime
+                        // @ts-ignore sceneStyle exists at runtime
                         options={{
                           headerStyle: styles.headerWithoutDivider,
                           title: 'Benchmark Runner',
                           drawerItemStyle: {display: 'none'},
-                          contentStyle: styles.transparent,
+                          sceneStyle: styles.transparent,
                         }}
                       />
                     )}
