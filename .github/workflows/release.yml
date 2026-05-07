@@ -153,7 +153,7 @@ jobs:
   build_ios:
     runs-on: macos-15 # macOS 15 with Xcode 16
     needs: build_android
-    if: ${{ always() && (needs.build_android.result == 'success' || needs.build_android.result == 'skipped') }}
+    if: false
     env:
       NODE_OPTIONS: '--max-old-space-size=8192'
 
