@@ -24,7 +24,11 @@ import {
   HelperText,
 } from 'react-native-paper';
 
-import {ProjectionModelSelector, MemoryRequirement, GlassCard} from '../../../components';
+import {
+  ProjectionModelSelector,
+  MemoryRequirement,
+  GlassCard,
+} from '../../../components';
 
 import {useTheme, useMemoryCheck, useStorageCheck} from '../../../hooks';
 
@@ -617,9 +621,7 @@ export const ModelCard: React.FC<ModelCardProps> = observer(
 
     return (
       <>
-        <GlassCard
-          style={styles.card}
-          testID={`model-card-${model.filename}`}>
+        <GlassCard style={styles.card} testID={`model-card-${model.filename}`}>
           {/* Compact Header */}
           <View style={styles.compactHeader}>
             <View style={styles.headerContent}>
