@@ -105,8 +105,8 @@ const App = observer(() => {
                       },
                       headerTintColor: theme.colors.onBackground,
                       headerTitleStyle: styles.headerTitle,
+                      sceneStyle: styles.sceneContainer,
                     }}
-                    sceneStyle={styles.sceneContainer}
                     drawerContent={props => <SidebarContent {...props} />}>
                     <Drawer.Screen
                       name={ROUTES.CHAT}
