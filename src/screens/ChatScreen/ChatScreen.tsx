@@ -2,7 +2,7 @@ import React, {useRef, ReactNode, useState} from 'react';
 
 import {observer} from 'mobx-react';
 
-import {Image, StyleSheet, View} from 'react-native';
+import {StyleSheet, View} from 'react-native';
 
 import {
   Bubble,
@@ -167,13 +167,6 @@ export const ChatScreen: React.FC = observer(() => {
   // Otherwise, show the regular chat view
   return (
     <View style={styles.container}>
-      <View pointerEvents="none" style={styles.backgroundImageWrapper}>
-        <Image
-          source={require('../../assets/background.png')}
-          style={styles.backgroundImage}
-          resizeMode="contain"
-        />
-      </View>
       <ChatView
         renderBubble={renderBubble}
         messages={chatSessionStore.currentSessionMessages}
@@ -235,17 +228,5 @@ export const ChatScreen: React.FC = observer(() => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  backgroundImageWrapper: {
-    position: 'absolute',
-    right: 0,
-    top: '15%',
-    height: '70%',
-    width: undefined,
-  },
-  backgroundImage: {
-    height: '100%',
-    width: undefined,
-    opacity: 0.4,
   },
 });

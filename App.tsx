@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {Dimensions, StyleSheet} from 'react-native';
+import {Dimensions, Image, StyleSheet, View} from 'react-native';
 
 import {observer} from 'mobx-react';
 import {NavigationContainer} from '@react-navigation/native';
@@ -74,6 +74,13 @@ const App = observer(() => {
 
   return (
     <GestureHandlerRootView style={styles.root}>
+      <View pointerEvents="none" style={styles.backgroundImageWrapper}>
+        <Image
+          source={require('./src/assets/background.png')}
+          style={styles.backgroundImage}
+          resizeMode="contain"
+        />
+      </View>
       {__E2E__ ? <AutomationBridge /> : null}
       <SafeAreaProvider>
         <KeyboardProvider statusBarTranslucent navigationBarTranslucent>
@@ -183,6 +190,19 @@ const createStyles = (theme: Theme) =>
   StyleSheet.create({
     root: {
       flex: 1,
+    },
+    backgroundImageWrapper: {
+      position: 'absolute',
+      right: 0,
+      top: '15%',
+      height: '70%',
+      width: undefined,
+      zIndex: 0,
+    },
+    backgroundImage: {
+      height: '100%',
+      width: undefined,
+      opacity: 0.4,
     },
     headerWithoutDivider: {
       elevation: 0,
