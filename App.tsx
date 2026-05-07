@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {Dimensions, Image, StyleSheet, View} from 'react-native';
+import {Dimensions, StyleSheet} from 'react-native';
 
 import {observer} from 'mobx-react';
 import {NavigationContainer} from '@react-navigation/native';
@@ -81,18 +81,6 @@ const App = observer(() => {
             <L10nContext.Provider value={currentL10n}>
               <NavigationContainer>
                 <DeepLinkHandler />
-                {/* Background image sits inside NavigationContainer so it
-                    renders beneath all screens but above SafeAreaProvider's
-                    default opaque background */}
-                <View
-                  pointerEvents="none"
-                  style={styles.backgroundImageWrapper}>
-                  <Image
-                    source={require('./src/assets/background.png')}
-                    style={styles.backgroundImage}
-                    resizeMode="contain"
-                  />
-                </View>
                 <BottomSheetModalProvider>
                   <Drawer.Navigator
                     screenOptions={{
@@ -215,18 +203,6 @@ const createStyles = (theme: Theme) =>
     },
     transparent: {
       backgroundColor: 'transparent',
-    },
-    backgroundImageWrapper: {
-      position: 'absolute',
-      right: 0,
-      top: '15%',
-      height: '70%',
-      zIndex: 0,
-    },
-    backgroundImage: {
-      height: '100%',
-      aspectRatio: 1,
-      opacity: 0.4,
     },
     headerWithoutDivider: {
       elevation: 0,
