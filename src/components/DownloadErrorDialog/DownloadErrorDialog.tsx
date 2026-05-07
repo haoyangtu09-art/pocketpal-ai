@@ -60,7 +60,7 @@ export const DownloadErrorDialog: React.FC<DownloadErrorDialogProps> = ({
     }
 
     if (error.code === 'authentication') {
-      if (error.message?.includes('Token is missing')) {
+      if (!hfStore.isTokenPresent) {
         return 'noToken';
       }
       return 'unauthorized';
