@@ -13,24 +13,10 @@ import {
 
 import {debounce} from 'lodash';
 import {observer} from 'mobx-react-lite';
-import {toJS} from 'mobx';
 import {SafeAreaView} from 'react-native-safe-area-context';
-import {
-  Switch,
-  Text,
-  Button,
-  Icon,
-  List,
-  SegmentedButtons,
-} from 'react-native-paper';
+import {Switch, Text, Button, Icon, SegmentedButtons} from 'react-native-paper';
 
-import {
-  GlobeIcon,
-  MoonIcon,
-  CpuChipIcon,
-  ShareIcon,
-  LinkExternalIcon,
-} from '../../assets/icons';
+import {GlobeIcon, MoonIcon, LinkExternalIcon} from '../../assets/icons';
 
 import {
   TextInput,
@@ -48,22 +34,10 @@ import {createStyles} from './styles';
 import {modelStore, uiStore, hfStore, serverStore} from '../../store';
 import {languageDisplayNames} from '../../locales';
 
-import {CacheType} from '../../utils/types';
-import {
-  L10nContext,
-  formatBytes,
-  clearAllSessionCaches,
-  getSessionCacheInfo,
-} from '../../utils';
+import {L10nContext} from '../../utils';
 import {t} from '../../locales';
 import {checkGpuSupport} from '../../utils/deviceCapabilities';
-import {exportLegacyChatSessions} from '../../utils/exportUtils';
 import {getDeviceOptions, DeviceOption} from '../../utils/deviceSelection';
-import {
-  inferBackendType,
-  getAllowedCacheTypeKOptions,
-  getAllowedCacheTypeVOptions,
-} from '../../utils/flashAttnCompatibility';
 
 // OpenCL documentation URL (not localized)
 const OPENCL_DOCS_URL =
@@ -77,33 +51,17 @@ export const SettingsScreen: React.FC = observer(() => {
     modelStore.contextInitParams.n_ctx.toString(),
   );
   const [isValidInput, setIsValidInput] = useState(true);
-  const [showAdvancedSettings, setShowAdvancedSettings] = useState(false);
   const inputRef = useRef<RNTextInput>(null);
-  const [showKeyCacheMenu, setShowKeyCacheMenu] = useState(false);
-  const [showValueCacheMenu, setShowValueCacheMenu] = useState(false);
   const [showLanguageMenu, setShowLanguageMenu] = useState(false);
   const [showHfTokenDialog, setShowHfTokenDialog] = useState(false);
   const [apiUrl, setApiUrl] = useState('');
   const [apiKeyInput, setApiKeyInput] = useState('');
   const [gpuSupported, setGpuSupported] = useState(false);
-  const [keyCacheAnchor, setKeyCacheAnchor] = useState<{x: number; y: number}>({
-    x: 0,
-    y: 0,
-  });
-  const [valueCacheAnchor, setValueCacheAnchor] = useState<{
-    x: number;
-    y: number;
-  }>({x: 0, y: 0});
   const [languageAnchor, setLanguageAnchor] = useState<{x: number; y: number}>({
     x: 0.0,
     y: 0.0,
   });
   const [deviceOptions, setDeviceOptions] = useState<DeviceOption[]>([]);
-  const [currentBackend, setCurrentBackend] = useState<
-    'metal' | 'opencl' | 'hexagon' | 'cpu' | 'blas'
-  >(Platform.OS === 'ios' ? 'metal' : 'cpu');
-  const keyCacheButtonRef = useRef<View>(null);
-  const valueCacheButtonRef = useRef<View>(null);
   const languageButtonRef = useRef<View>(null);
   const debouncedUpdateStore = useRef(
     debounce((value: number) => {
@@ -138,21 +96,6 @@ export const SettingsScreen: React.FC = observer(() => {
     loadDeviceOptions();
   }, []);
 
-  // Compute current backend type based on device selection
-  // Convert MobX observable to plain JS for dependency tracking
-  const devicesKey = JSON.stringify(toJS(modelStore.contextInitParams.devices));
-
-  useEffect(() => {
-    const updateBackend = async () => {
-      const backend = await inferBackendType(
-        modelStore.contextInitParams.devices,
-      );
-      setCurrentBackend(backend);
-    };
-
-    updateBackend();
-  }, [devicesKey]);
-
   useEffect(() => {
     return () => {
       debouncedUpdateStore.cancel();
@@ -178,8 +121,6 @@ export const SettingsScreen: React.FC = observer(() => {
     inputRef.current?.blur();
     setContextSize(modelStore.contextInitParams.n_ctx.toString());
     setIsValidInput(true);
-    setShowKeyCacheMenu(false);
-    setShowValueCacheMenu(false);
     setShowLanguageMenu(false);
   };
 
@@ -192,29 +133,6 @@ export const SettingsScreen: React.FC = observer(() => {
     } else {
       setIsValidInput(false);
     }
-  };
-
-  const currentFlashAttnType =
-    modelStore.contextInitParams.flash_attn_type ??
-    (Platform.OS === 'ios' ? 'auto' : 'off');
-
-  // Get dynamic cache type options based on flash attention compatibility
-  const cacheTypeKOptions = getAllowedCacheTypeKOptions(
-    currentFlashAttnType as 'auto' | 'on' | 'off',
-    currentBackend,
-  );
-
-  const cacheTypeVOptions = getAllowedCacheTypeVOptions(
-    currentFlashAttnType as 'auto' | 'on' | 'off',
-    currentBackend,
-  );
-
-  const getCacheTypeLabel = (
-    value: CacheType | string,
-    isValueCache = false,
-  ) => {
-    const options = isValueCache ? cacheTypeVOptions : cacheTypeKOptions;
-    return options.find(option => option.value === value)?.label || value;
   };
 
   const getCurrentDeviceId = (): string => {
@@ -264,27 +182,48 @@ export const SettingsScreen: React.FC = observer(() => {
     // Otherwise, keep the user's current flash attention preference
   };
 
-  const handleKeyCachePress = () => {
-    keyCacheButtonRef.current?.measure((x, y, width, height, pageX, pageY) => {
-      setKeyCacheAnchor({x: pageX, y: pageY + height});
-      setShowKeyCacheMenu(true);
-    });
-  };
-
-  const handleValueCachePress = () => {
-    valueCacheButtonRef.current?.measure(
-      (x, y, width, height, pageX, pageY) => {
-        setValueCacheAnchor({x: pageX, y: pageY + height});
-        setShowValueCacheMenu(true);
-      },
-    );
-  };
-
   const handleLanguagePress = () => {
     languageButtonRef.current?.measure((x, y, width, height, pageX, pageY) => {
       setLanguageAnchor({x: pageX, y: pageY + height});
       setShowLanguageMenu(true);
     });
+  };
+
+  const handleApplyServer = async () => {
+    let serverId: string;
+    if (serverStore.servers.length > 0) {
+      serverId = serverStore.servers[0].id;
+      serverStore.updateServer(serverId, {url: apiUrl});
+    } else {
+      serverId = serverStore.addServer({
+        name: 'Remote Server',
+        url: apiUrl,
+      });
+    }
+    await serverStore.setApiKey(serverId, apiKeyInput);
+    await serverStore.fetchModelsForServer(serverId);
+  };
+
+  const handleTestConnection = async () => {
+    // Ensure server is saved before testing
+    let serverId: string;
+    if (serverStore.servers.length > 0) {
+      serverId = serverStore.servers[0].id;
+      serverStore.updateServer(serverId, {url: apiUrl});
+    } else {
+      serverId = serverStore.addServer({
+        name: 'Remote Server',
+        url: apiUrl,
+      });
+    }
+    await serverStore.setApiKey(serverId, apiKeyInput);
+
+    const result = await serverStore.testServerConnection(serverId);
+    if (result.ok) {
+      Alert.alert('连接测试', `✓ 连接成功，找到 ${result.modelCount} 个模型`);
+    } else {
+      Alert.alert('连接测试', `✗ 连接失败: ${result.error ?? '未知错误'}`);
+    }
   };
 
   return (
@@ -293,7 +232,7 @@ export const SettingsScreen: React.FC = observer(() => {
         <ScrollView
           contentContainerStyle={styles.container}
           keyboardShouldPersistTaps="handled">
-          {/* Model Initialization Settings */}
+          {/* Card 1 — 模型参数 */}
           <GlassCard style={styles.card}>
             <Text
               variant="titleMedium"
@@ -302,9 +241,7 @@ export const SettingsScreen: React.FC = observer(() => {
             </Text>
             <View style={styles.cardContent}>
               {/* Device Selection */}
-
               <View style={styles.settingItemContainer}>
-                {/* Show full UI when multiple device options available */}
                 {deviceOptions.length > 1 ? (
                   <>
                     <Text variant="titleMedium" style={styles.textLabel}>
@@ -430,514 +367,10 @@ export const SettingsScreen: React.FC = observer(() => {
                   {l10n.settings.modelReloadNotice}
                 </Text>
               </View>
-
-              {/* Advanced Settings */}
-              <List.Accordion
-                title={l10n.settings.advancedSettings}
-                titleStyle={styles.accordionTitle}
-                style={styles.advancedAccordion}
-                expanded={showAdvancedSettings}
-                onPress={() => setShowAdvancedSettings(!showAdvancedSettings)}>
-                <View style={styles.advancedSettingsContent}>
-                  {/* Batch Size Slider */}
-                  <View style={styles.settingItemContainer}>
-                    <InputSlider
-                      testID="batch-size-slider"
-                      label={l10n.settings.batchSize}
-                      value={modelStore.contextInitParams.n_batch}
-                      onValueChange={value =>
-                        modelStore.setNBatch(Math.round(value))
-                      }
-                      min={1}
-                      max={4096}
-                      step={1}
-                    />
-                    <Text variant="labelSmall" style={styles.textDescription}>
-                      {t(l10n.settings.batchSizeDescription, {
-                        batchSize:
-                          modelStore.contextInitParams.n_batch.toString(),
-                        effectiveBatch:
-                          modelStore.contextInitParams.n_batch >
-                          modelStore.contextInitParams.n_ctx
-                            ? ` (${l10n.settings.effectiveLabel}: ${modelStore.contextInitParams.n_ctx})`
-                            : '',
-                      })}
-                    </Text>
-                  </View>
-                  <Divider />
-
-                  {/* Physical Batch Size Slider */}
-                  <View style={styles.settingItemContainer}>
-                    <InputSlider
-                      testID="ubatch-size-slider"
-                      label={l10n.settings.physicalBatchSize}
-                      value={modelStore.contextInitParams.n_ubatch}
-                      onValueChange={value =>
-                        modelStore.setNUBatch(Math.round(value))
-                      }
-                      min={1}
-                      max={4096}
-                      step={1}
-                    />
-                    <Text variant="labelSmall" style={styles.textDescription}>
-                      {t(l10n.settings.physicalBatchSizeDescription, {
-                        physicalBatchSize:
-                          modelStore.contextInitParams.n_ubatch.toString(),
-                        effectivePhysicalBatch:
-                          modelStore.contextInitParams.n_ubatch >
-                          Math.min(
-                            modelStore.contextInitParams.n_batch,
-                            modelStore.contextInitParams.n_ctx,
-                          )
-                            ? ` (${l10n.settings.effectiveLabel}: ${Math.min(
-                                modelStore.contextInitParams.n_batch,
-                                modelStore.contextInitParams.n_ctx,
-                              )})`
-                            : '',
-                      })}
-                    </Text>
-                  </View>
-                  <Divider />
-
-                  {/* Thread Count Slider */}
-                  <View style={styles.settingItemContainer}>
-                    <InputSlider
-                      testID="thread-count-slider"
-                      label={l10n.settings.cpuThreads}
-                      value={modelStore.contextInitParams.n_threads}
-                      onValueChange={value =>
-                        modelStore.setNThreads(Math.round(value))
-                      }
-                      min={1}
-                      max={modelStore.max_threads}
-                      step={1}
-                    />
-                    <Text variant="labelSmall" style={styles.textDescription}>
-                      {t(l10n.settings.cpuThreadsDescription, {
-                        threads:
-                          modelStore.contextInitParams.n_threads.toString(),
-                        maxThreads: modelStore.max_threads.toString(),
-                      })}
-                    </Text>
-                  </View>
-                  <Divider />
-
-                  {/* Image Max Tokens Slider */}
-                  <View style={styles.settingItemContainer}>
-                    <InputSlider
-                      testID="image-max-tokens-slider"
-                      label={l10n.settings.imageMaxTokens}
-                      value={
-                        modelStore.contextInitParams.image_max_tokens ?? 512
-                      }
-                      onValueChange={value =>
-                        modelStore.setImageMaxTokens(Math.round(value))
-                      }
-                      min={256}
-                      max={4096}
-                      step={1}
-                    />
-                    <Text variant="labelSmall" style={styles.textDescription}>
-                      {t(l10n.settings.imageMaxTokensDescription, {
-                        tokens: (
-                          modelStore.contextInitParams.image_max_tokens ?? 512
-                        ).toString(),
-                        effectiveTokens:
-                          (modelStore.contextInitParams.image_max_tokens ??
-                            512) > modelStore.contextInitParams.n_ctx
-                            ? ` (${l10n.settings.effectiveLabel}: ${modelStore.contextInitParams.n_ctx})`
-                            : '',
-                      })}
-                    </Text>
-                  </View>
-                  <Divider />
-
-                  {/* Flash Attention Type */}
-                  <View style={styles.settingItemContainer}>
-                    <Text variant="titleMedium" style={styles.textLabel}>
-                      {l10n.settings.flashAttention}
-                    </Text>
-                    <Text variant="labelSmall" style={styles.textDescription}>
-                      {Platform.OS === 'ios'
-                        ? l10n.settings.flashAttentionIOSDescription
-                        : l10n.settings.flashAttentionAndroidDescription}
-                    </Text>
-                    <SegmentedButtons
-                      value={
-                        modelStore.contextInitParams.flash_attn_type ??
-                        (Platform.OS === 'ios' ? 'auto' : 'off')
-                      }
-                      onValueChange={value =>
-                        modelStore.setFlashAttnType(
-                          value as 'auto' | 'on' | 'off',
-                        )
-                      }
-                      density="high"
-                      buttons={(() => {
-                        const currentDeviceId = getCurrentDeviceId();
-                        const currentDevice = deviceOptions.find(
-                          opt => opt.id === currentDeviceId,
-                        );
-                        const validTypes =
-                          currentDevice?.valid_flash_attn_types || [
-                            'auto',
-                            'on',
-                            'off',
-                          ];
-
-                        return [
-                          {
-                            value: 'auto',
-                            label: l10n.settings.flashAttentionAuto,
-                            disabled: !validTypes.includes('auto'),
-                          },
-                          {
-                            value: 'on',
-                            label: l10n.settings.flashAttentionOn,
-                            disabled: !validTypes.includes('on'),
-                          },
-                          {
-                            value: 'off',
-                            label: l10n.settings.flashAttentionOff,
-                            disabled: !validTypes.includes('off'),
-                          },
-                        ];
-                      })()}
-                      style={styles.segmentedButtons}
-                    />
-                  </View>
-                  <Divider />
-
-                  {/* Cache Type K Selection */}
-                  <View style={styles.settingItemContainer}>
-                    <View style={styles.switchContainer}>
-                      <View style={styles.textContainer}>
-                        <Text variant="titleMedium" style={styles.textLabel}>
-                          {l10n.settings.keyCacheType}
-                        </Text>
-                        <Text
-                          variant="labelSmall"
-                          style={styles.textDescription}>
-                          {modelStore.contextInitParams.flash_attn_type &&
-                          modelStore.contextInitParams.flash_attn_type !== 'off'
-                            ? l10n.settings.keyCacheTypeDescription
-                            : l10n.settings.keyCacheTypeDisabledDescription}
-                        </Text>
-                      </View>
-                      <View style={styles.menuContainer}>
-                        <Button
-                          ref={keyCacheButtonRef}
-                          mode="outlined"
-                          onPress={handleKeyCachePress}
-                          style={styles.menuButton}
-                          contentStyle={styles.buttonContent}
-                          disabled={
-                            !modelStore.contextInitParams.flash_attn_type ||
-                            modelStore.contextInitParams.flash_attn_type ===
-                              'off'
-                          }
-                          icon={({size, color}) => (
-                            <Icon
-                              source="chevron-down"
-                              size={size}
-                              color={color}
-                            />
-                          )}>
-                          {getCacheTypeLabel(
-                            modelStore.contextInitParams.cache_type_k,
-                            false,
-                          )}
-                        </Button>
-                        <Menu
-                          visible={showKeyCacheMenu}
-                          onDismiss={() => setShowKeyCacheMenu(false)}
-                          anchor={keyCacheAnchor}
-                          selectable>
-                          {cacheTypeKOptions.map(option => (
-                            <Menu.Item
-                              key={option.value}
-                              style={styles.menu}
-                              label={option.label}
-                              selected={
-                                option.value ===
-                                modelStore.contextInitParams.cache_type_k
-                              }
-                              disabled={option.disabled}
-                              onPress={() => {
-                                if (!option.disabled) {
-                                  modelStore.setCacheTypeK(option.value);
-                                  setShowKeyCacheMenu(false);
-                                }
-                              }}
-                            />
-                          ))}
-                        </Menu>
-                      </View>
-                    </View>
-                  </View>
-                  <Divider />
-
-                  {/* Cache Type V Selection */}
-                  <View style={styles.settingItemContainer}>
-                    <View style={styles.switchContainer}>
-                      <View style={styles.textContainer}>
-                        <Text variant="titleMedium" style={styles.textLabel}>
-                          {l10n.settings.valueCacheType}
-                        </Text>
-                        <Text
-                          variant="labelSmall"
-                          style={styles.textDescription}>
-                          {modelStore.contextInitParams.flash_attn_type &&
-                          modelStore.contextInitParams.flash_attn_type !== 'off'
-                            ? l10n.settings.valueCacheTypeDescription
-                            : l10n.settings.valueCacheTypeDisabledDescription}
-                        </Text>
-                      </View>
-                      <View style={styles.menuContainer}>
-                        <Button
-                          ref={valueCacheButtonRef}
-                          mode="outlined"
-                          onPress={handleValueCachePress}
-                          style={styles.menuButton}
-                          contentStyle={styles.buttonContent}
-                          disabled={
-                            !modelStore.contextInitParams.flash_attn_type ||
-                            modelStore.contextInitParams.flash_attn_type ===
-                              'off'
-                          }
-                          icon={({size, color}) => (
-                            <Icon
-                              source="chevron-down"
-                              size={size}
-                              color={color}
-                            />
-                          )}>
-                          {getCacheTypeLabel(
-                            modelStore.contextInitParams.cache_type_v,
-                            true,
-                          )}
-                        </Button>
-                        <Menu
-                          visible={showValueCacheMenu}
-                          onDismiss={() => setShowValueCacheMenu(false)}
-                          anchor={valueCacheAnchor}
-                          selectable>
-                          {cacheTypeVOptions.map(option => (
-                            <Menu.Item
-                              key={option.value}
-                              label={option.label}
-                              style={styles.menu}
-                              selected={
-                                option.value ===
-                                modelStore.contextInitParams.cache_type_v
-                              }
-                              disabled={option.disabled}
-                              onPress={() => {
-                                if (!option.disabled) {
-                                  modelStore.setCacheTypeV(option.value);
-                                  setShowValueCacheMenu(false);
-                                }
-                              }}
-                            />
-                          ))}
-                        </Menu>
-                      </View>
-                    </View>
-                  </View>
-                  <Divider />
-
-                  {/* Remote API Server Config */}
-                  <View style={styles.settingItemContainer}>
-                    <Text variant="titleMedium" style={styles.textLabel}>
-                      API 地址
-                    </Text>
-                    <RNTextInput
-                      style={[styles.textInput, styles.textLabel]}
-                      value={apiUrl}
-                      onChangeText={setApiUrl}
-                      placeholder="http://192.168.1.100:1234"
-                      placeholderTextColor={theme.colors.onSurfaceDisabled}
-                      autoCapitalize="none"
-                      autoCorrect={false}
-                      keyboardType="url"
-                    />
-                    <Text
-                      variant="titleMedium"
-                      style={[styles.textLabel, styles.marginTop8]}>
-                      API Key
-                    </Text>
-                    <RNTextInput
-                      style={[styles.textInput, styles.textLabel]}
-                      value={apiKeyInput}
-                      onChangeText={setApiKeyInput}
-                      placeholder="sk-..."
-                      placeholderTextColor={theme.colors.onSurfaceDisabled}
-                      secureTextEntry
-                      autoCapitalize="none"
-                      autoCorrect={false}
-                    />
-                    <Button
-                      mode="outlined"
-                      style={styles.marginTop8}
-                      onPress={async () => {
-                        let serverId: string;
-                        if (serverStore.servers.length > 0) {
-                          serverId = serverStore.servers[0].id;
-                          serverStore.updateServer(serverId, {url: apiUrl});
-                        } else {
-                          serverId = serverStore.addServer({
-                            name: 'Remote Server',
-                            url: apiUrl,
-                          });
-                        }
-                        await serverStore.setApiKey(serverId, apiKeyInput);
-                        await serverStore.fetchModelsForServer(serverId);
-                      }}>
-                      应用
-                    </Button>
-                  </View>
-                </View>
-              </List.Accordion>
             </View>
           </GlassCard>
 
-          {/* Memory Settings */}
-          <GlassCard style={styles.card}>
-            <Text
-              variant="titleMedium"
-              style={[styles.cardTitle, styles.textLabel]}>
-              {l10n.settings.memorySettings}
-            </Text>
-            <View style={styles.cardContent}>
-              <View style={styles.settingItemContainer}>
-                {/* Use Memory Lock */}
-                <View style={styles.switchContainer}>
-                  <View style={styles.textContainer}>
-                    <Text variant="titleMedium" style={styles.textLabel}>
-                      {l10n.settings.useMlock}
-                    </Text>
-                    <Text variant="labelSmall" style={styles.textDescription}>
-                      {l10n.settings.useMlockDescription}
-                    </Text>
-                  </View>
-                  <Switch
-                    testID="use-mlock-switch"
-                    value={modelStore.contextInitParams.use_mlock}
-                    onValueChange={value => modelStore.setUseMlock(value)}
-                  />
-                </View>
-              </View>
-              <Divider />
-
-              {/* Memory Mapping */}
-              <View style={styles.settingItemContainer}>
-                <View style={styles.switchContainer}>
-                  <View style={styles.textContainer}>
-                    <Text variant="titleMedium" style={styles.textLabel}>
-                      {l10n.settings.useMmap}
-                    </Text>
-                    <Text variant="labelSmall" style={styles.textDescription}>
-                      {l10n.settings.useMmapDescription}
-                    </Text>
-                  </View>
-                  <Switch
-                    testID="use-mmap-switch"
-                    value={
-                      modelStore.contextInitParams.use_mmap !== 'false' &&
-                      modelStore.contextInitParams.use_mmap !== 'smart'
-                    }
-                    onValueChange={value =>
-                      modelStore.setUseMmap(value ? 'true' : 'false')
-                    }
-                  />
-                </View>
-              </View>
-              <Divider />
-
-              {/* Enable Weight Repacking (Android only) */}
-              {Platform.OS === 'android' && (
-                <View style={styles.settingItemContainer}>
-                  <View style={styles.switchContainer}>
-                    <View style={styles.textContainer}>
-                      <Text variant="titleMedium" style={styles.textLabel}>
-                        {l10n.settings.weightRepacking}
-                      </Text>
-                      <Text variant="labelSmall" style={styles.textDescription}>
-                        {l10n.settings.weightRepackingDescription}
-                      </Text>
-                    </View>
-                    <Switch
-                      testID="weight-repacking-switch"
-                      value={
-                        !(modelStore.contextInitParams.no_extra_bufts ?? false)
-                      }
-                      onValueChange={value =>
-                        modelStore.setNoExtraBufts(!value)
-                      }
-                    />
-                  </View>
-                </View>
-              )}
-              {Platform.OS === 'android' && <Divider />}
-
-              <Text variant="labelSmall" style={styles.textDescription}>
-                {l10n.settings.modelReloadNotice}
-              </Text>
-            </View>
-          </GlassCard>
-
-          {/* Model Loading Settings */}
-          <GlassCard style={styles.card}>
-            <Text
-              variant="titleMedium"
-              style={[styles.cardTitle, styles.textLabel]}>
-              {l10n.settings.modelLoadingSettings}
-            </Text>
-            <View style={styles.cardContent}>
-              <View style={styles.settingItemContainer}>
-                {/* Auto Offload/Load */}
-                <View style={styles.switchContainer}>
-                  <View style={styles.textContainer}>
-                    <Text variant="titleMedium" style={styles.textLabel}>
-                      {l10n.settings.autoOffloadLoad}
-                    </Text>
-                    <Text variant="labelSmall" style={styles.textDescription}>
-                      {l10n.settings.autoOffloadLoadDescription}
-                    </Text>
-                  </View>
-                  <Switch
-                    testID="auto-offload-load-switch"
-                    value={modelStore.useAutoRelease}
-                    onValueChange={value =>
-                      modelStore.updateUseAutoRelease(value)
-                    }
-                  />
-                </View>
-                <Divider />
-
-                {/* Auto Navigate to Chat */}
-                <View style={styles.switchContainer}>
-                  <View style={styles.textContainer}>
-                    <Text variant="titleMedium" style={styles.textLabel}>
-                      {l10n.settings.autoNavigateToChat}
-                    </Text>
-                    <Text variant="labelSmall" style={styles.textDescription}>
-                      {l10n.settings.autoNavigateToChatDescription}
-                    </Text>
-                  </View>
-                  <Switch
-                    testID="auto-navigate-to-chat-switch"
-                    value={uiStore.autoNavigatetoChat}
-                    onValueChange={value =>
-                      uiStore.setAutoNavigateToChat(value)
-                    }
-                  />
-                </View>
-              </View>
-            </View>
-          </GlassCard>
-
-          {/* UI Settings */}
+          {/* Card 2 — 应用设置 */}
           <GlassCard style={styles.card}>
             <Text
               variant="titleMedium"
@@ -1021,40 +454,6 @@ export const SettingsScreen: React.FC = observer(() => {
                   />
                 </View>
 
-                {/* Display Memory Usage (iOS only) */}
-                {Platform.OS === 'ios' && (
-                  <>
-                    <Divider />
-                    <View style={styles.switchContainer}>
-                      <View style={styles.textContainer}>
-                        <View style={styles.labelWithIconContainer}>
-                          <CpuChipIcon
-                            width={20}
-                            height={20}
-                            style={styles.settingIcon}
-                            stroke={theme.colors.onSurface}
-                          />
-                          <Text variant="titleMedium" style={styles.textLabel}>
-                            {l10n.settings.displayMemoryUsage}
-                          </Text>
-                        </View>
-                        <Text
-                          variant="labelSmall"
-                          style={styles.textDescription}>
-                          {l10n.settings.displayMemoryUsageDescription}
-                        </Text>
-                      </View>
-                      <Switch
-                        testID="display-memory-usage-switch"
-                        value={uiStore.displayMemUsage}
-                        onValueChange={value =>
-                          uiStore.setDisplayMemUsage(value)
-                        }
-                      />
-                    </View>
-                  </>
-                )}
-
                 {/* Default System Prompt */}
                 <Divider />
                 <View style={styles.settingItemContainer}>
@@ -1084,7 +483,56 @@ export const SettingsScreen: React.FC = observer(() => {
             </View>
           </GlassCard>
 
-          {/* API Settings */}
+          {/* Card 3 — API 配置 */}
+          <GlassCard style={styles.card}>
+            <Text
+              variant="titleMedium"
+              style={[styles.cardTitle, styles.textLabel]}>
+              API 配置
+            </Text>
+            <View style={styles.cardContent}>
+              <View style={styles.settingItemContainer}>
+                <Text variant="titleMedium" style={styles.textLabel}>
+                  API 地址
+                </Text>
+                <RNTextInput
+                  style={[styles.textInput, styles.textLabel]}
+                  value={apiUrl}
+                  onChangeText={setApiUrl}
+                  placeholder="http://192.168.1.100:1234"
+                  placeholderTextColor={theme.colors.onSurfaceDisabled}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  keyboardType="url"
+                />
+                <Text
+                  variant="titleMedium"
+                  style={[styles.textLabel, styles.marginTop8]}>
+                  API Key
+                </Text>
+                <RNTextInput
+                  style={[styles.textInput, styles.textLabel]}
+                  value={apiKeyInput}
+                  onChangeText={setApiKeyInput}
+                  placeholder="sk-..."
+                  placeholderTextColor={theme.colors.onSurfaceDisabled}
+                  secureTextEntry
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                />
+                <View style={styles.buttonRow}>
+                  <Button mode="outlined" onPress={handleApplyServer}>
+                    应用
+                  </Button>
+                  <Button mode="outlined" onPress={handleTestConnection}>
+                    测试连接
+                  </Button>
+                </View>
+              </View>
+            </View>
+          </GlassCard>
+
+          {/* Card 4 — HuggingFace Token */}
           <GlassCard style={styles.card}>
             <Text
               variant="titleMedium"
@@ -1132,154 +580,6 @@ export const SettingsScreen: React.FC = observer(() => {
                     disabled={!hfStore.isTokenPresent}
                     onValueChange={value => hfStore.setUseHfToken(value)}
                   />
-                </View>
-              </View>
-            </View>
-          </GlassCard>
-
-          {/* Cache & Storage Settings - iOS only (for Shortcuts) */}
-          {Platform.OS === 'ios' && (
-            <GlassCard style={styles.card}>
-              <Text
-                variant="titleMedium"
-                style={[styles.cardTitle, styles.textLabel]}>
-                {l10n.settings.cacheStorageTitle}
-              </Text>
-              <View style={styles.cardContent}>
-                <View style={styles.settingItemContainer}>
-                  {/* Clear Shortcuts Caches */}
-                  <View style={styles.switchContainer}>
-                    <View style={styles.textContainer}>
-                      <Text variant="titleMedium" style={styles.textLabel}>
-                        {l10n.settings.clearPalCaches}
-                      </Text>
-                      <Text variant="labelSmall" style={styles.textDescription}>
-                        {l10n.settings.clearPalCachesDescription}
-                      </Text>
-                    </View>
-                    <Button
-                      mode="outlined"
-                      onPress={async () => {
-                        try {
-                          // Get cache info first
-                          const cacheInfo = await getSessionCacheInfo();
-
-                          if (cacheInfo.fileCount === 0) {
-                            Alert.alert(
-                              l10n.settings.clearPalCaches,
-                              l10n.settings.noCachesToClear,
-                            );
-                            return;
-                          }
-
-                          // Show confirmation dialog with cache info
-                          const formattedSize = formatBytes(
-                            cacheInfo.totalSizeBytes,
-                          );
-                          const confirmMessage = t(
-                            l10n.settings.clearCachesConfirmMessage,
-                            {
-                              fileCount: cacheInfo.fileCount.toString(),
-                              size: formattedSize,
-                            },
-                          );
-
-                          Alert.alert(
-                            l10n.settings.clearCachesConfirmTitle,
-                            confirmMessage,
-                            [
-                              {
-                                text: l10n.common.cancel,
-                                style: 'cancel',
-                              },
-                              {
-                                text: l10n.settings.clearCachesButton,
-                                style: 'destructive',
-                                onPress: async () => {
-                                  try {
-                                    const deletedCount =
-                                      await clearAllSessionCaches();
-                                    const successMessage = t(
-                                      l10n.settings.clearCachesSuccess,
-                                      {count: deletedCount.toString()},
-                                    );
-                                    Alert.alert(
-                                      l10n.settings.clearPalCaches,
-                                      successMessage,
-                                    );
-                                  } catch (error) {
-                                    console.error(
-                                      'Failed to clear caches:',
-                                      error,
-                                    );
-                                    Alert.alert(
-                                      l10n.settings.clearPalCaches,
-                                      l10n.settings.clearCachesError,
-                                    );
-                                  }
-                                },
-                              },
-                            ],
-                          );
-                        } catch (error) {
-                          console.error('Failed to get cache info:', error);
-                          Alert.alert(
-                            l10n.settings.clearPalCaches,
-                            l10n.settings.clearCachesError,
-                          );
-                        }
-                      }}
-                      style={styles.menuButton}>
-                      {l10n.settings.clearCachesButton}
-                    </Button>
-                  </View>
-                </View>
-              </View>
-            </GlassCard>
-          )}
-
-          {/* Export Options */}
-          <GlassCard style={styles.card}>
-            <Text
-              variant="titleMedium"
-              style={[styles.cardTitle, styles.textLabel]}>
-              {l10n.settings.exportOptions}
-            </Text>
-            <View style={styles.cardContent}>
-              <View style={styles.settingItemContainer}>
-                {/* Legacy Export */}
-                <View style={styles.switchContainer}>
-                  <View style={styles.textContainer}>
-                    <View style={styles.labelWithIconContainer}>
-                      <ShareIcon
-                        width={20}
-                        height={20}
-                        style={styles.settingIcon}
-                        stroke={theme.colors.onSurface}
-                      />
-                      <Text variant="titleMedium" style={styles.textLabel}>
-                        {l10n.settings.exportLegacyChats}
-                      </Text>
-                    </View>
-                    <Text variant="labelSmall" style={styles.textDescription}>
-                      {l10n.settings.exportLegacyChatsDescription}
-                    </Text>
-                  </View>
-                  <Button
-                    mode="outlined"
-                    onPress={async () => {
-                      try {
-                        await exportLegacyChatSessions();
-                      } catch {
-                        Alert.alert(
-                          'Export Error',
-                          'Failed to export legacy chat sessions. The file may not exist.',
-                        );
-                      }
-                    }}
-                    style={styles.menuButton}>
-                    {l10n.settings.exportButton}
-                  </Button>
                 </View>
               </View>
             </View>

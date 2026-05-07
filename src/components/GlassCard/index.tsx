@@ -1,9 +1,8 @@
 import React, {useEffect, useRef} from 'react';
 import {Animated, StyleSheet, View, ViewStyle} from 'react-native';
-import {BlurView} from '@react-native-community/blur';
 import {useTheme} from '../../hooks';
 
-const CORNER = 24;
+const CORNER = 20;
 
 interface GlassCardProps {
   children: React.ReactNode;
@@ -16,77 +15,59 @@ export const GlassCard: React.FC<GlassCardProps> = ({
   children,
   style,
   testID,
-  tintColor,
 }) => {
   const theme = useTheme();
-  const isDark = theme.colors.background === '#000000';
+  const isDark = theme.dark;
 
-  // Animated gradient border: gold ↔ white shimmer
-  const borderAnim = useRef(new Animated.Value(0)).current;
+  // Shimmer animation along top edge
+  const shimmerAnim = useRef(new Animated.Value(0)).current;
   useEffect(() => {
     Animated.loop(
-      Animated.timing(borderAnim, {
-        toValue: 1,
-        duration: 3000,
-        useNativeDriver: false,
-      }),
+      Animated.sequence([
+        Animated.timing(shimmerAnim, {
+          toValue: 1,
+          duration: 2000,
+          useNativeDriver: false,
+        }),
+        Animated.timing(shimmerAnim, {
+          toValue: 0,
+          duration: 2000,
+          useNativeDriver: false,
+        }),
+      ]),
     ).start();
-  }, [borderAnim]);
+  }, [shimmerAnim]);
 
-  const adaptiveTint =
-    tintColor ?? (isDark ? 'rgba(255,220,120,0.06)' : 'rgba(255,255,255,0.45)');
-
-  const borderColor = borderAnim.interpolate({
+  const borderColor = shimmerAnim.interpolate({
     inputRange: [0, 0.5, 1],
     outputRange: isDark
       ? [
-          'rgba(255,220,120,0.35)',
+          'rgba(180,180,200,0.25)',
           'rgba(255,255,255,0.55)',
-          'rgba(255,220,120,0.35)',
+          'rgba(180,180,200,0.25)',
         ]
       : [
-          'rgba(255,255,255,0.8)',
-          'rgba(200,180,255,0.7)',
-          'rgba(255,255,255,0.8)',
+          'rgba(200,200,220,0.4)',
+          'rgba(255,255,255,0.9)',
+          'rgba(200,200,220,0.4)',
         ],
   });
 
-  const glowColor = isDark ? 'rgba(255,210,100,0.18)' : 'rgba(255,255,255,0.5)';
-  const fallbackBg = isDark ? 'rgba(25,25,35,0.88)' : 'rgba(255,255,255,0.78)';
+  const topEdgeOpacity = shimmerAnim.interpolate({
+    inputRange: [0, 0.5, 1],
+    outputRange: [0.3, 0.9, 0.3],
+  });
+
+  const bg = isDark ? 'rgba(18,18,28,0.82)' : 'rgba(240,240,255,0.82)';
 
   return (
-    <View style={[styles.outerShadow, style]} testID={testID}>
-      {/* Edge glow ring */}
-      <View style={[styles.glowRing, {shadowColor: glowColor}]} />
-
-      {/* Squircle blur container */}
-      <View style={styles.wrapper}>
-        <BlurView
-          style={StyleSheet.absoluteFill}
-          blurType={isDark ? 'dark' : 'xlight'}
-          blurAmount={20}
-          reducedTransparencyFallbackColor={fallbackBg}
-        />
-
-        {/* Adaptive tint */}
-        <View
-          style={[
-            StyleSheet.absoluteFill,
-            {backgroundColor: adaptiveTint, borderRadius: CORNER},
-          ]}
-        />
-
-        {/* Top glare highlight */}
-        <View style={styles.glare} />
-
-        {/* Animated gradient border */}
-        <Animated.View
-          style={[
-            StyleSheet.absoluteFill,
-            {borderRadius: CORNER, borderWidth: 1, borderColor},
-          ]}
-        />
-
+    <View style={[styles.shadow, style]} testID={testID}>
+      {/* Outer border with shimmer */}
+      <Animated.View style={[styles.borderRing, {borderColor}]} />
+      {/* Card body */}
+      <View style={[styles.body, {backgroundColor: bg}]}>
+        {/* Top edge highlight — the "reflection" */}
+        <Animated.View style={[styles.topEdge, {opacity: topEdgeOpacity}]} />
         <View style={styles.content}>{children}</View>
       </View>
     </View>
@@ -94,35 +75,31 @@ export const GlassCard: React.FC<GlassCardProps> = ({
 };
 
 const styles = StyleSheet.create({
-  outerShadow: {
-    marginVertical: 8,
+  shadow: {
+    borderRadius: CORNER,
     shadowColor: '#000',
-    shadowOffset: {width: 0, height: 8},
-    shadowOpacity: 0.22,
-    shadowRadius: 20,
+    shadowOffset: {width: 0, height: 6},
+    shadowOpacity: 0.28,
+    shadowRadius: 16,
     elevation: 8,
   },
-  glowRing: {
+  borderRing: {
     ...StyleSheet.absoluteFillObject,
-    borderRadius: CORNER + 2,
-    shadowOffset: {width: 0, height: 0},
-    shadowOpacity: 0.5,
-    shadowRadius: 12,
-    elevation: 0,
+    borderRadius: CORNER,
+    borderWidth: 1,
   },
-  wrapper: {
+  body: {
     borderRadius: CORNER,
     overflow: 'hidden',
   },
-  glare: {
+  topEdge: {
     position: 'absolute',
     top: 0,
-    left: 0,
-    right: 0,
-    height: '35%',
-    borderTopLeftRadius: CORNER,
-    borderTopRightRadius: CORNER,
-    backgroundColor: 'rgba(255,255,255,0.2)',
+    left: '10%',
+    right: '10%',
+    height: 1.5,
+    backgroundColor: '#ffffff',
+    borderRadius: 1,
   },
   content: {
     borderRadius: CORNER,

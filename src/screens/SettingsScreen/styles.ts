@@ -119,4 +119,9 @@ export const createStyles = (theme: Theme) =>
     marginTop8: {
       marginTop: 8,
     },
+    buttonRow: {
+      flexDirection: 'row',
+      gap: 8,
+      marginTop: 8,
+    },
   });
