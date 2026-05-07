@@ -9,9 +9,22 @@ interface GlassCardProps {
   testID?: string;
 }
 
-export const GlassCard: React.FC<GlassCardProps> = ({children, style, testID}) => {
+export const GlassCard: React.FC<GlassCardProps> = ({
+  children,
+  style,
+  testID,
+}) => {
   const theme = useTheme();
   const isDark = theme.colors.background === '#000000';
+  const overlayBg = isDark
+    ? 'rgba(255,255,255,0.06)'
+    : 'rgba(255,255,255,0.45)';
+  const overlayBorder = isDark
+    ? 'rgba(255,255,255,0.12)'
+    : 'rgba(255,255,255,0.7)';
+  const fallbackColor = isDark
+    ? 'rgba(30,30,30,0.85)'
+    : 'rgba(255,255,255,0.75)';
 
   return (
     <View style={[styles.wrapper, style]} testID={testID}>
@@ -19,22 +32,16 @@ export const GlassCard: React.FC<GlassCardProps> = ({children, style, testID}) =
         style={StyleSheet.absoluteFill}
         blurType={isDark ? 'dark' : 'light'}
         blurAmount={16}
-        reducedTransparencyFallbackColor={
-          isDark ? 'rgba(30,30,30,0.85)' : 'rgba(255,255,255,0.75)'
-        }
+        reducedTransparencyFallbackColor={fallbackColor}
       />
       <View
         style={[
           StyleSheet.absoluteFill,
           {
-            backgroundColor: isDark
-              ? 'rgba(255,255,255,0.06)'
-              : 'rgba(255,255,255,0.45)',
+            backgroundColor: overlayBg,
             borderRadius: 16,
             borderWidth: 1,
-            borderColor: isDark
-              ? 'rgba(255,255,255,0.12)'
-              : 'rgba(255,255,255,0.7)',
+            borderColor: overlayBorder,
           },
         ]}
       />
