@@ -3,6 +3,7 @@ import {Theme} from '../../utils/types';
 import {EdgeInsets} from 'react-native-safe-area-context';
 
 export const createStyles = ({
+  theme,
   insets,
   headerHeight,
 }: {
@@ -35,9 +36,9 @@ export const createStyles = ({
       elevation: 0,
       shadowOpacity: 0,
       borderBottomWidth: 0,
-      backgroundColor: 'transparent',
+      backgroundColor: theme.colors.background,
     },
     headerWithDivider: {
-      backgroundColor: 'transparent',
+      backgroundColor: theme.colors.background,
     },
   });

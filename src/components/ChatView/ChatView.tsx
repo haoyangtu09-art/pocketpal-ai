@@ -943,7 +943,11 @@ export const ChatView = observer(
             {/* Chat input */}
             <Reanimated.View
               onLayout={onLayoutChatInput}
-              style={[styles.inputContainer, inputContainerAnimatedStyle]}>
+              style={[
+                styles.inputContainer,
+                inputContainerAnimatedStyle,
+                {backgroundColor: inputBackgroundColor},
+              ]}>
               <ChatInput
                 {...{
                   ...unwrap(inputProps),
