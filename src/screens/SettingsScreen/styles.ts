@@ -102,4 +102,18 @@ export const createStyles = (theme: Theme) =>
     segmentedButtons: {
       marginVertical: 8,
     },
+    cardTitle: {
+      paddingHorizontal: 16,
+      paddingTop: 16,
+      paddingBottom: 4,
+    },
+    cardContent: {
+      paddingHorizontal: 16,
+      paddingBottom: 16,
+    },
+    systemPromptInput: {
+      height: 120,
+      textAlignVertical: 'top' as const,
+      paddingTop: 8,
+    },
   });
