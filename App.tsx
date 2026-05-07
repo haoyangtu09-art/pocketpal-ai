@@ -74,22 +74,39 @@ const App = observer(() => {
 
   return (
     <GestureHandlerRootView style={styles.root}>
-      <View pointerEvents="none" style={styles.backgroundImageWrapper}>
-        <Image
-          source={require('./src/assets/background.png')}
-          style={styles.backgroundImage}
-          resizeMode="contain"
-        />
-      </View>
       {__E2E__ ? <AutomationBridge /> : null}
       <SafeAreaProvider>
         <KeyboardProvider statusBarTranslucent navigationBarTranslucent>
           <PaperProvider theme={theme}>
             <L10nContext.Provider value={currentL10n}>
-              <NavigationContainer>
+              <NavigationContainer
+                theme={{
+                  dark: true,
+                  colors: {
+                    background: 'transparent',
+                    card: 'transparent',
+                    text: theme.colors.onBackground,
+                    border: 'transparent',
+                    primary: theme.colors.primary,
+                    notification: theme.colors.error,
+                  },
+                }}>
                 <DeepLinkHandler />
+                {/* Background image sits inside NavigationContainer so it
+                    renders beneath all screens but above SafeAreaProvider's
+                    default opaque background */}
+                <View
+                  pointerEvents="none"
+                  style={styles.backgroundImageWrapper}>
+                  <Image
+                    source={require('./src/assets/background.png')}
+                    style={styles.backgroundImage}
+                    resizeMode="contain"
+                  />
+                </View>
                 <BottomSheetModalProvider>
                   <Drawer.Navigator
+                    sceneContainerStyle={styles.sceneContainer}
                     screenOptions={{
                       headerLeft: () => <HeaderLeft />,
                       drawerStyle: {
@@ -190,6 +207,10 @@ const createStyles = (theme: Theme) =>
   StyleSheet.create({
     root: {
       flex: 1,
+      backgroundColor: theme.colors.background,
+    },
+    sceneContainer: {
+      backgroundColor: 'transparent',
     },
     backgroundImageWrapper: {
       position: 'absolute',
