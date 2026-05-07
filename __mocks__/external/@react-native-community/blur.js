@@ -1,8 +1,10 @@
-import React from 'react';
-import {View} from 'react-native';
+const React = require('react');
+const {View} = require('react-native');
 
-export const BlurView = ({children, style, ...rest}) =>
-  React.createElement(View, {style, testID: rest.testID}, children);
+const BlurView = ({children, style, testID}) =>
+  React.createElement(View, {style, testID}, children);
 
-export const VibrancyView = ({children, style, ...rest}) =>
-  React.createElement(View, {style, testID: rest.testID}, children);
+const VibrancyView = ({children, style, testID}) =>
+  React.createElement(View, {style, testID}, children);
+
+module.exports = {BlurView, VibrancyView};
