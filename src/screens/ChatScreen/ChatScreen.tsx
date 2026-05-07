@@ -2,11 +2,7 @@ import React, {useRef, ReactNode, useState} from 'react';
 
 import {observer} from 'mobx-react';
 
-import {
-  Image,
-  StyleSheet,
-  View,
-} from 'react-native';
+import {Image, StyleSheet, View} from 'react-native';
 
 import {
   Bubble,
