@@ -13,7 +13,6 @@ import {observer} from 'mobx-react-lite';
 import {useNavigation} from '@react-navigation/native';
 import {DrawerNavigationProp} from '@react-navigation/drawer';
 import {
-  Card,
   Icon,
   ProgressBar,
   Button,
@@ -25,7 +24,7 @@ import {
   HelperText,
 } from 'react-native-paper';
 
-import {ProjectionModelSelector, MemoryRequirement} from '../../../components';
+import {ProjectionModelSelector, MemoryRequirement, GlassCard} from '../../../components';
 
 import {useTheme, useMemoryCheck, useStorageCheck} from '../../../hooks';
 
@@ -618,8 +617,7 @@ export const ModelCard: React.FC<ModelCardProps> = observer(
 
     return (
       <>
-        <Card
-          elevation={0}
+        <GlassCard
           style={styles.card}
           testID={`model-card-${model.filename}`}>
           {/* Compact Header */}
@@ -930,7 +928,7 @@ export const ModelCard: React.FC<ModelCardProps> = observer(
               </View>
             )}
           </View>
-        </Card>
+        </GlassCard>
         {/* Snackbar to show full memory warning */}
         <Snackbar
           testID="memory-warning-snackbar"

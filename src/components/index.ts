@@ -13,6 +13,7 @@ export * from './Checkbox';
 export * from './CircularActivityIndicator';
 export * from './CompletionSettings';
 export * from './DatabaseMigration';
+export * from './GlassCard';
 export * from './Dialog';
 export * from './Divider';
 export * from './DownloadErrorDialog';

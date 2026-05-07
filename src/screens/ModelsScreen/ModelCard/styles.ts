@@ -5,16 +5,7 @@ import {Theme} from '../../../utils/types';
 export const createStyles = (theme: Theme) =>
   StyleSheet.create({
     card: {
-      borderRadius: 24,
       margin: 6,
-      backgroundColor: theme.colors.glassBackground,
-      borderColor: theme.colors.glassBorder,
-      borderWidth: 1,
-      shadowColor: '#000',
-      shadowOffset: {width: 0, height: 2},
-      shadowOpacity: 0.08,
-      shadowRadius: 12,
-      elevation: 2,
     },
     cardContent: {
       paddingBottom: 6,
