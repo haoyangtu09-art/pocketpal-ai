@@ -79,7 +79,7 @@ const App = observer(() => {
         <KeyboardProvider statusBarTranslucent navigationBarTranslucent>
           <PaperProvider theme={theme}>
             <L10nContext.Provider value={currentL10n}>
-              <NavigationContainer style={styles.transparent}>
+              <NavigationContainer>
                 <DeepLinkHandler />
                 {/* Background image sits inside NavigationContainer so it
                     renders beneath all screens but above SafeAreaProvider's
@@ -113,6 +113,7 @@ const App = observer(() => {
                     <Drawer.Screen
                       name={ROUTES.CHAT}
                       component={gestureHandlerRootHOC(ChatScreen)}
+                      // @ts-ignore contentStyle exists at runtime
                       options={{
                         headerShown: false,
                         contentStyle: styles.transparent,
@@ -121,6 +122,7 @@ const App = observer(() => {
                     <Drawer.Screen
                       name={ROUTES.MODELS}
                       component={gestureHandlerRootHOC(ModelsScreen)}
+                      // @ts-ignore contentStyle exists at runtime
                       options={{
                         headerRight: () => <ModelsHeaderRight />,
                         headerStyle: styles.headerWithoutDivider,
@@ -131,6 +133,7 @@ const App = observer(() => {
                     <Drawer.Screen
                       name={ROUTES.BENCHMARK}
                       component={gestureHandlerRootHOC(BenchmarkScreen)}
+                      // @ts-ignore contentStyle exists at runtime
                       options={{
                         headerStyle: styles.headerWithoutDivider,
                         title: currentL10n.screenTitles.benchmark,
@@ -140,6 +143,7 @@ const App = observer(() => {
                     <Drawer.Screen
                       name={ROUTES.SETTINGS}
                       component={gestureHandlerRootHOC(SettingsScreen)}
+                      // @ts-ignore contentStyle exists at runtime
                       options={{
                         headerStyle: styles.headerWithoutDivider,
                         title: currentL10n.screenTitles.settings,
@@ -149,6 +153,7 @@ const App = observer(() => {
                     <Drawer.Screen
                       name={ROUTES.APP_INFO}
                       component={gestureHandlerRootHOC(AboutScreen)}
+                      // @ts-ignore contentStyle exists at runtime
                       options={{
                         headerStyle: styles.headerWithoutDivider,
                         title: currentL10n.screenTitles.appInfo,
@@ -161,6 +166,7 @@ const App = observer(() => {
                       <Drawer.Screen
                         name={ROUTES.DEV_TOOLS}
                         component={gestureHandlerRootHOC(DevToolsScreen)}
+                        // @ts-ignore contentStyle exists at runtime
                         options={{
                           headerStyle: styles.headerWithoutDivider,
                           title: 'Dev Tools',
@@ -181,6 +187,7 @@ const App = observer(() => {
                       <Drawer.Screen
                         name={ROUTES.BENCHMARK_RUNNER}
                         component={gestureHandlerRootHOC(BenchmarkRunnerScreen)}
+                        // @ts-ignore contentStyle exists at runtime
                         options={{
                           headerStyle: styles.headerWithoutDivider,
                           title: 'Benchmark Runner',
