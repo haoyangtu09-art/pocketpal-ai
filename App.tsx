@@ -79,18 +79,7 @@ const App = observer(() => {
         <KeyboardProvider statusBarTranslucent navigationBarTranslucent>
           <PaperProvider theme={theme}>
             <L10nContext.Provider value={currentL10n}>
-              <NavigationContainer
-                theme={{
-                  dark: true,
-                  colors: {
-                    background: 'transparent',
-                    card: 'transparent',
-                    text: theme.colors.onBackground,
-                    border: 'transparent',
-                    primary: theme.colors.primary,
-                    notification: theme.colors.error,
-                  },
-                }}>
+              <NavigationContainer>
                 <DeepLinkHandler />
                 {/* Background image sits inside NavigationContainer so it
                     renders beneath all screens but above SafeAreaProvider's
@@ -106,7 +95,6 @@ const App = observer(() => {
                 </View>
                 <BottomSheetModalProvider>
                   <Drawer.Navigator
-                    sceneContainerStyle={styles.sceneContainer}
                     screenOptions={{
                       headerLeft: () => <HeaderLeft />,
                       drawerStyle: {
@@ -117,6 +105,7 @@ const App = observer(() => {
                       },
                       headerTintColor: theme.colors.onBackground,
                       headerTitleStyle: styles.headerTitle,
+                      contentStyle: styles.sceneContainer,
                     }}
                     drawerContent={props => <SidebarContent {...props} />}>
                     <Drawer.Screen
