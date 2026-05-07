@@ -63,7 +63,7 @@ export const GlassCard: React.FC<GlassCardProps> = ({
       <View style={styles.wrapper}>
         <BlurView
           style={StyleSheet.absoluteFill}
-          blurType={isDark ? 'dark' : 'extraLight'}
+          blurType={isDark ? 'dark' : 'xlight'}
           blurAmount={20}
           reducedTransparencyFallbackColor={fallbackBg}
         />
