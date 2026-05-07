@@ -279,9 +279,17 @@ export const SettingsScreen: React.FC = observer(() => {
           keyboardShouldPersistTaps="handled">
           {/* Model Initialization Settings */}
           <GlassCard style={styles.card}>
-            
-          <Text variant="titleMedium" style={{paddingHorizontal:16, paddingTop:16, paddingBottom:4, color: theme.colors.onSurface}}>{l10n.settings.modelInitializationSettings}</Text>
-            <View style={{paddingHorizontal:16, paddingBottom:16}}>
+            <Text
+              variant="titleMedium"
+              style={{
+                paddingHorizontal: 16,
+                paddingTop: 16,
+                paddingBottom: 4,
+                color: theme.colors.onSurface,
+              }}>
+              {l10n.settings.modelInitializationSettings}
+            </Text>
+            <View style={{paddingHorizontal: 16, paddingBottom: 16}}>
               {/* Device Selection */}
 
               <View style={styles.settingItemContainer}>
@@ -732,9 +740,17 @@ export const SettingsScreen: React.FC = observer(() => {
 
           {/* Memory Settings */}
           <GlassCard style={styles.card}>
-            
-          <Text variant="titleMedium" style={{paddingHorizontal:16, paddingTop:16, paddingBottom:4, color: theme.colors.onSurface}}>{l10n.settings.memorySettings}</Text>
-            <View style={{paddingHorizontal:16, paddingBottom:16}}>
+            <Text
+              variant="titleMedium"
+              style={{
+                paddingHorizontal: 16,
+                paddingTop: 16,
+                paddingBottom: 4,
+                color: theme.colors.onSurface,
+              }}>
+              {l10n.settings.memorySettings}
+            </Text>
+            <View style={{paddingHorizontal: 16, paddingBottom: 16}}>
               <View style={styles.settingItemContainer}>
                 {/* Use Memory Lock */}
                 <View style={styles.switchContainer}>
@@ -814,9 +830,17 @@ export const SettingsScreen: React.FC = observer(() => {
 
           {/* Model Loading Settings */}
           <GlassCard style={styles.card}>
-            
-          <Text variant="titleMedium" style={{paddingHorizontal:16, paddingTop:16, paddingBottom:4, color: theme.colors.onSurface}}>{l10n.settings.modelLoadingSettings}</Text>
-            <View style={{paddingHorizontal:16, paddingBottom:16}}>
+            <Text
+              variant="titleMedium"
+              style={{
+                paddingHorizontal: 16,
+                paddingTop: 16,
+                paddingBottom: 4,
+                color: theme.colors.onSurface,
+              }}>
+              {l10n.settings.modelLoadingSettings}
+            </Text>
+            <View style={{paddingHorizontal: 16, paddingBottom: 16}}>
               <View style={styles.settingItemContainer}>
                 {/* Auto Offload/Load */}
                 <View style={styles.switchContainer}>
@@ -862,9 +886,17 @@ export const SettingsScreen: React.FC = observer(() => {
 
           {/* UI Settings */}
           <GlassCard style={styles.card}>
-            
-          <Text variant="titleMedium" style={{paddingHorizontal:16, paddingTop:16, paddingBottom:4, color: theme.colors.onSurface}}>{l10n.settings.appSettings}</Text>
-            <View style={{paddingHorizontal:16, paddingBottom:16}}>
+            <Text
+              variant="titleMedium"
+              style={{
+                paddingHorizontal: 16,
+                paddingTop: 16,
+                paddingBottom: 4,
+                color: theme.colors.onSurface,
+              }}>
+              {l10n.settings.appSettings}
+            </Text>
+            <View style={{paddingHorizontal: 16, paddingBottom: 16}}>
               <View style={styles.settingItemContainer}>
                 {/* Language Selection */}
                 <View style={styles.switchContainer}>
@@ -1010,9 +1042,17 @@ export const SettingsScreen: React.FC = observer(() => {
 
           {/* API Settings */}
           <GlassCard style={styles.card}>
-            
-          <Text variant="titleMedium" style={{paddingHorizontal:16, paddingTop:16, paddingBottom:4, color: theme.colors.onSurface}}>{l10n.settings.apiSettingsTitle}</Text>
-            <View style={{paddingHorizontal:16, paddingBottom:16}}>
+            <Text
+              variant="titleMedium"
+              style={{
+                paddingHorizontal: 16,
+                paddingTop: 16,
+                paddingBottom: 4,
+                color: theme.colors.onSurface,
+              }}>
+              {l10n.settings.apiSettingsTitle}
+            </Text>
+            <View style={{paddingHorizontal: 16, paddingBottom: 16}}>
               <View style={styles.settingItemContainer}>
                 {/* Hugging Face Token */}
                 <View style={styles.switchContainer}>
@@ -1061,9 +1101,17 @@ export const SettingsScreen: React.FC = observer(() => {
           {/* Cache & Storage Settings - iOS only (for Shortcuts) */}
           {Platform.OS === 'ios' && (
             <GlassCard style={styles.card}>
-              
-          <Text variant="titleMedium" style={{paddingHorizontal:16, paddingTop:16, paddingBottom:4, color: theme.colors.onSurface}}>{l10n.settings.cacheStorageTitle}</Text>
-              <View style={{paddingHorizontal:16, paddingBottom:16}}>
+              <Text
+                variant="titleMedium"
+                style={{
+                  paddingHorizontal: 16,
+                  paddingTop: 16,
+                  paddingBottom: 4,
+                  color: theme.colors.onSurface,
+                }}>
+                {l10n.settings.cacheStorageTitle}
+              </Text>
+              <View style={{paddingHorizontal: 16, paddingBottom: 16}}>
                 <View style={styles.settingItemContainer}>
                   {/* Clear Shortcuts Caches */}
                   <View style={styles.switchContainer}>
@@ -1158,9 +1206,17 @@ export const SettingsScreen: React.FC = observer(() => {
 
           {/* Export Options */}
           <GlassCard style={styles.card}>
-            
-          <Text variant="titleMedium" style={{paddingHorizontal:16, paddingTop:16, paddingBottom:4, color: theme.colors.onSurface}}>{l10n.settings.exportOptions}</Text>
-            <View style={{paddingHorizontal:16, paddingBottom:16}}>
+            <Text
+              variant="titleMedium"
+              style={{
+                paddingHorizontal: 16,
+                paddingTop: 16,
+                paddingBottom: 4,
+                color: theme.colors.onSurface,
+              }}>
+              {l10n.settings.exportOptions}
+            </Text>
+            <View style={{paddingHorizontal: 16, paddingBottom: 16}}>
               <View style={styles.settingItemContainer}>
                 {/* Legacy Export */}
                 <View style={styles.switchContainer}>
