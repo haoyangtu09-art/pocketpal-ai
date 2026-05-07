@@ -3,6 +3,12 @@ import React, {useRef, ReactNode, useState} from 'react';
 import {observer} from 'mobx-react';
 
 import {
+  Image,
+  StyleSheet,
+  View,
+} from 'react-native';
+
+import {
   Bubble,
   ChatView,
   ErrorSnackbar,
@@ -164,7 +170,13 @@ export const ChatScreen: React.FC = observer(() => {
 
   // Otherwise, show the regular chat view
   return (
-    <>
+    <View style={styles.container}>
+      <Image
+        source={require('../../assets/background.png')}
+        style={styles.backgroundImage}
+        resizeMode="contain"
+        pointerEvents="none"
+      />
       <ChatView
         renderBubble={renderBubble}
         messages={chatSessionStore.currentSessionMessages}
@@ -219,6 +231,21 @@ export const ChatScreen: React.FC = observer(() => {
           pal={activePal}
         />
       )}
-    </>
+    </View>
   );
+});
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  backgroundImage: {
+    position: 'absolute',
+    right: 0,
+    top: '15%',
+    height: '70%',
+    width: undefined,
+    opacity: 0.15,
+    pointerEvents: 'none',
+  },
 });

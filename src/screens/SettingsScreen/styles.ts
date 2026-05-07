@@ -17,8 +17,15 @@ export const createStyles = (theme: Theme) =>
     },
     card: {
       marginVertical: 8,
-      borderRadius: 12,
-      backgroundColor: theme.colors.background,
+      borderRadius: 16,
+      backgroundColor: theme.colors.glassBackground,
+      borderWidth: 1,
+      borderColor: theme.colors.glassBorder,
+      shadowColor: '#000',
+      shadowOffset: {width: 0, height: 2},
+      shadowOpacity: 0.08,
+      shadowRadius: 12,
+      elevation: 2,
     },
     settingItemContainer: {
       marginVertical: 16,

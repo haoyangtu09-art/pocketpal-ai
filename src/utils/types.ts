@@ -252,6 +252,10 @@ export interface SemanticColors {
   iconModelTypeText: string;
   iconModelTypeVision: string;
   iconModelTypeAudio: string;
+
+  // Glassmorphism
+  glassBackground: string;
+  glassBorder: string;
 }
 
 export interface ThemeBorders {

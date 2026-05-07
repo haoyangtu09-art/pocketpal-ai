@@ -246,6 +246,14 @@ const createSemanticColors = (
   iconModelTypeText: isDark ? '#93c5fd' : '#3b82f6',
   iconModelTypeVision: isDark ? '#c4b5fd' : '#9810fa',
   iconModelTypeAudio: isDark ? '#fdba74' : '#f97316',
+
+  // Glassmorphism — frosted glass effect for cards and buttons
+  glassBackground: isDark
+    ? 'rgba(255, 255, 255, 0.06)'
+    : 'rgba(255, 255, 255, 0.55)',
+  glassBorder: isDark
+    ? 'rgba(255, 255, 255, 0.12)'
+    : 'rgba(255, 255, 255, 0.7)',
 });
 
 export const fontStyles = {
