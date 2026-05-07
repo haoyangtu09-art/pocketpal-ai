@@ -246,6 +246,6 @@ const styles = StyleSheet.create({
   backgroundImage: {
     height: '100%',
     width: undefined,
-    opacity: 0.15,
+    opacity: 0.4,
   },
 });

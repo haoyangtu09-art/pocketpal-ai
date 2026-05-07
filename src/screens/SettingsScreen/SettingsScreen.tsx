@@ -1,5 +1,6 @@
 import React, {useState, useEffect, useRef, useContext} from 'react';
 import {
+  Image,
   View,
   Platform,
   TouchableWithoutFeedback,
@@ -273,6 +274,13 @@ export const SettingsScreen: React.FC = observer(() => {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['bottom']}>
+      <View pointerEvents="none" style={styles.backgroundImageWrapper}>
+        <Image
+          source={require('../../assets/background.png')}
+          style={styles.backgroundImage}
+          resizeMode="contain"
+        />
+      </View>
       <TouchableWithoutFeedback onPress={handleOutsidePress} accessible={false}>
         <ScrollView
           contentContainerStyle={styles.container}

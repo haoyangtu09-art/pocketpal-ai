@@ -102,4 +102,16 @@ export const createStyles = (theme: Theme) =>
     segmentedButtons: {
       marginVertical: 8,
     },
+    backgroundImageWrapper: {
+      position: 'absolute',
+      right: 0,
+      top: '15%',
+      height: '70%',
+      width: undefined,
+    },
+    backgroundImage: {
+      height: '100%',
+      width: undefined,
+      opacity: 0.4,
+    },
   });
