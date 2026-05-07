@@ -2,7 +2,7 @@ import React, {useState, useEffect, useRef, useContext} from 'react';
 import {
   View,
   Platform,
-  TouchableWithoutFeedback,
+  TouchableOpacity,
   Keyboard,
   ScrollView,
   TextInput as RNTextInput,
@@ -228,364 +228,358 @@ export const SettingsScreen: React.FC = observer(() => {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['bottom']}>
-      <TouchableWithoutFeedback onPress={handleOutsidePress} accessible={false}>
-        <ScrollView
-          contentContainerStyle={styles.container}
-          keyboardShouldPersistTaps="handled">
-          {/* Card 1 — 模型参数 */}
-          <GlassCard style={styles.card}>
-            <Text
-              variant="titleMedium"
-              style={[styles.cardTitle, styles.textLabel]}>
-              {l10n.settings.modelInitializationSettings}
-            </Text>
-            <View style={styles.cardContent}>
-              {/* Device Selection */}
-              <View style={styles.settingItemContainer}>
-                {deviceOptions.length > 1 ? (
-                  <>
-                    <Text variant="titleMedium" style={styles.textLabel}>
-                      {Platform.OS === 'ios'
-                        ? l10n.settings.deviceSelectionIOS
-                        : l10n.settings.deviceSelection}
-                    </Text>
-                    <Text variant="labelSmall" style={styles.textDescription}>
-                      {Platform.OS === 'ios'
-                        ? l10n.settings.deviceSelectionIOSDescription
-                        : l10n.settings.deviceSelectionAndroidDescription}
-                    </Text>
-                    <SegmentedButtons
-                      value={getCurrentDeviceId()}
-                      onValueChange={deviceId => {
-                        const option = deviceOptions.find(
-                          opt => opt.id === deviceId,
-                        );
-                        if (option) {
-                          handleDeviceSelect(option);
-                        }
-                      }}
-                      density="medium"
-                      buttons={deviceOptions.map(option => ({
-                        value: option.id,
-                        label: option.label,
-                        labelStyle: {
-                          fontSize: 10,
-                        },
-                        testID: `device-option-${option.id}`,
-                      }))}
-                      style={styles.segmentedButtons}
-                    />
-
-                    {/* GPU Layers Slider */}
-                    <InputSlider
-                      testID="gpu-layers-slider"
-                      value={modelStore.contextInitParams.n_gpu_layers}
-                      onValueChange={value =>
-                        modelStore.setNGPULayers(Math.round(value))
+      <ScrollView
+        contentContainerStyle={styles.container}
+        keyboardShouldPersistTaps="handled"
+        onScrollBeginDrag={handleOutsidePress}>
+        {/* Card 1 — 模型参数 */}
+        <GlassCard style={styles.card}>
+          <Text
+            variant="titleMedium"
+            style={[styles.cardTitle, styles.textLabel]}>
+            {l10n.settings.modelInitializationSettings}
+          </Text>
+          <View style={styles.cardContent}>
+            {/* Device Selection */}
+            <View style={styles.settingItemContainer}>
+              {deviceOptions.length > 1 ? (
+                <>
+                  <Text variant="titleMedium" style={styles.textLabel}>
+                    {Platform.OS === 'ios'
+                      ? l10n.settings.deviceSelectionIOS
+                      : l10n.settings.deviceSelection}
+                  </Text>
+                  <Text variant="labelSmall" style={styles.textDescription}>
+                    {Platform.OS === 'ios'
+                      ? l10n.settings.deviceSelectionIOSDescription
+                      : l10n.settings.deviceSelectionAndroidDescription}
+                  </Text>
+                  <SegmentedButtons
+                    value={getCurrentDeviceId()}
+                    onValueChange={deviceId => {
+                      const option = deviceOptions.find(
+                        opt => opt.id === deviceId,
+                      );
+                      if (option) {
+                        handleDeviceSelect(option);
                       }
-                      min={0}
-                      max={99}
-                      step={1}
-                    />
-                    <Text variant="labelSmall" style={styles.textDescription}>
-                      {t(l10n.settings.layersOnGPU, {
-                        gpuLayers:
-                          modelStore.contextInitParams.n_gpu_layers.toString(),
-                      })}
-                    </Text>
-                  </>
-                ) : (
-                  /* Simplified UI when only CPU available */
-                  <>
-                    <Text variant="titleMedium" style={styles.textLabel}>
-                      {l10n.settings.deviceSelection}
-                    </Text>
-                    <Text variant="labelSmall" style={styles.textDescription}>
-                      {l10n.settings.cpuOnlyNoAccelerators}
-                    </Text>
-                  </>
-                )}
+                    }}
+                    density="medium"
+                    buttons={deviceOptions.map(option => ({
+                      value: option.id,
+                      label: option.label,
+                      labelStyle: {
+                        fontSize: 10,
+                      },
+                      testID: `device-option-${option.id}`,
+                    }))}
+                    style={styles.segmentedButtons}
+                  />
 
-                {/* OpenCL quantization note for Android */}
-                {Platform.OS === 'android' &&
-                  gpuSupported &&
-                  (modelStore.contextInitParams.n_gpu_layers ?? 0) > 0 && (
-                    <View>
-                      <Text variant="labelSmall" style={styles.textDescription}>
-                        {l10n.settings.openCLQuantizationNote}
+                  {/* GPU Layers Slider */}
+                  <InputSlider
+                    testID="gpu-layers-slider"
+                    value={modelStore.contextInitParams.n_gpu_layers}
+                    onValueChange={value =>
+                      modelStore.setNGPULayers(Math.round(value))
+                    }
+                    min={0}
+                    max={99}
+                    step={1}
+                  />
+                  <Text variant="labelSmall" style={styles.textDescription}>
+                    {t(l10n.settings.layersOnGPU, {
+                      gpuLayers:
+                        modelStore.contextInitParams.n_gpu_layers.toString(),
+                    })}
+                  </Text>
+                </>
+              ) : (
+                /* Simplified UI when only CPU available */
+                <>
+                  <Text variant="titleMedium" style={styles.textLabel}>
+                    {l10n.settings.deviceSelection}
+                  </Text>
+                  <Text variant="labelSmall" style={styles.textDescription}>
+                    {l10n.settings.cpuOnlyNoAccelerators}
+                  </Text>
+                </>
+              )}
+
+              {/* OpenCL quantization note for Android */}
+              {Platform.OS === 'android' &&
+                gpuSupported &&
+                (modelStore.contextInitParams.n_gpu_layers ?? 0) > 0 && (
+                  <View>
+                    <Text variant="labelSmall" style={styles.textDescription}>
+                      {l10n.settings.openCLQuantizationNote}
+                    </Text>
+                    <TouchableOpacity
+                      onPress={() => Linking.openURL(OPENCL_DOCS_URL)}
+                      style={styles.linkContainer}>
+                      <Text
+                        variant="labelSmall"
+                        style={[
+                          styles.textDescription,
+                          {color: theme.colors.primary},
+                        ]}>
+                        {l10n.settings.openCLDocsLink}
                       </Text>
-                      <TouchableOpacity
-                        onPress={() => Linking.openURL(OPENCL_DOCS_URL)}
-                        style={styles.linkContainer}>
-                        <Text
-                          variant="labelSmall"
-                          style={[
-                            styles.textDescription,
-                            {color: theme.colors.primary},
-                          ]}>
-                          {l10n.settings.openCLDocsLink}
-                        </Text>
-                        <LinkExternalIcon
-                          width={12}
-                          height={12}
-                          stroke={theme.colors.primary}
-                          style={styles.linkIcon}
-                        />
-                      </TouchableOpacity>
-                    </View>
-                  )}
+                      <LinkExternalIcon
+                        width={12}
+                        height={12}
+                        stroke={theme.colors.primary}
+                        style={styles.linkIcon}
+                      />
+                    </TouchableOpacity>
+                  </View>
+                )}
+            </View>
+            <Divider />
+
+            {/* Context Size */}
+            <View style={styles.settingItemContainer}>
+              <Text variant="titleMedium" style={styles.textLabel}>
+                {l10n.settings.contextSize}
+              </Text>
+              <TextInput
+                ref={inputRef}
+                testID="context-size-input"
+                style={[styles.textInput, !isValidInput && styles.invalidInput]}
+                keyboardType="numeric"
+                value={contextSize}
+                onChangeText={handleContextSizeChange}
+                placeholder={t(l10n.settings.contextSizePlaceholder, {
+                  minContextSize: modelStore.MIN_CONTEXT_SIZE.toString(),
+                })}
+              />
+              {!isValidInput && (
+                <Text style={styles.errorText}>
+                  {t(l10n.settings.invalidContextSizeError, {
+                    minContextSize: modelStore.MIN_CONTEXT_SIZE.toString(),
+                  })}
+                </Text>
+              )}
+              <Text variant="labelSmall" style={styles.textDescription}>
+                {l10n.settings.modelReloadNotice}
+              </Text>
+            </View>
+          </View>
+        </GlassCard>
+
+        {/* Card 2 — 应用设置 */}
+        <GlassCard style={styles.card}>
+          <Text
+            variant="titleMedium"
+            style={[styles.cardTitle, styles.textLabel]}>
+            {l10n.settings.appSettings}
+          </Text>
+          <View style={styles.cardContent}>
+            <View style={styles.settingItemContainer}>
+              {/* Language Selection */}
+              <View style={styles.switchContainer}>
+                <View style={styles.textContainer}>
+                  <View style={styles.labelWithIconContainer}>
+                    <GlobeIcon
+                      width={20}
+                      height={20}
+                      style={styles.settingIcon}
+                      stroke={theme.colors.onSurface}
+                    />
+                    <Text variant="titleMedium" style={styles.textLabel}>
+                      {l10n.settings.language}
+                    </Text>
+                  </View>
+                </View>
+                <View style={styles.menuContainer}>
+                  <Button
+                    ref={languageButtonRef}
+                    testID="language-selector-button"
+                    mode="outlined"
+                    onPress={handleLanguagePress}
+                    style={styles.menuButton}
+                    contentStyle={styles.buttonContent}
+                    icon={({size, color}) => (
+                      <Icon source="chevron-down" size={size} color={color} />
+                    )}>
+                    {languageDisplayNames[uiStore.language]}
+                  </Button>
+                  <Menu
+                    visible={showLanguageMenu}
+                    onDismiss={() => setShowLanguageMenu(false)}
+                    anchor={languageAnchor}
+                    selectable>
+                    {uiStore.supportedLanguages.map(lang => (
+                      <Menu.Item
+                        key={lang}
+                        testID={`language-option-${lang}`}
+                        style={styles.menu}
+                        label={languageDisplayNames[lang]}
+                        selected={lang === uiStore.language}
+                        onPress={() => {
+                          uiStore.setLanguage(lang);
+                          setShowLanguageMenu(false);
+                        }}
+                      />
+                    ))}
+                  </Menu>
+                </View>
               </View>
               <Divider />
 
-              {/* Context Size */}
+              {/* Dark Mode */}
+              <View style={styles.switchContainer}>
+                <View style={styles.textContainer}>
+                  <View style={styles.labelWithIconContainer}>
+                    <MoonIcon
+                      width={20}
+                      height={20}
+                      style={styles.settingIcon}
+                      stroke={theme.colors.onSurface}
+                    />
+                    <Text variant="titleMedium" style={styles.textLabel}>
+                      {l10n.settings.darkMode}
+                    </Text>
+                  </View>
+                </View>
+                <Switch
+                  testID="dark-mode-switch"
+                  value={uiStore.colorScheme === 'dark'}
+                  onValueChange={value =>
+                    uiStore.setColorScheme(value ? 'dark' : 'light')
+                  }
+                />
+              </View>
+
+              {/* Default System Prompt */}
+              <Divider />
               <View style={styles.settingItemContainer}>
                 <Text variant="titleMedium" style={styles.textLabel}>
-                  {l10n.settings.contextSize}
+                  {l10n.settings.defaultSystemPrompt}
                 </Text>
-                <TextInput
-                  ref={inputRef}
-                  testID="context-size-input"
+                <Text variant="labelSmall" style={styles.textDescription}>
+                  {l10n.settings.defaultSystemPromptDescription}
+                </Text>
+                <RNTextInput
+                  testID="default-system-prompt-input"
                   style={[
                     styles.textInput,
-                    !isValidInput && styles.invalidInput,
+                    styles.systemPromptInput,
+                    styles.textLabel,
                   ]}
-                  keyboardType="numeric"
-                  value={contextSize}
-                  onChangeText={handleContextSizeChange}
-                  placeholder={t(l10n.settings.contextSizePlaceholder, {
-                    minContextSize: modelStore.MIN_CONTEXT_SIZE.toString(),
-                  })}
+                  multiline
+                  value={uiStore.defaultSystemPrompt}
+                  onChangeText={value => uiStore.setDefaultSystemPrompt(value)}
+                  placeholder={l10n.settings.defaultSystemPromptPlaceholder}
+                  placeholderTextColor={theme.colors.onSurfaceDisabled}
                 />
-                {!isValidInput && (
-                  <Text style={styles.errorText}>
-                    {t(l10n.settings.invalidContextSizeError, {
-                      minContextSize: modelStore.MIN_CONTEXT_SIZE.toString(),
-                    })}
-                  </Text>
-                )}
-                <Text variant="labelSmall" style={styles.textDescription}>
-                  {l10n.settings.modelReloadNotice}
-                </Text>
               </View>
             </View>
-          </GlassCard>
+          </View>
+        </GlassCard>
 
-          {/* Card 2 — 应用设置 */}
-          <GlassCard style={styles.card}>
-            <Text
-              variant="titleMedium"
-              style={[styles.cardTitle, styles.textLabel]}>
-              {l10n.settings.appSettings}
-            </Text>
-            <View style={styles.cardContent}>
-              <View style={styles.settingItemContainer}>
-                {/* Language Selection */}
-                <View style={styles.switchContainer}>
-                  <View style={styles.textContainer}>
-                    <View style={styles.labelWithIconContainer}>
-                      <GlobeIcon
-                        width={20}
-                        height={20}
-                        style={styles.settingIcon}
-                        stroke={theme.colors.onSurface}
-                      />
-                      <Text variant="titleMedium" style={styles.textLabel}>
-                        {l10n.settings.language}
-                      </Text>
-                    </View>
-                  </View>
-                  <View style={styles.menuContainer}>
-                    <Button
-                      ref={languageButtonRef}
-                      testID="language-selector-button"
-                      mode="outlined"
-                      onPress={handleLanguagePress}
-                      style={styles.menuButton}
-                      contentStyle={styles.buttonContent}
-                      icon={({size, color}) => (
-                        <Icon source="chevron-down" size={size} color={color} />
-                      )}>
-                      {languageDisplayNames[uiStore.language]}
-                    </Button>
-                    <Menu
-                      visible={showLanguageMenu}
-                      onDismiss={() => setShowLanguageMenu(false)}
-                      anchor={languageAnchor}
-                      selectable>
-                      {uiStore.supportedLanguages.map(lang => (
-                        <Menu.Item
-                          key={lang}
-                          testID={`language-option-${lang}`}
-                          style={styles.menu}
-                          label={languageDisplayNames[lang]}
-                          selected={lang === uiStore.language}
-                          onPress={() => {
-                            uiStore.setLanguage(lang);
-                            setShowLanguageMenu(false);
-                          }}
-                        />
-                      ))}
-                    </Menu>
-                  </View>
-                </View>
-                <Divider />
+        {/* Card 3 — API 配置 */}
+        <GlassCard style={styles.card}>
+          <Text
+            variant="titleMedium"
+            style={[styles.cardTitle, styles.textLabel]}>
+            API 配置
+          </Text>
+          <View style={styles.cardContent}>
+            <View style={styles.settingItemContainer}>
+              <Text variant="titleMedium" style={styles.textLabel}>
+                API 地址
+              </Text>
+              <RNTextInput
+                style={[styles.textInput, styles.textLabel]}
+                value={apiUrl}
+                onChangeText={setApiUrl}
+                placeholder="http://192.168.1.100:1234"
+                placeholderTextColor={theme.colors.onSurfaceDisabled}
+                autoCapitalize="none"
+                autoCorrect={false}
+                keyboardType="url"
+              />
+              <Text
+                variant="titleMedium"
+                style={[styles.textLabel, styles.marginTop8]}>
+                API Key
+              </Text>
+              <RNTextInput
+                style={[styles.textInput, styles.textLabel]}
+                value={apiKeyInput}
+                onChangeText={setApiKeyInput}
+                placeholder="sk-..."
+                placeholderTextColor={theme.colors.onSurfaceDisabled}
+                secureTextEntry
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
+              <View style={styles.buttonRow}>
+                <Button mode="outlined" onPress={handleApplyServer}>
+                  应用
+                </Button>
+                <Button mode="outlined" onPress={handleTestConnection}>
+                  测试连接
+                </Button>
+              </View>
+            </View>
+          </View>
+        </GlassCard>
 
-                {/* Dark Mode */}
-                <View style={styles.switchContainer}>
-                  <View style={styles.textContainer}>
-                    <View style={styles.labelWithIconContainer}>
-                      <MoonIcon
-                        width={20}
-                        height={20}
-                        style={styles.settingIcon}
-                        stroke={theme.colors.onSurface}
-                      />
-                      <Text variant="titleMedium" style={styles.textLabel}>
-                        {l10n.settings.darkMode}
-                      </Text>
-                    </View>
-                  </View>
-                  <Switch
-                    testID="dark-mode-switch"
-                    value={uiStore.colorScheme === 'dark'}
-                    onValueChange={value =>
-                      uiStore.setColorScheme(value ? 'dark' : 'light')
-                    }
-                  />
-                </View>
-
-                {/* Default System Prompt */}
-                <Divider />
-                <View style={styles.settingItemContainer}>
+        {/* Card 4 — HuggingFace Token */}
+        <GlassCard style={styles.card}>
+          <Text
+            variant="titleMedium"
+            style={[styles.cardTitle, styles.textLabel]}>
+            {l10n.settings.apiSettingsTitle}
+          </Text>
+          <View style={styles.cardContent}>
+            <View style={styles.settingItemContainer}>
+              {/* Hugging Face Token */}
+              <View style={styles.switchContainer}>
+                <View style={styles.textContainer}>
                   <Text variant="titleMedium" style={styles.textLabel}>
-                    {l10n.settings.defaultSystemPrompt}
+                    {l10n.settings.huggingFaceTokenLabel}
                   </Text>
                   <Text variant="labelSmall" style={styles.textDescription}>
-                    {l10n.settings.defaultSystemPromptDescription}
-                  </Text>
-                  <RNTextInput
-                    testID="default-system-prompt-input"
-                    style={[
-                      styles.textInput,
-                      styles.systemPromptInput,
-                      styles.textLabel,
-                    ]}
-                    multiline
-                    value={uiStore.defaultSystemPrompt}
-                    onChangeText={value =>
-                      uiStore.setDefaultSystemPrompt(value)
-                    }
-                    placeholder={l10n.settings.defaultSystemPromptPlaceholder}
-                    placeholderTextColor={theme.colors.onSurfaceDisabled}
-                  />
-                </View>
-              </View>
-            </View>
-          </GlassCard>
-
-          {/* Card 3 — API 配置 */}
-          <GlassCard style={styles.card}>
-            <Text
-              variant="titleMedium"
-              style={[styles.cardTitle, styles.textLabel]}>
-              API 配置
-            </Text>
-            <View style={styles.cardContent}>
-              <View style={styles.settingItemContainer}>
-                <Text variant="titleMedium" style={styles.textLabel}>
-                  API 地址
-                </Text>
-                <RNTextInput
-                  style={[styles.textInput, styles.textLabel]}
-                  value={apiUrl}
-                  onChangeText={setApiUrl}
-                  placeholder="http://192.168.1.100:1234"
-                  placeholderTextColor={theme.colors.onSurfaceDisabled}
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                  keyboardType="url"
-                />
-                <Text
-                  variant="titleMedium"
-                  style={[styles.textLabel, styles.marginTop8]}>
-                  API Key
-                </Text>
-                <RNTextInput
-                  style={[styles.textInput, styles.textLabel]}
-                  value={apiKeyInput}
-                  onChangeText={setApiKeyInput}
-                  placeholder="sk-..."
-                  placeholderTextColor={theme.colors.onSurfaceDisabled}
-                  secureTextEntry
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                />
-                <View style={styles.buttonRow}>
-                  <Button mode="outlined" onPress={handleApplyServer}>
-                    应用
-                  </Button>
-                  <Button mode="outlined" onPress={handleTestConnection}>
-                    测试连接
-                  </Button>
-                </View>
-              </View>
-            </View>
-          </GlassCard>
-
-          {/* Card 4 — HuggingFace Token */}
-          <GlassCard style={styles.card}>
-            <Text
-              variant="titleMedium"
-              style={[styles.cardTitle, styles.textLabel]}>
-              {l10n.settings.apiSettingsTitle}
-            </Text>
-            <View style={styles.cardContent}>
-              <View style={styles.settingItemContainer}>
-                {/* Hugging Face Token */}
-                <View style={styles.switchContainer}>
-                  <View style={styles.textContainer}>
-                    <Text variant="titleMedium" style={styles.textLabel}>
-                      {l10n.settings.huggingFaceTokenLabel}
-                    </Text>
-                    <Text variant="labelSmall" style={styles.textDescription}>
-                      {hfStore.isTokenPresent
-                        ? l10n.settings.tokenIsSetDescription
-                        : l10n.settings.setTokenDescription}
-                    </Text>
-                  </View>
-                  <Button
-                    mode="outlined"
-                    onPress={() => setShowHfTokenDialog(true)}
-                    style={styles.menuButton}>
                     {hfStore.isTokenPresent
-                      ? l10n.common.update
-                      : l10n.settings.setTokenButton}
-                  </Button>
+                      ? l10n.settings.tokenIsSetDescription
+                      : l10n.settings.setTokenDescription}
+                  </Text>
                 </View>
+                <Button
+                  mode="outlined"
+                  onPress={() => setShowHfTokenDialog(true)}
+                  style={styles.menuButton}>
+                  {hfStore.isTokenPresent
+                    ? l10n.common.update
+                    : l10n.settings.setTokenButton}
+                </Button>
+              </View>
 
-                {/* Use HF Token Switch */}
-                <Divider style={styles.divider} />
-                <View style={styles.switchContainer}>
-                  <View style={styles.textContainer}>
-                    <Text variant="titleMedium" style={styles.textLabel}>
-                      {l10n.settings.useHfTokenLabel}
-                    </Text>
-                    <Text variant="labelSmall" style={styles.textDescription}>
-                      {l10n.settings.useHfTokenDescription}
-                    </Text>
-                  </View>
-                  <Switch
-                    testID="use-hf-token-switch"
-                    value={hfStore.useHfToken}
-                    disabled={!hfStore.isTokenPresent}
-                    onValueChange={value => hfStore.setUseHfToken(value)}
-                  />
+              {/* Use HF Token Switch */}
+              <Divider style={styles.divider} />
+              <View style={styles.switchContainer}>
+                <View style={styles.textContainer}>
+                  <Text variant="titleMedium" style={styles.textLabel}>
+                    {l10n.settings.useHfTokenLabel}
+                  </Text>
+                  <Text variant="labelSmall" style={styles.textDescription}>
+                    {l10n.settings.useHfTokenDescription}
+                  </Text>
                 </View>
+                <Switch
+                  testID="use-hf-token-switch"
+                  value={hfStore.useHfToken}
+                  disabled={!hfStore.isTokenPresent}
+                  onValueChange={value => hfStore.setUseHfToken(value)}
+                />
               </View>
             </View>
-          </GlassCard>
-        </ScrollView>
-      </TouchableWithoutFeedback>
+          </View>
+        </GlassCard>
+      </ScrollView>
       <HFTokenSheet
         isVisible={showHfTokenDialog}
         onDismiss={() => setShowHfTokenDialog(false)}

@@ -1,4 +1,5 @@
 import React, {useContext, useEffect, useState} from 'react';
+import {StyleSheet, TextInput, View} from 'react-native';
 import {Sheet} from '../Sheet/Sheet';
 import {CompletionSettings} from '..';
 import {CompletionParams} from '../../utils/completionTypes';
@@ -8,6 +9,7 @@ import {
   palStore,
 } from '../../store';
 import {styles} from './styles';
+import {useTheme} from '../../hooks';
 import {
   COMPLETION_PARAMS_METADATA,
   validateCompletionSettings,
@@ -17,6 +19,29 @@ import {Button, SegmentedButtons, Text} from 'react-native-paper';
 import {L10nContext} from '../../utils';
 import {ChevronDownIcon} from '../../assets/icons';
 import {Menu} from '../Menu';
+
+const sheetStyles = StyleSheet.create({
+  systemPromptContainer: {
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  systemPromptLabel: {
+    marginBottom: 4,
+  },
+  systemPromptDesc: {
+    marginBottom: 8,
+    opacity: 0.6,
+  },
+  systemPromptInput: {
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.2)',
+    borderRadius: 8,
+    padding: 10,
+    minHeight: 100,
+    fontSize: 14,
+    backgroundColor: 'rgba(255,255,255,0.05)',
+  },
+});
 interface ResetButtonProps {
   session: any;
   resetMenuVisible: boolean;
@@ -90,6 +115,7 @@ export const ChatGenerationSettingsSheet = ({
   onClose: () => void;
 }) => {
   const l10n = useContext(L10nContext);
+  const theme = useTheme();
   const session = chatSessionStore.sessions.find(
     item => item.id === chatSessionStore.activeSessionId,
   );
@@ -352,6 +378,28 @@ export const ChatGenerationSettingsSheet = ({
           onChange={updateSettings}
           disabled={isUsingPalSettings}
         />
+
+        {/* Per-session system prompt */}
+        <View style={sheetStyles.systemPromptContainer}>
+          <Text variant="labelMedium" style={sheetStyles.systemPromptLabel}>
+            对话系统提示词
+          </Text>
+          <Text variant="labelSmall" style={sheetStyles.systemPromptDesc}>
+            设置后将覆盖默认提示词，可用于塑造AI人格
+          </Text>
+          <TextInput
+            style={[
+              sheetStyles.systemPromptInput,
+              {color: theme.colors.onSurface},
+            ]}
+            multiline
+            value={settings.session_system_prompt ?? ''}
+            onChangeText={v => updateSettings('session_system_prompt', v)}
+            placeholder="例：你是一个温柔体贴的树洞，专注倾听用户的内心..."
+            placeholderTextColor={theme.colors.onSurfaceDisabled}
+            textAlignVertical="top"
+          />
+        </View>
       </Sheet.ScrollView>
       <Sheet.Actions>
         <View style={styles.actionsContainer}>

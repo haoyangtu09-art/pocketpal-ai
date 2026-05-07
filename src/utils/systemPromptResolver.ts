@@ -6,10 +6,12 @@ export interface SystemPromptDependencies {
   pal?: Pal | null;
   model?: Model | null;
   globalDefault?: string;
+  sessionCustom?: string;
 }
 
 /**
  * Resolves the system prompt based on priority:
+ * 0. Session custom system prompt (highest — set per-conversation in generation settings)
  * 1. Pal's system prompt (with parameter rendering if needed)
  * 2. Fallback to model's chat template system prompt
  * 3. Global default system prompt (from UIStore)
@@ -18,7 +20,12 @@ export interface SystemPromptDependencies {
 export function resolveSystemPrompt(
   dependencies: SystemPromptDependencies,
 ): string {
-  const {pal, model, globalDefault} = dependencies;
+  const {pal, model, globalDefault, sessionCustom} = dependencies;
+
+  // Priority 0: Session custom system prompt
+  if (sessionCustom?.trim()) {
+    return sessionCustom;
+  }
 
   // Priority 1: Pal's system prompt
   if (pal?.systemPrompt) {

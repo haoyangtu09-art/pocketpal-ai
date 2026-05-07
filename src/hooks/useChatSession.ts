@@ -254,6 +254,9 @@ export const useChatSession = (
       pal,
       model: modelStore.activeModel,
       globalDefault: uiStore.defaultSystemPrompt,
+      sessionCustom:
+        activeSession?.completionSettings?.session_system_prompt ??
+        chatSessionStore.newChatCompletionSettings?.session_system_prompt,
     });
 
     // Prepare completion parameters and create message record

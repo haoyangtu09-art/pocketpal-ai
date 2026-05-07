@@ -10,18 +10,13 @@ export type ApiCompletionParams = LlamaRNCompletionParams;
  * sending to the llama.rn API.
  */
 export type AppOnlyCompletionParams = {
-  /**
-   * Schema version for the completion parameters.
-   * Used for migrations when the schema changes.
-   */
   version?: number;
-
-  /**
-   * Whether to include thinking parts in the context sent to the model.
-   * When false, thinking parts are removed from the context to save context space.
-   */
   include_thinking_in_context?: boolean;
-  // Add other PocketPal-only fields here
+  /**
+   * Per-session custom system prompt. Overrides all other system prompt sources.
+   * Stored in completionSettings so no DB migration is needed.
+   */
+  session_system_prompt?: string;
 };
 
 /**
@@ -31,6 +26,7 @@ export type AppOnlyCompletionParams = {
 const APP_ONLY_KEYS: (keyof AppOnlyCompletionParams)[] = [
   'version',
   'include_thinking_in_context',
+  'session_system_prompt',
 ];
 
 /**
