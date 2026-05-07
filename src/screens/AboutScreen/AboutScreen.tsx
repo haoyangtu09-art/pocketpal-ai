@@ -1,12 +1,5 @@
 import React, {useState, useContext} from 'react';
-import {
-  View,
-  ScrollView,
-  TouchableOpacity,
-  Alert,
-  Linking,
-  Platform,
-} from 'react-native';
+import {View, ScrollView, TouchableOpacity, Alert} from 'react-native';
 
 import DeviceInfo from 'react-native-device-info';
 import Clipboard from '@react-native-clipboard/clipboard';
@@ -16,21 +9,12 @@ import {BuildInfo} from 'llama.rn';
 
 import {submitFeedback} from '../../api/feedback';
 
-import {
-  CopyIcon,
-  GithubIcon,
-  ChevronRightIcon,
-  HeartIcon,
-} from '../../assets/icons';
+import {CopyIcon, ChevronRightIcon} from '../../assets/icons';
 
 import {Sheet, TextInput} from '../../components';
 import {useTheme} from '../../hooks';
 import {createStyles} from './styles';
 import {L10nContext} from '../../utils';
-
-const GithubButtonIcon = ({color}: {color: string}) => (
-  <GithubIcon stroke={color} />
-);
 
 const ChevronRightButtonIcon = ({color}: {color: string}) => (
   <ChevronRightIcon stroke={color} />
@@ -140,30 +124,6 @@ export const AboutScreen: React.FC = () => {
             <Text variant="bodyMedium" style={styles.description}>
               {l10n.about.supportProjectDescription}
             </Text>
-            <Button
-              mode="outlined"
-              onPress={() =>
-                Linking.openURL('https://github.com/a-ghorbani/pocketpal-ai')
-              }
-              style={styles.actionButton}
-              icon={GithubButtonIcon}>
-              {l10n.about.githubButton}
-            </Button>
-            {Platform.OS !== 'ios' && (
-              <>
-                <Text style={styles.orText}>{l10n.about.orText}</Text>
-                <TouchableOpacity
-                  style={styles.supportButton}
-                  onPress={() =>
-                    Linking.openURL('https://www.buymeacoffee.com/aghorbani')
-                  }>
-                  <HeartIcon stroke={theme.colors.onPrimary} />
-                  <Text style={styles.supportButtonText}>
-                    {l10n.about.sponsorButton}
-                  </Text>
-                </TouchableOpacity>
-              </>
-            )}
             <Text style={styles.orText}>{l10n.about.orBy}</Text>
             <Button
               mode="outlined"

@@ -116,4 +116,7 @@ export const createStyles = (theme: Theme) =>
       textAlignVertical: 'top' as const,
       paddingTop: 8,
     },
+    marginTop8: {
+      marginTop: 8,
+    },
   });

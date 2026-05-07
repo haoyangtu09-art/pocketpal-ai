@@ -45,7 +45,7 @@ import {useTheme} from '../../hooks';
 
 import {createStyles} from './styles';
 
-import {modelStore, uiStore, hfStore} from '../../store';
+import {modelStore, uiStore, hfStore, serverStore} from '../../store';
 import {languageDisplayNames} from '../../locales';
 
 import {CacheType} from '../../utils/types';
@@ -83,6 +83,8 @@ export const SettingsScreen: React.FC = observer(() => {
   const [showValueCacheMenu, setShowValueCacheMenu] = useState(false);
   const [showLanguageMenu, setShowLanguageMenu] = useState(false);
   const [showHfTokenDialog, setShowHfTokenDialog] = useState(false);
+  const [apiUrl, setApiUrl] = useState('');
+  const [apiKeyInput, setApiKeyInput] = useState('');
   const [gpuSupported, setGpuSupported] = useState(false);
   const [keyCacheAnchor, setKeyCacheAnchor] = useState<{x: number; y: number}>({
     x: 0,
@@ -156,6 +158,20 @@ export const SettingsScreen: React.FC = observer(() => {
       debouncedUpdateStore.cancel();
     };
   }, [debouncedUpdateStore]);
+
+  useEffect(() => {
+    const loadServerConfig = async () => {
+      const firstServer = serverStore.servers[0];
+      if (firstServer) {
+        setApiUrl(firstServer.url);
+        const key = await serverStore.getApiKey(firstServer.id);
+        if (key) {
+          setApiKeyInput(key);
+        }
+      }
+    };
+    loadServerConfig();
+  }, []);
 
   const handleOutsidePress = () => {
     Keyboard.dismiss();
@@ -727,6 +743,58 @@ export const SettingsScreen: React.FC = observer(() => {
                         </Menu>
                       </View>
                     </View>
+                  </View>
+                  <Divider />
+
+                  {/* Remote API Server Config */}
+                  <View style={styles.settingItemContainer}>
+                    <Text variant="titleMedium" style={styles.textLabel}>
+                      API 地址
+                    </Text>
+                    <RNTextInput
+                      style={[styles.textInput, styles.textLabel]}
+                      value={apiUrl}
+                      onChangeText={setApiUrl}
+                      placeholder="http://192.168.1.100:1234"
+                      placeholderTextColor={theme.colors.onSurfaceDisabled}
+                      autoCapitalize="none"
+                      autoCorrect={false}
+                      keyboardType="url"
+                    />
+                    <Text
+                      variant="titleMedium"
+                      style={[styles.textLabel, styles.marginTop8]}>
+                      API Key
+                    </Text>
+                    <RNTextInput
+                      style={[styles.textInput, styles.textLabel]}
+                      value={apiKeyInput}
+                      onChangeText={setApiKeyInput}
+                      placeholder="sk-..."
+                      placeholderTextColor={theme.colors.onSurfaceDisabled}
+                      secureTextEntry
+                      autoCapitalize="none"
+                      autoCorrect={false}
+                    />
+                    <Button
+                      mode="outlined"
+                      style={styles.marginTop8}
+                      onPress={async () => {
+                        let serverId: string;
+                        if (serverStore.servers.length > 0) {
+                          serverId = serverStore.servers[0].id;
+                          serverStore.updateServer(serverId, {url: apiUrl});
+                        } else {
+                          serverId = serverStore.addServer({
+                            name: 'Remote Server',
+                            url: apiUrl,
+                          });
+                        }
+                        await serverStore.setApiKey(serverId, apiKeyInput);
+                        await serverStore.fetchModelsForServer(serverId);
+                      }}>
+                      应用
+                    </Button>
                   </View>
                 </View>
               </List.Accordion>
