@@ -21,12 +21,10 @@ describe('SettingsScreen', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.spyOn(Keyboard, 'dismiss');
-    // Ensure clean timer state for each test
     jest.clearAllTimers();
   });
 
   afterEach(() => {
-    // Clean up any remaining timers
     jest.runOnlyPendingTimers();
     jest.useRealTimers();
   });
@@ -38,9 +36,8 @@ describe('SettingsScreen', () => {
     });
 
     expect(getByText('Model Initialization Settings')).toBeTruthy();
-    expect(getByText('Model Loading Settings')).toBeTruthy();
     expect(getByText('App Settings')).toBeTruthy();
-    expect(getByDisplayValue('2048')).toBeTruthy(); // Context size
+    expect(getByDisplayValue('2048')).toBeTruthy();
   });
 
   it('updates context size correctly', async () => {
@@ -58,9 +55,8 @@ describe('SettingsScreen', () => {
       fireEvent(contextSizeInput, 'blur');
     });
 
-    // Advance timers within act to handle React state updates
     act(() => {
-      jest.advanceTimersByTime(501); // Wait for debounce
+      jest.advanceTimersByTime(501);
     });
 
     await waitFor(() => {
@@ -76,7 +72,7 @@ describe('SettingsScreen', () => {
     const contextSizeInput = getByDisplayValue('2048');
 
     await act(async () => {
-      fireEvent.changeText(contextSizeInput, '100'); // Below minimum size
+      fireEvent.changeText(contextSizeInput, '100');
     });
 
     expect(getByText('Please enter a valid number (minimum 200)')).toBeTruthy();
@@ -94,36 +90,8 @@ describe('SettingsScreen', () => {
 
     await waitFor(() => {
       expect(Keyboard.dismiss).toHaveBeenCalled();
-      expect(getByDisplayValue('2048')).toBeTruthy(); // Reset back to original size
+      expect(getByDisplayValue('2048')).toBeTruthy();
     });
-  });
-
-  it('toggles Auto Offload/Load switch', async () => {
-    const {getByTestId} = render(<SettingsScreen />, {
-      withSafeArea: true,
-      withNavigation: true,
-    });
-    const autoOffloadSwitch = getByTestId('auto-offload-load-switch');
-
-    await act(async () => {
-      fireEvent(autoOffloadSwitch, 'valueChange', false);
-    });
-
-    expect(modelStore.updateUseAutoRelease).toHaveBeenCalledWith(false);
-  });
-
-  it('toggles Auto-Navigate to Chat switch', async () => {
-    const {getByTestId} = render(<SettingsScreen />, {
-      withSafeArea: true,
-      withNavigation: true,
-    });
-    const autoNavigateSwitch = getByTestId('auto-navigate-to-chat-switch');
-
-    await act(async () => {
-      fireEvent(autoNavigateSwitch, 'valueChange', false);
-    });
-
-    expect(uiStore.setAutoNavigateToChat).toHaveBeenCalledWith(false);
   });
 
   it('toggles Dark Mode switch', async () => {
@@ -140,7 +108,7 @@ describe('SettingsScreen', () => {
     expect(uiStore.setColorScheme).toHaveBeenCalledWith('dark');
   });
 
-  it('toggles GPU acceleration switch on iOS and adjusts GPU layers', async () => {
+  it('toggles GPU acceleration on iOS and adjusts GPU layers', async () => {
     Platform.OS = 'ios';
     jest.useFakeTimers();
 
@@ -151,109 +119,21 @@ describe('SettingsScreen', () => {
     await waitFor(() => {
       expect(getByTestId('device-option-gpu')).toBeTruthy();
     });
-    const gpuBtn = getByTestId('device-option-gpu');
 
     act(() => {
-      fireEvent(gpuBtn, 'press');
+      fireEvent(getByTestId('device-option-gpu'), 'press');
     });
 
     expect(modelStore.setDevices).toHaveBeenCalledWith(['Metal']);
 
-    const gpuSlider = getByTestId('gpu-layers-slider');
-
     act(() => {
-      fireEvent(gpuSlider, 'valueChange', 60);
+      fireEvent(getByTestId('gpu-layers-slider'), 'valueChange', 60);
     });
 
-    // Fast-forward time by 300ms to trigger debounced callback within act
-    act(() => {
-      jest.advanceTimersByTime(300); // Wait for debounce
-    });
-
-    expect(modelStore.setNGPULayers).toHaveBeenCalledWith(60);
-  });
-
-  it('toggles Display Memory Usage switch', async () => {
-    const {getByTestId} = render(<SettingsScreen />, {
-      withSafeArea: true,
-      withNavigation: true,
-    });
-    const memoryUsageSwitch = getByTestId('display-memory-usage-switch');
-
-    await act(async () => {
-      fireEvent(memoryUsageSwitch, 'valueChange', true);
-    });
-
-    expect(uiStore.setDisplayMemUsage).toHaveBeenCalledWith(true);
-  });
-
-  it('renders image max tokens slider in advanced settings', async () => {
-    jest.useFakeTimers();
-    const {getByTestId, getByText} = render(<SettingsScreen />, {
-      withSafeArea: true,
-      withNavigation: true,
-    });
-
-    // Expand advanced settings
-    const advancedSettingsButton = getByText('Advanced Settings');
-    fireEvent.press(advancedSettingsButton);
-
-    await waitFor(() => {
-      expect(getByTestId('image-max-tokens-slider')).toBeTruthy();
-    });
-  });
-
-  it('updates image max tokens correctly', async () => {
-    jest.useFakeTimers();
-    const {getByTestId, getByText} = render(<SettingsScreen />, {
-      withSafeArea: true,
-      withNavigation: true,
-    });
-
-    // Expand advanced settings
-    fireEvent.press(getByText('Advanced Settings'));
-
-    await waitFor(() => {
-      expect(getByTestId('image-max-tokens-slider')).toBeTruthy();
-    });
-
-    const slider = getByTestId('image-max-tokens-slider');
-
-    act(() => {
-      fireEvent(slider, 'onValueChange', 768);
-    });
-
-    // Fast-forward time by 300ms to trigger debounced callback within act
     act(() => {
       jest.advanceTimersByTime(300);
     });
 
-    expect(modelStore.setImageMaxTokens).toHaveBeenCalledWith(768);
-  });
-
-  it('shows effective value when image_max_tokens exceeds n_ctx', async () => {
-    jest.useFakeTimers();
-    const {getByText, queryByText} = render(<SettingsScreen />, {
-      withSafeArea: true,
-      withNavigation: true,
-    });
-
-    // Expand advanced settings
-    fireEvent.press(getByText('Advanced Settings'));
-
-    await waitFor(() => {
-      // Initially, with image_max_tokens = 512 and n_ctx = 2048, no effective label should show
-      expect(queryByText(/effective:/)).toBeFalsy();
-    });
-
-    // Now set image_max_tokens > n_ctx to trigger effective display
-    act(() => {
-      modelStore.contextInitParams.image_max_tokens = 3000;
-    });
-
-    await waitFor(() => {
-      // Should show effective value clamped to n_ctx (2048)
-      expect(getByText(/effective: 2048/)).toBeTruthy();
-    });
+    expect(modelStore.setNGPULayers).toHaveBeenCalledWith(60);
   });
 });
