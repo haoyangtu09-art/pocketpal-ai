@@ -105,7 +105,6 @@ const App = observer(() => {
                       },
                       headerTintColor: theme.colors.onBackground,
                       headerTitleStyle: styles.headerTitle,
-                      sceneStyle: styles.sceneContainer,
                     }}
                     drawerContent={props => <SidebarContent {...props} />}>
                     <Drawer.Screen
@@ -197,9 +196,6 @@ const createStyles = (theme: Theme) =>
     root: {
       flex: 1,
       backgroundColor: theme.colors.background,
-    },
-    sceneContainer: {
-      backgroundColor: 'transparent',
     },
     backgroundImageWrapper: {
       position: 'absolute',
