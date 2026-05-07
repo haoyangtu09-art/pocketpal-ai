@@ -75,11 +75,11 @@ const App = observer(() => {
   return (
     <GestureHandlerRootView style={styles.root}>
       {__E2E__ ? <AutomationBridge /> : null}
-      <SafeAreaProvider>
+      <SafeAreaProvider style={styles.transparent}>
         <KeyboardProvider statusBarTranslucent navigationBarTranslucent>
           <PaperProvider theme={theme}>
             <L10nContext.Provider value={currentL10n}>
-              <NavigationContainer>
+              <NavigationContainer style={styles.transparent}>
                 <DeepLinkHandler />
                 {/* Background image sits inside NavigationContainer so it
                     renders beneath all screens but above SafeAreaProvider's
@@ -105,9 +105,9 @@ const App = observer(() => {
                       },
                       headerTintColor: theme.colors.onBackground,
                       headerTitleStyle: styles.headerTitle,
-                      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                      // @ts-ignore sceneStyle exists at runtime in drawer v7
-                      sceneStyle: {backgroundColor: 'transparent'},
+                      // @ts-ignore sceneStyle / sceneContainerStyle exist at runtime
+                      sceneContainerStyle: styles.transparent,
+                      sceneStyle: styles.transparent,
                     }}
                     drawerContent={props => <SidebarContent {...props} />}>
                     <Drawer.Screen
@@ -115,6 +115,7 @@ const App = observer(() => {
                       component={gestureHandlerRootHOC(ChatScreen)}
                       options={{
                         headerShown: false,
+                        contentStyle: styles.transparent,
                       }}
                     />
                     <Drawer.Screen
@@ -124,6 +125,7 @@ const App = observer(() => {
                         headerRight: () => <ModelsHeaderRight />,
                         headerStyle: styles.headerWithoutDivider,
                         title: currentL10n.screenTitles.models,
+                        contentStyle: styles.transparent,
                       }}
                     />
                     <Drawer.Screen
@@ -132,6 +134,7 @@ const App = observer(() => {
                       options={{
                         headerStyle: styles.headerWithoutDivider,
                         title: currentL10n.screenTitles.benchmark,
+                        contentStyle: styles.transparent,
                       }}
                     />
                     <Drawer.Screen
@@ -140,6 +143,7 @@ const App = observer(() => {
                       options={{
                         headerStyle: styles.headerWithoutDivider,
                         title: currentL10n.screenTitles.settings,
+                        contentStyle: styles.transparent,
                       }}
                     />
                     <Drawer.Screen
@@ -148,6 +152,7 @@ const App = observer(() => {
                       options={{
                         headerStyle: styles.headerWithoutDivider,
                         title: currentL10n.screenTitles.appInfo,
+                        contentStyle: styles.transparent,
                       }}
                     />
 
@@ -159,6 +164,7 @@ const App = observer(() => {
                         options={{
                           headerStyle: styles.headerWithoutDivider,
                           title: 'Dev Tools',
+                          contentStyle: styles.transparent,
                         }}
                       />
                     )}
@@ -179,6 +185,7 @@ const App = observer(() => {
                           headerStyle: styles.headerWithoutDivider,
                           title: 'Benchmark Runner',
                           drawerItemStyle: {display: 'none'},
+                          contentStyle: styles.transparent,
                         }}
                       />
                     )}
@@ -199,6 +206,9 @@ const createStyles = (theme: Theme) =>
     root: {
       flex: 1,
       backgroundColor: theme.colors.background,
+    },
+    transparent: {
+      backgroundColor: 'transparent',
     },
     backgroundImageWrapper: {
       position: 'absolute',
