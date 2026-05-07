@@ -105,6 +105,9 @@ const App = observer(() => {
                       },
                       headerTintColor: theme.colors.onBackground,
                       headerTitleStyle: styles.headerTitle,
+                      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                      // @ts-ignore sceneStyle exists at runtime in drawer v7
+                      sceneStyle: {backgroundColor: 'transparent'},
                     }}
                     drawerContent={props => <SidebarContent {...props} />}>
                     <Drawer.Screen
