@@ -47,6 +47,7 @@
     "@react-navigation/native": "^7.1.26",
     "@react-navigation/stack": "^7.6.13",
     "@supabase/supabase-js": "^2.75.0",
+    "@uginy/react-native-liquid-glass": "^1.2.6",
     "axios": "^1.12.2",
     "chat-formatter": "^0.3.4",
     "date-fns": "^4.1.0",

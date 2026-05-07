@@ -109,7 +109,7 @@ export const AboutScreen: React.FC = () => {
           <View style={styles.header}>
             <View style={styles.headerContent}>
               <Text variant="titleLarge" style={styles.title}>
-                PocketPal AI
+                树洞
               </Text>
               <Text variant="bodyMedium" style={styles.description}>
                 {l10n.about.description}
@@ -173,22 +173,6 @@ export const AboutScreen: React.FC = () => {
               onPress={() => setShowFeedback(true)}>
               {l10n.feedback.shareThoughtsButton}
             </Button>
-          </View>
-
-          <View style={styles.legalRow}>
-            <Text
-              style={styles.legalLink}
-              onPress={() =>
-                Linking.openURL('https://pocketpal.dev/privacy-policy')
-              }>
-              {l10n.about.privacyPolicy}
-            </Text>
-            <Text style={styles.legalSeparator}>·</Text>
-            <Text
-              style={styles.legalLink}
-              onPress={() => Linking.openURL('https://pocketpal.dev/terms')}>
-              {l10n.about.termsOfService}
-            </Text>
           </View>
         </View>
       </ScrollView>

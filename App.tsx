@@ -196,12 +196,11 @@ const createStyles = (theme: Theme) =>
       right: 0,
       top: '15%',
       height: '70%',
-      width: undefined,
       zIndex: 0,
     },
     backgroundImage: {
       height: '100%',
-      width: undefined,
+      aspectRatio: 1,
       opacity: 0.4,
     },
     headerWithoutDivider: {

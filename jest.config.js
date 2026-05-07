@@ -83,5 +83,7 @@ module.exports = {
       '<rootDir>/__mocks__/external/@pocketpalai/react-native-speech.ts',
     '@react-native-community/blur':
       '<rootDir>/__mocks__/external/@react-native-community/blur.js',
+    '@uginy/react-native-liquid-glass':
+      '<rootDir>/__mocks__/external/@uginy/react-native-liquid-glass.js',
   },
 };
