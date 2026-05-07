@@ -9,10 +9,11 @@ export const createStyles = ({theme}: {theme: Theme}) =>
     },
     flatList: {
       height: '100%',
-      // flex: 1,
+      backgroundColor: 'transparent',
     },
     flatListContentContainer: {
       flexGrow: 1,
+      backgroundColor: 'transparent',
     },
     footer: {
       height: 16,
