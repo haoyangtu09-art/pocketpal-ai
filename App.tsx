@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {Dimensions, StyleSheet} from 'react-native';
+import {Dimensions, Image, StyleSheet, View} from 'react-native';
 
 import {observer} from 'mobx-react';
 import {NavigationContainer} from '@react-navigation/native';
@@ -75,6 +75,13 @@ const App = observer(() => {
   return (
     <GestureHandlerRootView style={styles.root}>
       {__E2E__ ? <AutomationBridge /> : null}
+      <View style={styles.backgroundImageContainer} pointerEvents="none">
+        <Image
+          source={require('./src/assets/background.png')}
+          style={styles.backgroundImage}
+          resizeMode="contain"
+        />
+      </View>
       <SafeAreaProvider style={styles.transparent}>
         <KeyboardProvider statusBarTranslucent navigationBarTranslucent>
           <PaperProvider theme={theme}>
@@ -195,11 +202,24 @@ const App = observer(() => {
   );
 });
 
-const createStyles = (theme: Theme) =>
-  StyleSheet.create({
+const createStyles = (theme: Theme) => {
+  const {width, height} = Dimensions.get('window');
+  return StyleSheet.create({
     root: {
       flex: 1,
-      backgroundColor: theme.colors.background,
+      backgroundColor: '#000000',
+    },
+    backgroundImageContainer: {
+      position: 'absolute',
+      right: 0,
+      top: height * 0.15,
+      width: width * 0.6,
+      height: height * 0.7,
+    },
+    backgroundImage: {
+      width: '100%',
+      height: '100%',
+      opacity: 0.3,
     },
     transparent: {
       backgroundColor: 'transparent',
@@ -208,15 +228,16 @@ const createStyles = (theme: Theme) =>
       elevation: 0,
       shadowOpacity: 0,
       borderBottomWidth: 0,
-      backgroundColor: theme.colors.background,
+      backgroundColor: 'transparent',
     },
     headerWithDivider: {
-      backgroundColor: theme.colors.background,
+      backgroundColor: 'transparent',
     },
     headerTitle: {
       ...theme.fonts.titleSmall,
     },
   });
+};
 
 // Wrap the App component with AppWithMigration to show migration UI when needed
 const AppWithMigrationWrapper = () => {
