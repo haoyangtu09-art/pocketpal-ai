@@ -5,6 +5,7 @@ export const createStyles = ({theme}: {theme: Theme}) =>
   StyleSheet.create({
     container: {
       flex: 1,
+      backgroundColor: 'transparent',
     },
     flatList: {
       height: '100%',
@@ -63,7 +64,7 @@ export const createStyles = ({theme}: {theme: Theme}) =>
     chatContainer: {
       flex: 1,
       position: 'relative',
-      backgroundColor: theme.colors.background,
+      backgroundColor: 'transparent',
       zIndex: 0,
     },
     headerWrapper: {

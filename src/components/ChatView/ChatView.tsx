@@ -929,9 +929,7 @@ export const ChatView = observer(
     // ============ COMPONENT RENDER ============
     return (
       <UserContext.Provider value={user}>
-        <View
-          style={[styles.container, {backgroundColor: inputBackgroundColor}]}
-          onLayout={onLayout}>
+        <View style={styles.container} onLayout={onLayout}>
           {/* Header */}
           <View style={styles.headerWrapper}>
             <ChatHeader />
