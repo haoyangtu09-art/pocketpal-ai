@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useMemo} from 'react';
 import {Image, StyleSheet} from 'react-native';
 import {Gesture, GestureDetector} from 'react-native-gesture-handler';
 import Animated, {
@@ -15,59 +15,58 @@ interface Props {
   globalOpacity: number;
 }
 
+function safeNum(v: number | undefined, fallback: number): number {
+  return typeof v === 'number' && Number.isFinite(v) ? v : fallback;
+}
+
 export const BackgroundLayer = observer(
   ({image, isEditing, globalOpacity}: Props) => {
-    const translateX = useSharedValue(image.x);
-    const translateY = useSharedValue(image.y);
-    const scale = useSharedValue(image.scale);
-    const savedTx = useSharedValue(image.x);
-    const savedTy = useSharedValue(image.y);
-    const savedScale = useSharedValue(image.scale);
+    const translateX = useSharedValue(safeNum(image.x, 0));
+    const translateY = useSharedValue(safeNum(image.y, 0));
+    const scale = useSharedValue(safeNum(image.scale, 1));
+    const savedTx = useSharedValue(safeNum(image.x, 0));
+    const savedTy = useSharedValue(safeNum(image.y, 0));
+    const savedScale = useSharedValue(safeNum(image.scale, 1));
 
-    const persist = (x: number, y: number, s: number, id: string) => {
+    const persist = (x: number, y: number, s: number) => {
       try {
-        backgroundStore.updateImageTransform(id, {x, y, scale: s});
+        backgroundStore.updateImageTransform(image.id, {
+          x: safeNum(x, 0),
+          y: safeNum(y, 0),
+          scale: safeNum(s, 1),
+        });
       } catch {
         // ignore
       }
     };
 
-    // Pan gesture for position — works with 1 finger
-    const pan = Gesture.Pan()
-      .enabled(isEditing)
-      .onUpdate(e => {
-        translateX.value = savedTx.value + e.translationX;
-        translateY.value = savedTy.value + e.translationY;
-      })
-      .onEnd(() => {
-        savedTx.value = translateX.value;
-        savedTy.value = translateY.value;
-        runOnJS(persist)(
-          translateX.value,
-          translateY.value,
-          scale.value,
-          image.id,
-        );
-      });
+    // Stable gesture objects — only recreated when isEditing changes
+    const composed = useMemo(() => {
+      const pan = Gesture.Pan()
+        .enabled(isEditing)
+        .onUpdate(e => {
+          translateX.value = savedTx.value + e.translationX;
+          translateY.value = savedTy.value + e.translationY;
+        })
+        .onEnd(() => {
+          savedTx.value = translateX.value;
+          savedTy.value = translateY.value;
+          runOnJS(persist)(translateX.value, translateY.value, scale.value);
+        });
 
-    // Pinch gesture for scale — works with 2 fingers
-    const pinch = Gesture.Pinch()
-      .enabled(isEditing)
-      .onUpdate(e => {
-        scale.value = Math.max(0.1, Math.min(5, savedScale.value * e.scale));
-      })
-      .onEnd(() => {
-        savedScale.value = scale.value;
-        runOnJS(persist)(
-          translateX.value,
-          translateY.value,
-          scale.value,
-          image.id,
-        );
-      });
+      const pinch = Gesture.Pinch()
+        .enabled(isEditing)
+        .onUpdate(e => {
+          scale.value = Math.max(0.1, Math.min(5, savedScale.value * e.scale));
+        })
+        .onEnd(() => {
+          savedScale.value = scale.value;
+          runOnJS(persist)(translateX.value, translateY.value, scale.value);
+        });
 
-    // Race: pan wins with 1 finger, pinch wins with 2
-    const composed = Gesture.Race(pan, pinch);
+      return Gesture.Race(pan, pinch);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isEditing]);
 
     const animatedStyle = useAnimatedStyle(() => ({
       transform: [
@@ -75,12 +74,13 @@ export const BackgroundLayer = observer(
         {translateY: translateY.value},
         {scale: scale.value},
       ],
-      opacity: image.opacity * globalOpacity,
+      opacity:
+        safeNum(image.opacity, 1) * Math.max(0, Math.min(1, globalOpacity)),
     }));
 
-    const imageSource = React.useMemo(() => {
+    const imageSource = useMemo(() => {
       try {
-        return {uri: image.uri};
+        return image.uri ? {uri: image.uri} : undefined;
       } catch {
         return undefined;
       }
