@@ -3,7 +3,7 @@
  *
  * Platform-specific trigger mechanisms:
  * - Android: TextInput setValue (onChangeText fires reliably)
- * - iOS: Deep link pocketpal://memory?cmd=... (onChangeText doesn't fire
+ * - iOS: Deep link lumo://memory?cmd=... (onChangeText doesn't fire
  *   from XCUITest sendKeys in Release builds)
  *
  * File reading:
@@ -20,7 +20,7 @@ import {byTestId} from './selectors';
 
 declare const driver: WebdriverIO.Browser;
 
-const IOS_BUNDLE_ID = 'ai.pocketpal';
+const IOS_BUNDLE_ID = 'ai.lumo';
 const SNAPSHOTS_FILENAME = 'memory-snapshots.json';
 
 export interface MemorySnapshot {
@@ -52,7 +52,7 @@ async function sendCommand(command: string): Promise<void> {
     // iOS: use deep link (onChangeText doesn't fire from XCUITest sendKeys)
     const encoded = encodeURIComponent(command);
     await driver.execute('mobile: deepLink', {
-      url: `pocketpal://memory?cmd=${encoded}`,
+      url: `lumo://memory?cmd=${encoded}`,
       bundleId: IOS_BUNDLE_ID,
     });
   }

@@ -99,15 +99,10 @@ Appium + WebDriverIO test suite. The E2E build (`yarn android:build:e2e`) uses a
 ## Project Info
 - React Native + TypeScript
 - Build: git push → GitHub Actions → APK
-- Do NOT modify the android/ directory
+1. Fix stats display: change "词元/秒" back to "tokens/s", "毫秒/词元" to "ms/token", "毫秒首词" to "ms TTFT"
 
-## Goals
-- Translate all UI to Chinese
-- Dark theme
-- Remove pals feature, keep chat, model store, benchmark and settings
-- Built-in default system prompt (treehouse/journaling style: non-judgmental, listening-focused), user can customize in settings
-- Open directly to chat on launch, no need to select model first
+2. Add background character image: place src/assets/background.png in the chat screen, absolute position, right: 0, top: 15%, height 70% of screen, width auto, opacity 15%, pointerEvents none
 
-## Rules
-- After each change, tell me which files were modified
-- Only change one feature at a time, finish before moving to the next
+3. Remove x86_64 build: only keep arm64 in the Android build config to reduce APK size and build time
+
+4. Glassmorphism UI: apply frosted glass effect to buttons and cards, similar to iOS 26 liquid glass style

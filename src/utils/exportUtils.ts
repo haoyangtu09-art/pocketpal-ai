@@ -338,7 +338,7 @@ const shareJsonData = async (
                 try {
                   const options = {
                     title: `Share ${filename}`,
-                    message: '树洞 Chat Export',
+                    message: 'Lumo Chat Export',
                     url: `file://${savePath}`,
                     type: 'application/json',
                     failOnCancel: false,

@@ -4,7 +4,7 @@
  * Covers the SHOULD rows from the TASK-20260428-1532 Test Requirements
  * table for the new `__E2E__`-gated `useEffect` that reads
  * `Linking.getInitialURL()` and routes to `BenchmarkRunner` when the
- * launching intent matches `pocketpal://e2e/benchmark`.
+ * launching intent matches `lumo://e2e/benchmark`.
  *
  * Notes:
  * - We do NOT cover the existing iOS-only chat-deep-link path here; the
@@ -64,7 +64,7 @@ describe('useDeepLinking — cold-launch routing', () => {
   });
 
   it('navigates to BenchmarkRunner when __E2E__=true and getInitialURL returns the bench URL', async () => {
-    getInitialURLSpy.mockResolvedValue('pocketpal://e2e/benchmark');
+    getInitialURLSpy.mockResolvedValue('lumo://e2e/benchmark');
 
     renderHook(() => useDeepLinking());
 
@@ -78,7 +78,7 @@ describe('useDeepLinking — cold-launch routing', () => {
 
   it('does NOT navigate when __E2E__=false (cold-launch effect short-circuits)', async () => {
     (global as any).__E2E__ = false;
-    getInitialURLSpy.mockResolvedValue('pocketpal://e2e/benchmark');
+    getInitialURLSpy.mockResolvedValue('lumo://e2e/benchmark');
 
     renderHook(() => useDeepLinking());
 
@@ -104,7 +104,7 @@ describe('useDeepLinking — cold-launch routing', () => {
   });
 
   it('does NOT navigate when getInitialURL returns an unrelated URL', async () => {
-    getInitialURLSpy.mockResolvedValue('pocketpal://chat?palId=foo');
+    getInitialURLSpy.mockResolvedValue('lumo://chat?palId=foo');
 
     renderHook(() => useDeepLinking());
 
@@ -156,7 +156,7 @@ describe('useDeepLinking — cold-launch routing', () => {
 
     // Simulate WDIO firing `mobile: deepLink` after the app started.
     expect(captured.handler).not.toBeNull();
-    captured.handler!({url: 'pocketpal://e2e/benchmark'});
+    captured.handler!({url: 'lumo://e2e/benchmark'});
     expect(mockNavigate).toHaveBeenCalledWith(ROUTES.BENCHMARK_RUNNER);
 
     addEventListenerSpy.mockRestore();

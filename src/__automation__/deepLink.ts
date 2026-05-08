@@ -3,9 +3,9 @@
  * in src/hooks/useDeepLinking.ts, so this module is DCE-stripped in prod.
  *
  * Supported protocols in v1:
- *   pocketpal://memory?cmd=snap::<label>
- *   pocketpal://memory?cmd=clear::snapshots
- *   pocketpal://e2e/benchmark   (Android: cold-launch path lives in
+ *   lumo://memory?cmd=snap::<label>
+ *   lumo://memory?cmd=clear::snapshots
+ *   lumo://e2e/benchmark   (Android: cold-launch path lives in
  *                                useDeepLinking.ts since RN's Android side
  *                                doesn't deliver the URL via DeepLinkService)
  */
@@ -35,7 +35,7 @@ export async function dispatchAutomationDeepLink(
     }
     return true;
   }
-  // pocketpal://e2e/benchmark — bench host. Match against the raw URL via
+  // lumo://e2e/benchmark — bench host. Match against the raw URL via
   // the shared helper so both deep-link sites (this dispatcher and the
   // useDeepLinking cold/warm-launch effect) accept the exact same shape.
   if (isBenchmarkRunnerUrl(params.url)) {

@@ -38,9 +38,8 @@ describe('AboutScreen', () => {
   it('renders correctly', () => {
     const {getByText} = render(<AboutScreen />);
 
-    expect(getByText('树洞')).toBeTruthy();
+    expect(getByText('Lumo')).toBeTruthy();
     expect(getByText('v1.0.0 (100)')).toBeTruthy();
-    expect(getByText(l10n.en.about.supportProject)).toBeTruthy();
   });
 
   it('copies version to clipboard when version button is pressed', () => {

@@ -16,8 +16,8 @@ jest.mock('../../utils/memoryProfile', () => ({
 // Helper: every DeepLinkParams has url+scheme+host at minimum; tests only
 // care about host + queryParams so we fill the rest with placeholders.
 const makeParams = (overrides: Partial<DeepLinkParams>): DeepLinkParams => ({
-  url: 'pocketpal://placeholder',
-  scheme: 'pocketpal',
+  url: 'lumo://placeholder',
+  scheme: 'lumo',
   host: 'memory',
   ...overrides,
 });
@@ -99,11 +99,11 @@ describe('dispatchAutomationDeepLink', () => {
   });
 
   describe('bench host', () => {
-    it('navigates to BenchmarkRunner for pocketpal://e2e/benchmark', async () => {
+    it('navigates to BenchmarkRunner for lumo://e2e/benchmark', async () => {
       const navigate = jest.fn();
       const handled = await dispatchAutomationDeepLink(
         makeParams({
-          url: 'pocketpal://e2e/benchmark',
+          url: 'lumo://e2e/benchmark',
           host: 'e2e',
         }),
         {navigate},
@@ -116,7 +116,7 @@ describe('dispatchAutomationDeepLink', () => {
     it('returns true even when no navigation is supplied (cold-launch path handles nav itself)', async () => {
       const handled = await dispatchAutomationDeepLink(
         makeParams({
-          url: 'pocketpal://e2e/benchmark',
+          url: 'lumo://e2e/benchmark',
           host: 'e2e',
         }),
       );
@@ -127,7 +127,7 @@ describe('dispatchAutomationDeepLink', () => {
       const navigate = jest.fn();
       const handled = await dispatchAutomationDeepLink(
         makeParams({
-          url: 'pocketpal://e2e/other',
+          url: 'lumo://e2e/other',
           host: 'e2e',
         }),
         {navigate},

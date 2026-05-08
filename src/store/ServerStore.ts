@@ -7,7 +7,7 @@ import * as Keychain from 'react-native-keychain';
 import {fetchModels, testConnection, RemoteModelInfo} from '../api/openai';
 import {ServerConfig} from '../utils/types';
 
-const KEYCHAIN_SERVICE_PREFIX = 'pocketpal-server-';
+const KEYCHAIN_SERVICE_PREFIX = 'lumo-server-';
 
 /** Minimum interval between auto-fetch cycles (ms) */
 const FETCH_THROTTLE_MS = 60000;

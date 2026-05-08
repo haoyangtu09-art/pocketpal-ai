@@ -93,7 +93,7 @@ export const AboutScreen: React.FC = () => {
           <View style={styles.header}>
             <View style={styles.headerContent}>
               <Text variant="titleLarge" style={styles.title}>
-                树洞
+                Lumo
               </Text>
               <Text variant="bodyMedium" style={styles.description}>
                 {l10n.about.description}
@@ -120,11 +120,7 @@ export const AboutScreen: React.FC = () => {
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>{l10n.about.supportProject}</Text>
-            <Text variant="bodyMedium" style={styles.description}>
-              {l10n.about.supportProjectDescription}
-            </Text>
-            <Text style={styles.orText}>{l10n.about.orBy}</Text>
+            <Text style={styles.sectionTitle}>Feedback</Text>
             <Button
               mode="outlined"
               style={styles.actionButton}

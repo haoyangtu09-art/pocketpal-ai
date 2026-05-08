@@ -439,25 +439,17 @@
     "typical_p": "Enable locally typical sampling with parameter p. 1.0 is disabled"
   },
   "about": {
-    "screenTitle": "App Info",
-    "description": "An app that brings language models directly to your phone. Sits on the shoulders of llama.cpp and llama.rn.",
-    "supportProject": "Support the Project",
-    "supportProjectDescription": "If you enjoy using 树洞, please consider supporting the project by:",
-    "githubButton": "Star on GitHub",
-    "orText": "or",
-    "orBy": "or by",
-    "sponsorButton": "Become a Sponsor",
+    "screenTitle": "About",
+    "description": "Run language models entirely on your device. Built on llama.cpp and llama.rn.",
     "versionCopiedTitle": "Version copied",
-    "versionCopiedDescription": "Version information has been copied to clipboard",
-    "privacyPolicy": "Privacy Policy",
-    "termsOfService": "Terms of Service"
+    "versionCopiedDescription": "Version information has been copied to clipboard"
   },
   "feedback": {
     "title": "Send Feedback",
-    "description": "Your voice matters! Tell us how 树洞 is helping you and what we can do to make it even more useful.",
-    "shareThoughtsButton": "Sharing your thoughts",
+    "description": "Tell us how Lumo can be better.",
+    "shareThoughtsButton": "Share your thoughts",
     "useCase": {
-      "label": "What are you using 树洞 for?",
+      "label": "What are you using Lumo for?",
       "placeholder": "e.g., summarization, roleplay, etc."
     },
     "featureRequests": {
@@ -469,7 +461,7 @@
       "placeholder": "Share any other thoughts you may have."
     },
     "usageFrequency": {
-      "label": "How often do you use 树洞? (Optional)",
+      "label": "How often do you use Lumo? (Optional)",
       "options": {
         "daily": "Daily",
         "weekly": "Weekly",
@@ -524,7 +516,7 @@
     },
     "chatEmptyPlaceholder": {
       "noModelsTitle": "No Models Available",
-      "noModelsDescription": "Download a model to start chatting with 树洞",
+      "noModelsDescription": "Download a model to start chatting with Lumo",
       "noModelsButton": "Download Model",
       "activateModelTitle": "Activate Model To Get Started",
       "activateModelDescription": "Select the model and download it. After downloading, tap Load next to the model and start chatting.",
@@ -574,7 +566,7 @@
     },
     "modelErrorReportSheet": {
       "title": "Report Model Loading Issue",
-      "privacyNote": "Help us improve 树洞 by sharing details about this error. Review below what will be shared - you can deselect any items you prefer not to include.",
+      "privacyNote": "Help us improve Lumo by sharing details about this error. Review below what will be shared - you can deselect any items you prefer not to include.",
       "errorMessage": "Error message",
       "modelInfo": "Model Information",
       "modelName": "Name",
@@ -592,7 +584,7 @@
       "submit": "Submit Report",
       "success": {
         "title": "Report Submitted",
-        "message": "Thank you for helping us improve 树洞. Your report will help us fix this issue."
+        "message": "Thank you for helping us improve Lumo. Your report will help us fix this issue."
       },
       "error": {
         "title": "Report Failed",
@@ -1007,7 +999,7 @@
   },
   "camera": {
     "permissionTitle": "Camera Permission Required",
-    "permissionMessage": "树洞 needs camera access to analyze images",
+    "permissionMessage": "Lumo needs camera access to analyze images",
     "requestingPermission": "Requesting camera permission...",
     "noDevice": "No camera device found",
     "errorTitle": "Camera Error",
@@ -1021,7 +1013,7 @@
   },
   "video": {
     "permissionTitle": "Camera Permission Required",
-    "permissionMessage": "树洞 needs camera access for video analysis",
+    "permissionMessage": "Lumo needs camera access for video analysis",
     "requestingPermission": "Requesting camera permission...",
     "noDevice": "No camera device found",
     "errorTitle": "Camera Error",

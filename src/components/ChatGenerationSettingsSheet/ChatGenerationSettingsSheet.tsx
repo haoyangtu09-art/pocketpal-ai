@@ -394,7 +394,7 @@ export const ChatGenerationSettingsSheet = ({
             multiline
             value={settings.session_system_prompt ?? ''}
             onChangeText={v => updateSettings('session_system_prompt', v)}
-            placeholder="例：你是一个温柔体贴的树洞，专注倾听用户的内心..."
+            placeholder="例：你是一个温柔体贴的伙伴，专注倾听用户的内心..."
             placeholderTextColor={theme.colors.onSurfaceDisabled}
             textAlignVertical="top"
           />
