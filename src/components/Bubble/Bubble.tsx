@@ -91,6 +91,7 @@ export const Bubble = ({
       style={[
         contentContainer,
         uiStore.useLiquidGlass &&
+          theme.dark &&
           currentUserIsAuthor && {
             borderWidth: 1,
             borderColor: theme.dark

@@ -46,7 +46,7 @@ export const ChatHeader: React.FC = observer(() => {
     </>
   );
 
-  if (uiStore.useLiquidGlass) {
+  if (uiStore.useLiquidGlass && theme.dark) {
     return (
       <LiquidGlass
         style={[styles.container, {backgroundColor: 'transparent'}]}

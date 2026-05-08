@@ -945,7 +945,7 @@ export const ChatView = observer(
             <Reanimated.View
               onLayout={onLayoutChatInput}
               style={[styles.inputContainer, inputContainerAnimatedStyle]}>
-              {uiStore.useLiquidGlass ? (
+              {uiStore.useLiquidGlass && theme.dark ? (
                 <LiquidGlass
                   cornerRadius={12}
                   blurAmount={15}

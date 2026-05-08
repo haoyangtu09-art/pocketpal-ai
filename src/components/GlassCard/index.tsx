@@ -27,14 +27,16 @@ export const GlassCard: React.FC<GlassCardProps> = ({
 }) => {
   const theme = useTheme();
   const isDark = theme.dark;
-  const useLiquid = uiStore.useLiquidGlass;
+  // LiquidGlass only renders correctly in dark mode (BackdropFilter
+  // with dark tint over light content produces ugly gray).
+  const useLiquid = uiStore.useLiquidGlass && isDark;
 
   if (useLiquid) {
     return (
       <LiquidGlass
         style={[styles.liquidShadow, style]}
         cornerRadius={CORNER}
-        blurAmount={15}>
+        blurAmount={12}>
         <View style={styles.content}>{children}</View>
       </LiquidGlass>
     );
