@@ -5,13 +5,14 @@ import {observer} from 'mobx-react';
 import {createStyles} from './styles';
 import {HeaderRight} from '../HeaderRight';
 import {ChatHeaderTitle} from '../ChatHeaderTitle';
+import {LiquidGlass} from '../LiquidGlass';
 import {
   useSafeAreaFrame,
   useSafeAreaInsets,
 } from 'react-native-safe-area-context';
 import {getDefaultHeaderHeight} from '@react-navigation/elements';
 import {useTheme} from '../../hooks';
-import {chatSessionStore} from '../../store';
+import {chatSessionStore, uiStore} from '../../store';
 import {HeaderLeft} from '../HeaderLeft';
 
 export const ChatHeader: React.FC = observer(() => {
@@ -35,13 +36,30 @@ export const ChatHeader: React.FC = observer(() => {
     ? styles.headerWithDivider
     : styles.headerWithoutDivider;
 
-  return (
-    <View testID="header-view" style={[styles.container, headerStyle]}>
+  const headerContent = (
+    <>
       <View style={styles.leftSection}>
         <HeaderLeft />
         <ChatHeaderTitle />
       </View>
       <HeaderRight />
+    </>
+  );
+
+  if (uiStore.useLiquidGlass) {
+    return (
+      <LiquidGlass
+        style={[styles.container, {backgroundColor: 'transparent'}]}
+        cornerRadius={0}
+        blurAmount={12}>
+        {headerContent}
+      </LiquidGlass>
+    );
+  }
+
+  return (
+    <View testID="header-view" style={[styles.container, headerStyle]}>
+      {headerContent}
     </View>
   );
 });

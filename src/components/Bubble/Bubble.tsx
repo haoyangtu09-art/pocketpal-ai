@@ -8,6 +8,7 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 
 import {useTheme} from '../../hooks';
+import {uiStore} from '../../store';
 
 import {styles} from './styles';
 import {PlayButton} from '../TextMessage/PlayButton';
@@ -89,6 +90,16 @@ export const Bubble = ({
       testID={currentUserIsAuthor ? 'user-message' : 'ai-message'}
       style={[
         contentContainer,
+        uiStore.useLiquidGlass &&
+          currentUserIsAuthor && {
+            borderWidth: 1,
+            borderColor: theme.dark
+              ? 'rgba(255,255,255,0.10)'
+              : 'rgba(255,255,255,0.40)',
+            backgroundColor: theme.dark
+              ? 'rgba(30,30,40,0.75)'
+              : 'rgba(235,235,245,0.75)',
+          },
         {
           transform: [{scale}],
         },

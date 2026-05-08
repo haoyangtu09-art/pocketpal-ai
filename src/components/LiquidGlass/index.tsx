@@ -1,52 +1,39 @@
 import React, {useMemo} from 'react';
 import {StyleSheet, View, type ViewStyle, type StyleProp} from 'react-native';
-import {Canvas, Fill, Shader, Skia} from '@shopify/react-native-skia';
+import {
+  Canvas,
+  Fill,
+  Shader,
+  Skia,
+  BackdropFilter,
+  Blur,
+} from '@shopify/react-native-skia';
 import {useWindowDimensions} from 'react-native';
-import {liquidGlassShader} from './shaders';
+import {highlightShader} from './shaders';
 
 interface LiquidGlassProps {
   children?: React.ReactNode;
   style?: StyleProp<ViewStyle>;
+  /** Blur intensity (sigma). Higher = more frosted. Default 15. */
   blurAmount?: number;
-  refractionStrength?: number;
+  /** Corner radius for the glass panel. */
   cornerRadius?: number;
-  /** Glass tint as [r, g, b, a] normalized 0-1. */
-  tintColor?: readonly [number, number, number, number];
+  /** Glass tint as rgba string, e.g. "rgba(7,7,11,0.65)" */
+  tintColor?: string;
 }
 
-const DARK_TINT: readonly [number, number, number, number] = [
-  0.07, 0.07, 0.11, 0.82,
-];
+const DEFAULT_TINT = 'rgba(7,7,11,0.65)';
 
 export const LiquidGlass: React.FC<LiquidGlassProps> = ({
   children,
   style,
-  blurAmount = 2.0,
-  refractionStrength = 0.15,
+  blurAmount = 15,
   cornerRadius = 16,
-  tintColor,
+  tintColor = DEFAULT_TINT,
 }) => {
   const {width, height} = useWindowDimensions();
 
-  const effect = useMemo(() => Skia.RuntimeEffect.Make(liquidGlassShader), []);
-
-  const color = tintColor ?? DARK_TINT;
-
-  if (!effect) {
-    return (
-      <View
-        style={[
-          styles.container,
-          {
-            borderRadius: cornerRadius,
-            backgroundColor: `rgba(${Math.round(color[0] * 255)}, ${Math.round(color[1] * 255)}, ${Math.round(color[2] * 255)}, ${color[3]})`,
-          },
-          style,
-        ]}>
-        {children}
-      </View>
-    );
-  }
+  const effect = useMemo(() => Skia.RuntimeEffect.Make(highlightShader), []);
 
   return (
     <View
@@ -56,19 +43,24 @@ export const LiquidGlass: React.FC<LiquidGlassProps> = ({
         style,
       ]}>
       <Canvas style={StyleSheet.absoluteFill}>
-        <Fill>
-          <Shader
-            source={effect}
-            uniforms={{
-              iResolution: [width, height],
-              glassColor: color,
-              cornerRadius,
-              refractionStrength,
-              blurAmount,
-              iTime: 0,
-            }}
-          />
-        </Fill>
+        {/* Blur what's behind the component */}
+        <BackdropFilter filter={<Blur blur={blurAmount} />}>
+          {/* Semi-transparent tint over the blurred backdrop */}
+          <Fill color={tintColor} />
+        </BackdropFilter>
+
+        {/* Highlight shader: specular reflection + fresnel edges */}
+        {effect ? (
+          <Fill>
+            <Shader
+              source={effect}
+              uniforms={{
+                iResolution: [width, height],
+                cornerRadius,
+              }}
+            />
+          </Fill>
+        ) : null}
       </Canvas>
       {children}
     </View>

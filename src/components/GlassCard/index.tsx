@@ -34,8 +34,7 @@ export const GlassCard: React.FC<GlassCardProps> = ({
       <LiquidGlass
         style={[styles.liquidShadow, style]}
         cornerRadius={CORNER}
-        blurAmount={2.5}
-        refractionStrength={0.18}>
+        blurAmount={15}>
         <View style={styles.content}>{children}</View>
       </LiquidGlass>
     );

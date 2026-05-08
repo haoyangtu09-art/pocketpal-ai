@@ -36,7 +36,7 @@ import {useTheme, useMessageActions, usePrevious} from '../../hooks';
 import ImageView from './ImageView';
 import {createStyles} from './styles';
 
-import {chatSessionStore, modelStore} from '../../store';
+import {chatSessionStore, modelStore, uiStore} from '../../store';
 
 import {MessageType, User} from '../../utils/types';
 import {Pal} from '../../types/pal';
@@ -62,6 +62,7 @@ import {
   ChatEmptyPlaceholder,
   VideoPalEmptyPlaceholder,
   ContentReportSheet,
+  LiquidGlass,
 } from '..';
 import {
   AlertIcon,
@@ -943,38 +944,69 @@ export const ChatView = observer(
             {/* Chat input */}
             <Reanimated.View
               onLayout={onLayoutChatInput}
-              style={[
-                styles.inputContainer,
-                inputContainerAnimatedStyle,
-                {backgroundColor: inputBackgroundColor},
-              ]}>
-              <ChatInput
-                {...{
-                  ...unwrap(inputProps),
-                  isStreaming,
-                  onSendPress: wrappedOnSendPress,
-                  onStopPress,
-                  chatInputHeight,
-                  inputBackgroundColor,
-                  onCancelEdit: handleCancelEdit,
-                  onPalBtnPress: () => setIsPickerVisible(!isPickerVisible),
-                  isStopVisible,
-                  isPickerVisible,
-                  sendButtonVisibilityMode,
-                  showImageUpload,
-                  isVisionEnabled,
-                  defaultImages: inputImages,
-                  onDefaultImagesChange: setInputImages,
-                  textInputProps: {
-                    ...textInputProps,
-                    // Only override value and onChangeText if not using promptText
-                    ...(!(activePal && hasVideoCapability(activePal)) && {
-                      value: inputText,
-                      onChangeText: setInputText,
-                    }),
-                  },
-                }}
-              />
+              style={[styles.inputContainer, inputContainerAnimatedStyle]}>
+              {uiStore.useLiquidGlass ? (
+                <LiquidGlass
+                  cornerRadius={12}
+                  blurAmount={15}
+                  tintColor={
+                    theme.dark ? 'rgba(7,7,11,0.55)' : 'rgba(240,240,248,0.50)'
+                  }>
+                  <ChatInput
+                    {...{
+                      ...unwrap(inputProps),
+                      isStreaming,
+                      onSendPress: wrappedOnSendPress,
+                      onStopPress,
+                      chatInputHeight,
+                      inputBackgroundColor,
+                      onCancelEdit: handleCancelEdit,
+                      onPalBtnPress: () => setIsPickerVisible(!isPickerVisible),
+                      isStopVisible,
+                      isPickerVisible,
+                      sendButtonVisibilityMode,
+                      showImageUpload,
+                      isVisionEnabled,
+                      defaultImages: inputImages,
+                      onDefaultImagesChange: setInputImages,
+                      textInputProps: {
+                        ...textInputProps,
+                        ...(!(activePal && hasVideoCapability(activePal)) && {
+                          value: inputText,
+                          onChangeText: setInputText,
+                        }),
+                      },
+                    }}
+                  />
+                </LiquidGlass>
+              ) : (
+                <ChatInput
+                  {...{
+                    ...unwrap(inputProps),
+                    isStreaming,
+                    onSendPress: wrappedOnSendPress,
+                    onStopPress,
+                    chatInputHeight,
+                    inputBackgroundColor,
+                    onCancelEdit: handleCancelEdit,
+                    onPalBtnPress: () => setIsPickerVisible(!isPickerVisible),
+                    isStopVisible,
+                    isPickerVisible,
+                    sendButtonVisibilityMode,
+                    showImageUpload,
+                    isVisionEnabled,
+                    defaultImages: inputImages,
+                    onDefaultImagesChange: setInputImages,
+                    textInputProps: {
+                      ...textInputProps,
+                      ...(!(activePal && hasVideoCapability(activePal)) && {
+                        value: inputText,
+                        onChangeText: setInputText,
+                      }),
+                    },
+                  }}
+                />
+              )}
             </Reanimated.View>
 
             {/* Pal/Model picker sheet */}
