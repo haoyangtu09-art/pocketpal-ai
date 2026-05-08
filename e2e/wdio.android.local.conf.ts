@@ -33,8 +33,8 @@ export const config: Options.Testrunner = {
       'appium:platformVersion': PLATFORM_VERSION,
       'appium:automationName': 'UiAutomator2',
       'appium:app': APP_PATH,
-      'appium:appPackage': 'com.pocketpalai.e2e',
-      'appium:appActivity': 'com.pocketpal.MainActivity',
+      'appium:appPackage': 'com.lumoai.app.e2e',
+      'appium:appActivity': 'com.lumoai.app.MainActivity',
       // Force fresh install to ensure clean state
       'appium:noReset': false,
       'appium:fullReset': true,
