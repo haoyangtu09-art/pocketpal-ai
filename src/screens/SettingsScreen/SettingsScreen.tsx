@@ -55,6 +55,7 @@ export const SettingsScreen: React.FC = observer(() => {
   const [showHfTokenDialog, setShowHfTokenDialog] = useState(false);
   const [apiUrl, setApiUrl] = useState('');
   const [apiKeyInput, setApiKeyInput] = useState('');
+  const [isApplyingServer, setIsApplyingServer] = useState(false);
   const [gpuSupported, setGpuSupported] = useState(false);
   const [languageAnchor, setLanguageAnchor] = useState<{x: number; y: number}>({
     x: 0.0,
@@ -189,18 +190,37 @@ export const SettingsScreen: React.FC = observer(() => {
   };
 
   const handleApplyServer = async () => {
-    let serverId: string;
-    if (serverStore.servers.length > 0) {
-      serverId = serverStore.servers[0].id;
-      serverStore.updateServer(serverId, {url: apiUrl});
-    } else {
-      serverId = serverStore.addServer({
-        name: 'Remote Server',
-        url: apiUrl,
-      });
+    setIsApplyingServer(true);
+    try {
+      let serverId: string;
+      if (serverStore.servers.length > 0) {
+        serverId = serverStore.servers[0].id;
+        serverStore.updateServer(serverId, {url: apiUrl});
+      } else {
+        serverId = serverStore.addServer({
+          name: 'Remote Server',
+          url: apiUrl,
+        });
+      }
+      await serverStore.setApiKey(serverId, apiKeyInput);
+      await serverStore.fetchModelsForServer(serverId);
+
+      const models = serverStore.serverModels.get(serverId) || [];
+      if (models.length > 0) {
+        // Auto-add the first model so it appears in the chat model selector immediately
+        serverStore.addUserSelectedModel(serverId, models[0].id);
+        Alert.alert(
+          '✓ 已连接',
+          `找到 ${models.length} 个模型，已将「${models[0].id}」加入可用列表。\n\n在聊天界面右上角菜单可切换模型。`,
+        );
+      } else {
+        Alert.alert('✓ 已连接', '该服务器没有返回任何模型');
+      }
+    } catch (e: any) {
+      Alert.alert('✗ 连接失败', e.message || '未知错误');
+    } finally {
+      setIsApplyingServer(false);
     }
-    await serverStore.setApiKey(serverId, apiKeyInput);
-    await serverStore.fetchModelsForServer(serverId);
   };
 
   const handleTestConnection = async () => {
@@ -515,7 +535,10 @@ export const SettingsScreen: React.FC = observer(() => {
                 autoCorrect={false}
               />
               <View style={styles.buttonRow}>
-                <Button mode="outlined" onPress={handleApplyServer}>
+                <Button
+                  mode="outlined"
+                  loading={isApplyingServer}
+                  onPress={handleApplyServer}>
                   应用
                 </Button>
                 <Button mode="outlined" onPress={handleTestConnection}>
