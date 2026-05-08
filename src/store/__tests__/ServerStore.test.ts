@@ -175,7 +175,7 @@ describe('ServerStore', () => {
       serverStore.removeServer(id);
 
       expect(Keychain.resetGenericPassword).toHaveBeenCalledWith({
-        service: `pocketpal-server-${id}`,
+        service: `lumo-server-${id}`,
       });
     });
 
@@ -328,7 +328,7 @@ describe('ServerStore', () => {
       serverStore.removeServerIfOrphaned(id);
 
       expect(Keychain.resetGenericPassword).toHaveBeenCalledWith({
-        service: `pocketpal-server-${id}`,
+        service: `lumo-server-${id}`,
       });
     });
   });
@@ -411,7 +411,7 @@ describe('ServerStore', () => {
       expect(Keychain.setGenericPassword).toHaveBeenCalledWith(
         'apiKey',
         'sk-test-key',
-        {service: 'pocketpal-server-server-1'},
+        {service: 'lumo-server-server-1'},
       );
     });
 
@@ -425,7 +425,7 @@ describe('ServerStore', () => {
 
       expect(key).toBe('sk-stored-key');
       expect(Keychain.getGenericPassword).toHaveBeenCalledWith({
-        service: 'pocketpal-server-server-1',
+        service: 'lumo-server-server-1',
       });
     });
 
@@ -440,7 +440,7 @@ describe('ServerStore', () => {
       await serverStore.removeApiKey('server-1');
 
       expect(Keychain.resetGenericPassword).toHaveBeenCalledWith({
-        service: 'pocketpal-server-server-1',
+        service: 'lumo-server-server-1',
       });
     });
 
