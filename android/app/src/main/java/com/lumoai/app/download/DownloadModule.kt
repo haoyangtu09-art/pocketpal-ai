@@ -1,4 +1,4 @@
-package com.pocketpal.download
+package com.lumoai.app.download
 
 import android.util.Log
 import androidx.lifecycle.Observer
@@ -6,7 +6,7 @@ import androidx.work.*
 import com.facebook.react.bridge.*
 import com.facebook.react.module.annotations.ReactModule
 import com.facebook.react.modules.core.DeviceEventManagerModule
-import com.pocketpal.specs.NativeDownloadModuleSpec
+import com.lumoai.app.specs.NativeDownloadModuleSpec
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.first
 import java.io.File

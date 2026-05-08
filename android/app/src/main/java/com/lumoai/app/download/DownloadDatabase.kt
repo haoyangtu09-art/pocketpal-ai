@@ -1,4 +1,4 @@
-package com.pocketpal.download
+package com.lumoai.app.download
 
 import android.content.Context
 import androidx.room.Database

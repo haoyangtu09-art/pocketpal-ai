@@ -1,11 +1,11 @@
-package com.pocketpal
+package com.lumoai.app
 
 import com.facebook.react.TurboReactPackage
 import com.facebook.react.bridge.NativeModule
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.module.model.ReactModuleInfo
 import com.facebook.react.module.model.ReactModuleInfoProvider
-import com.pocketpal.specs.NativeKeepAwakeSpec
+import com.lumoai.app.specs.NativeKeepAwakeSpec
 
 class KeepAwakePackage : TurboReactPackage() {
   override fun getModule(name: String, reactContext: ReactApplicationContext): NativeModule? {

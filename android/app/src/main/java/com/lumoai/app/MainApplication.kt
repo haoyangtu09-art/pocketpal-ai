@@ -1,4 +1,4 @@
-package com.pocketpal
+package com.lumoai.app
 
 import android.app.Application
 import com.facebook.react.PackageList
@@ -11,10 +11,10 @@ import com.facebook.react.defaults.DefaultReactHost.getDefaultReactHost
 import com.facebook.react.defaults.DefaultReactNativeHost
 import com.facebook.react.soloader.OpenSourceMergedSoMapping
 import com.facebook.soloader.SoLoader
-import com.pocketpal.KeepAwakePackage
-import com.pocketpal.HardwareInfoPackage
-import com.pocketpal.StorefrontPackage
-import com.pocketpal.download.DownloadPackage
+import com.lumoai.app.KeepAwakePackage
+import com.lumoai.app.HardwareInfoPackage
+import com.lumoai.app.StorefrontPackage
+import com.lumoai.app.download.DownloadPackage
 
 class MainApplication : Application(), ReactApplication {
 

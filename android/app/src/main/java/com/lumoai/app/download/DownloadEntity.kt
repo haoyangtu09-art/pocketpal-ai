@@ -1,4 +1,4 @@
-package com.pocketpal.download
+package com.lumoai.app.download
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

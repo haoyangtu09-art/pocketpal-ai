@@ -81,7 +81,7 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace "com.pocketpal"
+    namespace "com.lumoai.app"
     defaultConfig {
         applicationId "com.lumoai.app"
         minSdkVersion rootProject.ext.minSdkVersion
