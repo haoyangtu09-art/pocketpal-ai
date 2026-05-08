@@ -13,8 +13,6 @@ import {
   Skia,
   BackdropFilter,
   Blur,
-  RadialGradient,
-  vec,
 } from '@shopify/react-native-skia';
 import {highlightShader} from './shaders';
 
@@ -73,14 +71,6 @@ export const LiquidGlass: React.FC<LiquidGlassProps> = ({
     }
   }, [ready, fadeAnim]);
 
-  // Parse tint into center (darker) and edge (lighter) for radial gradient
-  // that reinforces the bubble illusion
-  const tintCenter = tintColor.replace(/[\d.]+\)$/, m => {
-    const a = parseFloat(m);
-    return `${Math.min(a + 0.08, 1).toFixed(2)})`;
-  });
-  const tintEdge = tintColor;
-
   return (
     <View
       onLayout={onLayout}
@@ -93,13 +83,7 @@ export const LiquidGlass: React.FC<LiquidGlassProps> = ({
         <Animated.View style={[StyleSheet.absoluteFill, {opacity: fadeAnim}]}>
           <Canvas style={StyleSheet.absoluteFill}>
             <BackdropFilter filter={<Blur blur={blurAmount} />}>
-              <Fill>
-                <RadialGradient
-                  c={vec(size.width / 2, size.height / 2)}
-                  r={Math.max(size.width, size.height) / 1.5}
-                  colors={[tintCenter, tintEdge]}
-                />
-              </Fill>
+              <Fill color={tintColor} />
             </BackdropFilter>
             <Fill>
               <Shader
@@ -107,7 +91,6 @@ export const LiquidGlass: React.FC<LiquidGlassProps> = ({
                 uniforms={{
                   iResolution: [size.width, size.height],
                   cornerRadius: safeCornerRadius,
-                  iLightOrigin: [0.3, 0.2],
                 }}
               />
             </Fill>

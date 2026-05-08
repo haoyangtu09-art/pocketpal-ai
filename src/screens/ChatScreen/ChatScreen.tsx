@@ -2,8 +2,13 @@ import React, {useRef, ReactNode, useState} from 'react';
 
 import {observer} from 'mobx-react';
 
-import {ImageBackground, StyleSheet, View} from 'react-native';
-import {Text, Button} from 'react-native-paper';
+import {
+  ImageBackground,
+  StyleSheet,
+  View,
+  TouchableOpacity,
+} from 'react-native';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 import {
   Bubble,
@@ -175,32 +180,33 @@ export const ChatScreen: React.FC = observer(() => {
   // Otherwise, show the regular chat view
   return (
     <ImageBackground
-      source={require('../../assets/background.png')}
+      source={
+        uiStore.showDefaultBackground
+          ? require('../../assets/background.png')
+          : undefined
+      }
       style={styles.container}
       imageStyle={styles.backgroundImage}
       resizeMode="contain">
-      {/* Background image layers (user-uploaded) */}
-      {backgroundStore.images.map(img => (
-        <BackgroundLayer
-          key={img.id}
-          image={img}
-          isEditing={uiStore.isBackgroundEditMode}
-          globalOpacity={backgroundStore.globalOpacity}
-        />
-      ))}
+      {/* Background image layers (user-uploaded) — above ChatView */}
+      <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
+        {backgroundStore.images.map(img => (
+          <BackgroundLayer
+            key={img.id}
+            image={img}
+            isEditing={uiStore.isBackgroundEditMode}
+            globalOpacity={backgroundStore.globalOpacity}
+          />
+        ))}
+      </View>
 
-      {/* Edit mode top bar */}
+      {/* Edit mode: X close button at top-right */}
       {uiStore.isBackgroundEditMode && (
-        <View style={styles.editBar}>
-          <Text variant="titleMedium" style={styles.editBarTitle}>
-            编辑背景图
-          </Text>
-          <Button
-            mode="contained"
-            onPress={() => uiStore.setBackgroundEditMode(false)}>
-            完成
-          </Button>
-        </View>
+        <TouchableOpacity
+          style={styles.editCloseBtn}
+          onPress={() => uiStore.setBackgroundEditMode(false)}>
+          <Icon name="close" size={22} color="#fff" />
+        </TouchableOpacity>
       )}
 
       <ChatView
@@ -274,21 +280,16 @@ const styles = StyleSheet.create({
     left: undefined,
     bottom: undefined,
   },
-  editBar: {
+  editCloseBtn: {
     position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    zIndex: 10,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    top: 48,
+    right: 16,
+    zIndex: 20,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(0,0,0,0.60)',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    paddingTop: 50,
-    backgroundColor: 'rgba(0,0,0,0.75)',
-  },
-  editBarTitle: {
-    color: '#fff',
+    justifyContent: 'center',
   },
 });

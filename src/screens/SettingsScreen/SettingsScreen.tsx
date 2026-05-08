@@ -491,11 +491,11 @@ export const SettingsScreen: React.FC = observer(() => {
                       color={theme.colors.onSurface}
                     />
                     <Text variant="titleMedium" style={styles.textLabel}>
-                      液态玻璃效果
+                      亚光玻璃效果
                     </Text>
                   </View>
                   <Text variant="labelSmall" style={styles.textDescription}>
-                    Skia 渲染的液态玻璃效果，流畅设备推荐开启
+                    Skia 渲染的亚光玻璃效果，流畅设备推荐开启
                   </Text>
                 </View>
                 <Switch
@@ -695,6 +695,37 @@ export const SettingsScreen: React.FC = observer(() => {
               style={styles.marginTop8}>
               添加背景图片
             </Button>
+
+            {/* Edit mode button */}
+            {backgroundStore.images.length > 0 && (
+              <Button
+                mode="outlined"
+                icon="pencil"
+                style={styles.marginTop8}
+                onPress={() => {
+                  uiStore.setBackgroundEditMode(true);
+                  navigation.navigate('Chat');
+                }}>
+                编辑背景图布局
+              </Button>
+            )}
+
+            {/* Show/hide default background */}
+            <Divider />
+            <View style={styles.switchContainer}>
+              <View style={styles.textContainer}>
+                <Text variant="titleMedium" style={styles.textLabel}>
+                  显示默认背景图
+                </Text>
+                <Text variant="labelSmall" style={styles.textDescription}>
+                  关闭后仅显示导入的背景图
+                </Text>
+              </View>
+              <Switch
+                value={uiStore.showDefaultBackground}
+                onValueChange={v => uiStore.setShowDefaultBackground(v)}
+              />
+            </View>
 
             {/* Image list */}
             {backgroundStore.images.length > 0 && (

@@ -1,105 +1,82 @@
 /**
- * Bubble Glass Highlight Shader
+ * Matte Glass Highlight Shader
  *
  * Sits on top of BackdropFilter (blurred backdrop + tinted fill) and adds
- * lighting layers that create the *illusion* of a curved 3D glass surface.
+ * lighting layers that create a softly curved glass surface.
  *
- * Four layers, all driven by the signed distance to the rounded rectangle edge:
- *   1. Contour-following Fresnel glow (edge-distance based, two bands)
- *   2. Anisotropic specular highlight (elongated reflection band)
- *   3. Inner shadow ring (dark band ~3px inside edge → thickness)
- *   4. Center darkening (radial gradient → convex depth)
+ * Edge glow fades inward (not a directional beam).
+ * Light catches the top rim and gently fades downward/inward.
  */
 
 export const highlightShader = /* sksl */ `
 uniform float2 iResolution;
 uniform float cornerRadius;
-uniform float2 iLightOrigin;
 
 half4 main(float2 xy) {
   float2 uv = xy / iResolution;
   float2 center = float2(0.5);
   float aspect = iResolution.x / iResolution.y;
 
-  // Guard: minimum normalized radius to avoid division by zero
-  float r = cornerRadius / min(iResolution.x, iResolution.y);
-  r = max(r, 0.001);
+  float r = max(cornerRadius / min(iResolution.x, iResolution.y), 0.001);
 
-  // === Rounded rectangle SDF (signed distance field) ===
+  // Rounded rectangle SDF
   float2 halfSize = float2(aspect * 0.5 - r, 0.5 - r);
   float2 p = (uv - center) * float2(aspect, 1.0);
   float2 q = abs(p) - halfSize;
   float sdf = length(max(q, 0.0)) + min(max(q.x, q.y), 0.0) - r;
-
-  // Normalized distance: positive = outside, negative = inside
   float d = sdf / min(iResolution.x, iResolution.y);
-  float innerDist = -d;  // positive = inside, larger = deeper inside
+  float innerDist = -d;
 
-  // Sharp edge mask for alpha clipping
+  // Sharp edge mask
   float edgeMask = 1.0 - smoothstep(-0.0015, 0.0015, d);
 
-  // === 1. Contour Fresnel glow (narrow intense band) ===
-  // Rapid exponential falloff from the exact edge inward.
-  // Multiplier 50.0 controls glow width; higher = thinner/brighter.
-  float fresnel = exp(-innerDist * 50.0) * 0.50;
-  fresnel *= smoothstep(-0.002, 0.008, innerDist); // soften the absolute edge
+  // === Edge glow — uniform along contour, fades inward ===
+  // The glow is brightest at the edge and decays exponentially inward.
+  // Two bands: narrow bright rim + wider soft halo.
+  float rimGlow = exp(-innerDist * 35.0) * 0.45;
+  float haloGlow = exp(-innerDist * 14.0) * 0.12;
 
-  // Wider secondary Fresnel band (warmer, less intense)
-  float fresnel2 = exp(-innerDist * 22.0) * 0.14;
+  // === Top-edge highlight — soft overhead light reflection ===
+  // Vertical gradient: brightest at top edge, fades downward.
+  // This simulates overhead room light catching the top of the glass bubble.
+  float topHighlight = exp(-innerDist * 20.0)
+                      * exp(-uv.y * uv.y / 0.06)
+                      * 0.28;
 
-  // === 2. Anisotropic specular highlight ===
-  // Light reflects off convex glass as an elongated streak
-  // perpendicular to the light direction.
-  float2 lightDir = normalize(center - iLightOrigin);
-  float2 perpDir = float2(-lightDir.y, lightDir.x);
-  float2 dUv = uv - iLightOrigin;
-  float projPerp = dot(dUv, perpDir);
-  float projParallel = dot(dUv, lightDir);
-
-  float spec = exp(-projPerp * projPerp / 0.09)
-             * exp(-projParallel * projParallel / 0.0064);
-  spec *= 0.42;
-  // Fade specular near edges — highlight sits on the glass surface
-  spec *= clamp(innerDist / 0.06, 0.0, 1.0);
-
-  // === 3. Inner shadow ring (glass thickness illusion) ===
-  // A dark band ~3px inside the edge (innerDist ≈ 0.025)
+  // === Inner shadow — subtle dark band ~3px inside edge ===
   float innerShadow = exp(-(innerDist - 0.025) * (innerDist - 0.025)
                           / (0.005 * 0.005));
-  innerShadow *= 0.18;
+  innerShadow *= 0.15;
 
-  // === 4. Center darkening (convex depth) ===
+  // === Center darkening — subtle radial falloff ===
   float radialDist = length((uv - center) * float2(aspect, 1.0));
-  float maxRadial = length(
-    float2(aspect * 0.5, 0.5) - float2(r / aspect, r));
+  float maxRadial = length(float2(aspect * 0.5, 0.5) - float2(r / aspect, r));
   float centerDark = pow(clamp(radialDist / max(maxRadial, 0.001), 0.0, 1.0), 2.5);
-  centerDark *= 0.12;
+  centerDark *= 0.10;
 
   // === Compose ===
   float3 color = float3(0.0);
 
-  // Specular: warm white, slightly golden
-  color += float3(spec * 1.08, spec * 1.03, spec * 0.95);
+  // Top highlight: warm white
+  color += float3(topHighlight * 1.05, topHighlight * 1.02, topHighlight * 0.95);
 
-  // Fresnel narrow: cool blue-white (glass edge reflection)
-  color += float3(fresnel * 0.20, fresnel * 0.28, fresnel * 0.55);
-  // Fresnel wide: warmer rim
-  color += float3(fresnel2 * 0.16, fresnel2 * 0.13, fresnel2 * 0.06);
+  // Rim glow: cool blue-white edge reflection
+  color += float3(rimGlow * 0.22, rimGlow * 0.30, rimGlow * 0.55);
+
+  // Halo glow: wider warm edge
+  color += float3(haloGlow * 0.14, haloGlow * 0.12, haloGlow * 0.05);
 
   // Inner shadow: subtractive dark band
-  color -= float3(innerShadow * 0.7, innerShadow * 0.75, innerShadow * 0.90);
+  color -= float3(innerShadow * 0.6, innerShadow * 0.65, innerShadow * 0.80);
 
-  // Center darkening: subtractive gradient
-  color -= centerDark * 0.55;
+  // Center darkening
+  color -= centerDark * 0.45;
 
-  // Very subtle overall blue glass tint
-  color += float3(0.0, 0.0, 0.010);
+  // Subtle blue glass tint
+  color += float3(0.0, 0.0, 0.008);
 
-  // Alpha from all highlight contributions
-  float a = spec * 0.55 + fresnel * 0.60 + fresnel2 * 0.28 + innerShadow * 0.30;
-  a = clamp(a, 0.0, 0.92);
-
-  // Apply edge mask so highlights don't bleed outside the shape
+  float a = topHighlight * 0.5 + rimGlow * 0.55 + haloGlow * 0.25 + innerShadow * 0.25;
+  a = clamp(a, 0.0, 0.90);
   a *= edgeMask;
 
   return half4(half3(color), half(a));

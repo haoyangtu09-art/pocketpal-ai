@@ -48,11 +48,14 @@ export class UIStore {
     shouldShow: true,
   };
 
-  // Toggle Skia liquid glass effect (off for low-end devices)
+  // Toggle Skia matte glass effect (off for low-end devices)
   useLiquidGlass = true;
 
   // Background image edit mode (not persisted — resets on app restart)
   isBackgroundEditMode = false;
+
+  // Show the default background.png in chat
+  showDefaultBackground = true;
 
   // Warning state for chat-related warnings (like multimodal warnings)
   chatWarning: ErrorState | null = null;
@@ -86,6 +89,7 @@ export class UIStore {
         'defaultSystemPrompt',
         'benchmarkShareDialog',
         'useLiquidGlass',
+        'showDefaultBackground',
         '_language',
       ],
       storage: AsyncStorage,
@@ -124,6 +128,12 @@ export class UIStore {
   setBackgroundEditMode(value: boolean) {
     runInAction(() => {
       this.isBackgroundEditMode = value;
+    });
+  }
+
+  setShowDefaultBackground(value: boolean) {
+    runInAction(() => {
+      this.showDefaultBackground = value;
     });
   }
 

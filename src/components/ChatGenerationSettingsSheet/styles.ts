@@ -42,4 +42,23 @@ export const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '500',
   },
+  settingItemContainer: {
+    marginVertical: 8,
+  },
+  switchContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  textContainer: {
+    flex: 1,
+    marginRight: 16,
+  },
+  textLabel: {
+    fontWeight: '500',
+  },
+  textDescription: {
+    opacity: 0.6,
+    marginTop: 2,
+  },
 });

@@ -14,7 +14,7 @@ import {
   COMPLETION_PARAMS_METADATA,
   validateCompletionSettings,
 } from '../../utils/modelSettings';
-import {Button, List, SegmentedButtons, Text} from 'react-native-paper';
+import {Button, List, SegmentedButtons, Switch, Text} from 'react-native-paper';
 import {L10nContext} from '../../utils';
 import {ChevronDownIcon} from '../../assets/icons';
 import {Menu} from '../Menu';
@@ -393,6 +393,27 @@ export const ChatGenerationSettingsSheet = ({
             />
           </View>
         )}
+
+        {/* Deep thinking (CoT) visibility toggle */}
+        <View style={styles.settingItemContainer}>
+          <View style={styles.switchContainer}>
+            <View style={styles.textContainer}>
+              <Text variant="titleMedium" style={styles.textLabel}>
+                显示深度思考
+              </Text>
+              <Text variant="labelSmall" style={styles.textDescription}>
+                开启后显示AI的思考链（需模型支持）
+              </Text>
+            </View>
+            <Switch
+              value={settings.include_thinking_in_context !== false}
+              onValueChange={v =>
+                updateSettings('include_thinking_in_context', v)
+              }
+              disabled={isUsingPalSettings}
+            />
+          </View>
+        </View>
 
         {/* Advanced Settings Accordion */}
         <List.Accordion
