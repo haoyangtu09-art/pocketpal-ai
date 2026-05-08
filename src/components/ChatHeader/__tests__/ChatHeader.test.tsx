@@ -32,6 +32,10 @@ const mockChatSessionStore = {
 // Mock the stores
 jest.mock('../../../store', () => ({
   chatSessionStore: mockChatSessionStore,
+  uiStore: {
+    useLiquidGlass: false,
+    setUseLiquidGlass: jest.fn(),
+  },
 }));
 
 describe('ChatHeader', () => {
