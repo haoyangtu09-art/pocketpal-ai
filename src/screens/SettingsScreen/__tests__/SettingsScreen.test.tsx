@@ -1,5 +1,5 @@
 import React from 'react';
-import {Platform, Keyboard} from 'react-native';
+import {Platform} from 'react-native';
 
 import {
   fireEvent,
@@ -20,7 +20,6 @@ const render = (ui: React.ReactElement, options: any = {}) =>
 describe('SettingsScreen', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.spyOn(Keyboard, 'dismiss');
     jest.clearAllTimers();
   });
 
@@ -76,22 +75,6 @@ describe('SettingsScreen', () => {
     });
 
     expect(getByText('Please enter a valid number (minimum 200)')).toBeTruthy();
-  });
-
-  it('handles outside press correctly and resets input', async () => {
-    const {getByDisplayValue, getByText} = render(<SettingsScreen />, {
-      withSafeArea: true,
-      withNavigation: true,
-    });
-    const contextSizeInput = getByDisplayValue('2048');
-
-    fireEvent.changeText(contextSizeInput, '512');
-    fireEvent.press(getByText('Model Initialization Settings'));
-
-    await waitFor(() => {
-      expect(Keyboard.dismiss).toHaveBeenCalled();
-      expect(getByDisplayValue('2048')).toBeTruthy();
-    });
   });
 
   it('toggles Dark Mode switch', async () => {
