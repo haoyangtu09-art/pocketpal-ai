@@ -9,6 +9,7 @@ import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 
 import {useTheme} from '../../hooks';
 import {uiStore} from '../../store';
+import {LiquidGlass} from '../LiquidGlass';
 
 import {styles} from './styles';
 import {PlayButton} from '../TextMessage/PlayButton';
@@ -85,25 +86,15 @@ export const Bubble = ({
     message.author?.id === assistant.id && message.type === 'text';
   const showFooter = timings || isAssistantText;
 
-  return (
+  const bubbleContent = (
     <Animated.View
       testID={currentUserIsAuthor ? 'user-message' : 'ai-message'}
       style={[
         contentContainer,
+        // When LiquidGlass wraps this bubble, content bg must be transparent
         uiStore.useLiquidGlass &&
-          theme.dark &&
-          currentUserIsAuthor && {
-            borderWidth: 1,
-            borderColor: theme.dark
-              ? 'rgba(255,255,255,0.10)'
-              : 'rgba(255,255,255,0.40)',
-            backgroundColor: theme.dark
-              ? 'rgba(30,30,40,0.75)'
-              : 'rgba(235,235,245,0.75)',
-          },
-        {
-          transform: [{scale}],
-        },
+          currentUserIsAuthor && {backgroundColor: 'transparent'},
+        {transform: [{scale}]},
       ]}>
       {child}
       {showFooter && (
@@ -121,4 +112,19 @@ export const Bubble = ({
       )}
     </Animated.View>
   );
+
+  if (uiStore.useLiquidGlass && currentUserIsAuthor) {
+    return (
+      <LiquidGlass
+        cornerRadius={theme.borders.messageBorderRadius}
+        blurAmount={8}
+        tintColor={
+          theme.dark ? 'rgba(30,30,40,0.60)' : 'rgba(235,235,245,0.45)'
+        }>
+        {bubbleContent}
+      </LiquidGlass>
+    );
+  }
+
+  return bubbleContent;
 };

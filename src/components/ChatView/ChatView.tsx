@@ -945,13 +945,8 @@ export const ChatView = observer(
             <Reanimated.View
               onLayout={onLayoutChatInput}
               style={[styles.inputContainer, inputContainerAnimatedStyle]}>
-              {uiStore.useLiquidGlass && theme.dark ? (
-                <LiquidGlass
-                  cornerRadius={12}
-                  blurAmount={15}
-                  tintColor={
-                    theme.dark ? 'rgba(7,7,11,0.55)' : 'rgba(240,240,248,0.50)'
-                  }>
+              {(() => {
+                const chatInputElement = (
                   <ChatInput
                     {...{
                       ...unwrap(inputProps),
@@ -978,35 +973,22 @@ export const ChatView = observer(
                       },
                     }}
                   />
-                </LiquidGlass>
-              ) : (
-                <ChatInput
-                  {...{
-                    ...unwrap(inputProps),
-                    isStreaming,
-                    onSendPress: wrappedOnSendPress,
-                    onStopPress,
-                    chatInputHeight,
-                    inputBackgroundColor,
-                    onCancelEdit: handleCancelEdit,
-                    onPalBtnPress: () => setIsPickerVisible(!isPickerVisible),
-                    isStopVisible,
-                    isPickerVisible,
-                    sendButtonVisibilityMode,
-                    showImageUpload,
-                    isVisionEnabled,
-                    defaultImages: inputImages,
-                    onDefaultImagesChange: setInputImages,
-                    textInputProps: {
-                      ...textInputProps,
-                      ...(!(activePal && hasVideoCapability(activePal)) && {
-                        value: inputText,
-                        onChangeText: setInputText,
-                      }),
-                    },
-                  }}
-                />
-              )}
+                );
+                return uiStore.useLiquidGlass ? (
+                  <LiquidGlass
+                    cornerRadius={12}
+                    blurAmount={12}
+                    tintColor={
+                      theme.dark
+                        ? 'rgba(7,7,11,0.55)'
+                        : 'rgba(240,240,248,0.45)'
+                    }>
+                    {chatInputElement}
+                  </LiquidGlass>
+                ) : (
+                  chatInputElement
+                );
+              })()}
             </Reanimated.View>
 
             {/* Pal/Model picker sheet */}

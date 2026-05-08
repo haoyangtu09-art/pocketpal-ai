@@ -46,12 +46,17 @@ export const ChatHeader: React.FC = observer(() => {
     </>
   );
 
-  if (uiStore.useLiquidGlass && theme.dark) {
+  if (uiStore.useLiquidGlass) {
     return (
       <LiquidGlass
-        style={[styles.container, {backgroundColor: 'transparent'}]}
-        cornerRadius={0}
-        blurAmount={12}>
+        style={[
+          styles.container,
+          headerStyle,
+          {backgroundColor: 'transparent'},
+        ]}
+        cornerRadius={1}
+        blurAmount={12}
+        tintColor={theme.dark ? 'rgba(7,7,11,0.55)' : 'rgba(240,240,248,0.40)'}>
         {headerContent}
       </LiquidGlass>
     );

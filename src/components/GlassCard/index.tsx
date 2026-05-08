@@ -11,6 +11,7 @@ interface GlassCardProps {
   style?: ViewStyle;
   testID?: string;
   tintColor?: string;
+  blurAmount?: number;
 }
 
 /**
@@ -24,26 +25,31 @@ export const GlassCard: React.FC<GlassCardProps> = ({
   children,
   style,
   testID,
+  tintColor,
+  blurAmount = 12,
 }) => {
   const theme = useTheme();
-  const isDark = theme.dark;
-  // LiquidGlass only renders correctly in dark mode (BackdropFilter
-  // with dark tint over light content produces ugly gray).
-  const useLiquid = uiStore.useLiquidGlass && isDark;
+  const useLiquid = uiStore.useLiquidGlass;
 
   if (useLiquid) {
+    const glassTint =
+      tintColor ??
+      (theme.dark ? 'rgba(7,7,11,0.65)' : 'rgba(240,240,248,0.50)');
     return (
       <LiquidGlass
         style={[styles.liquidShadow, style]}
         cornerRadius={CORNER}
-        blurAmount={12}>
+        blurAmount={blurAmount}
+        tintColor={glassTint}>
         <View style={styles.content}>{children}</View>
       </LiquidGlass>
     );
   }
 
   // ---- Fallback: CSS shimmer card ----
-  return <ShimmerGlassCard {...{children, style, testID, isDark}} />;
+  return (
+    <ShimmerGlassCard {...{children, style, testID, isDark: theme.dark}} />
+  );
 };
 
 // ---- Original shimmer-based glass card (fallback) ----
