@@ -2,7 +2,6 @@ import React, {useState, useEffect, useRef, useContext} from 'react';
 import {
   View,
   Platform,
-  TouchableOpacity,
   Keyboard,
   ScrollView,
   TextInput as RNTextInput,

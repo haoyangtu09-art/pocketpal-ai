@@ -1,5 +1,5 @@
 import React, {useContext, useEffect, useState} from 'react';
-import {StyleSheet, TextInput, View} from 'react-native';
+import {Alert, StyleSheet, TextInput, View} from 'react-native';
 import {Sheet} from '../Sheet/Sheet';
 import {CompletionSettings} from '..';
 import {CompletionParams} from '../../utils/completionTypes';
@@ -14,7 +14,6 @@ import {
   COMPLETION_PARAMS_METADATA,
   validateCompletionSettings,
 } from '../../utils/modelSettings';
-import {Alert, View} from 'react-native';
 import {Button, SegmentedButtons, Text} from 'react-native-paper';
 import {L10nContext} from '../../utils';
 import {ChevronDownIcon} from '../../assets/icons';
