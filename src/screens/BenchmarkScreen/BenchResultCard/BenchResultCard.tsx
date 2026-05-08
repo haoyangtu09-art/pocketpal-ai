@@ -11,7 +11,7 @@ import {createStyles} from './styles';
 
 import {BenchmarkResult} from '../../../utils/types';
 import {formatBytes, formatNumber} from '../../../utils';
-import {NetworkError, AppCheckError, ServerError} from '../../../utils/errors';
+import {NetworkError, ServerError} from '../../../utils/errors';
 
 type Props = {
   result: BenchmarkResult;
@@ -40,10 +40,6 @@ export const BenchResultCard = ({result, onDelete, onShare}: Props) => {
       if (error instanceof NetworkError) {
         setErrorType('network');
         setSubmitError(error.message);
-      } else if (error instanceof AppCheckError) {
-        setErrorType('appCheck');
-        setSubmitError(error.message);
-      } else if (error instanceof ServerError) {
         setErrorType('server');
         setSubmitError(error.message);
       } else {

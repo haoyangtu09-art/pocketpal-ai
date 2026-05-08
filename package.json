@@ -38,8 +38,6 @@
     "@react-native-community/blur": "^4.4.1",
     "@react-native-community/slider": "^5.0.1",
     "@react-native-documents/picker": "^10.1.7",
-    "@react-native-firebase/app": "^23.5.0",
-    "@react-native-firebase/app-check": "^23.5.0",
     "@react-native-google-signin/google-signin": "^16.0.0",
     "@react-native-masked-view/masked-view": "^0.3.2",
     "@react-native-picker/picker": "^2.11.4",
