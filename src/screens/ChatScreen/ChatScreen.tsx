@@ -2,12 +2,7 @@ import React, {useRef, ReactNode, useState} from 'react';
 
 import {observer} from 'mobx-react';
 
-import {
-  ImageBackground,
-  StyleSheet,
-  View,
-  TouchableOpacity,
-} from 'react-native';
+import {ImageBackground, StyleSheet, TouchableOpacity} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 import {
@@ -188,27 +183,6 @@ export const ChatScreen: React.FC = observer(() => {
       style={styles.container}
       imageStyle={styles.backgroundImage}
       resizeMode="contain">
-      {/* Background image layers (user-uploaded) — above ChatView */}
-      <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
-        {backgroundStore.images.map(img => (
-          <BackgroundLayer
-            key={img.id}
-            image={img}
-            isEditing={uiStore.isBackgroundEditMode}
-            globalOpacity={backgroundStore.globalOpacity}
-          />
-        ))}
-      </View>
-
-      {/* Edit mode: X close button at top-right */}
-      {uiStore.isBackgroundEditMode && (
-        <TouchableOpacity
-          style={styles.editCloseBtn}
-          onPress={() => uiStore.setBackgroundEditMode(false)}>
-          <Icon name="close" size={22} color="#fff" />
-        </TouchableOpacity>
-      )}
-
       <ChatView
         renderBubble={renderBubble}
         messages={chatSessionStore.currentSessionMessages}
@@ -262,6 +236,23 @@ export const ChatScreen: React.FC = observer(() => {
           onClose={handleClosePalSheet}
           pal={activePal}
         />
+      )}
+
+      {/* Background layers & edit UI — rendered AFTER ChatView so they sit ON TOP */}
+      {backgroundStore.images.map(img => (
+        <BackgroundLayer
+          key={img.id}
+          image={img}
+          isEditing={uiStore.isBackgroundEditMode}
+          globalOpacity={backgroundStore.globalOpacity}
+        />
+      ))}
+      {uiStore.isBackgroundEditMode && (
+        <TouchableOpacity
+          style={styles.editCloseBtn}
+          onPress={() => uiStore.setBackgroundEditMode(false)}>
+          <Icon name="close" size={22} color="#fff" />
+        </TouchableOpacity>
       )}
     </ImageBackground>
   );
