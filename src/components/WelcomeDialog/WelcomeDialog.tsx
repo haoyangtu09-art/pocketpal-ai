@@ -43,16 +43,24 @@ export const WelcomeDialog: React.FC = () => {
   const theme = useTheme();
 
   useEffect(() => {
-    AsyncStorage.getItem(WELCOME_SHOWN_KEY).then(value => {
-      if (!value) {
-        setVisible(true);
-      }
-    });
+    try {
+      AsyncStorage.getItem(WELCOME_SHOWN_KEY).then(value => {
+        if (!value) {
+          setVisible(true);
+        }
+      });
+    } catch {
+      // AsyncStorage unavailable (e.g. test environment) — skip dialog
+    }
   }, []);
 
   const handleDismiss = async () => {
     setVisible(false);
-    await AsyncStorage.setItem(WELCOME_SHOWN_KEY, 'true');
+    try {
+      await AsyncStorage.setItem(WELCOME_SHOWN_KEY, 'true');
+    } catch {
+      // Silently ignore — dialog is already dismissed
+    }
   };
 
   const textColor = theme.colors.onSurface;
