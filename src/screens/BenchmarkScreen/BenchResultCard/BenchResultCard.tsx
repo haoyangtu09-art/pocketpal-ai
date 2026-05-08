@@ -11,7 +11,7 @@ import {createStyles} from './styles';
 
 import {BenchmarkResult} from '../../../utils/types';
 import {formatBytes, formatNumber} from '../../../utils';
-import {NetworkError, ServerError} from '../../../utils/errors';
+import {NetworkError} from '../../../utils/errors';
 
 type Props = {
   result: BenchmarkResult;
