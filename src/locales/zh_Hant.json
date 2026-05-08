@@ -597,9 +597,6 @@
       "create": "新建"
     },
     "bubble": {
-      "msPerToken": "{{value}}毫秒/詞元",
-      "tokensPerSec": "{{value}} 詞元/秒",
-      "ttft": "{{value}}毫秒 TTFT"
     },
     "thinkingBubble": {
       "reasoning": "推理"

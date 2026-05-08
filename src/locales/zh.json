@@ -510,9 +510,6 @@
       "reasoning": "思考"
     },
     "bubble": {
-      "msPerToken": "{{value}}ms/token",
-      "tokensPerSec": "{{value}} tokens/s",
-      "ttft": "{{value}}ms TTFT"
     },
     "chatEmptyPlaceholder": {
       "noModelsTitle": "没有可用的模型",

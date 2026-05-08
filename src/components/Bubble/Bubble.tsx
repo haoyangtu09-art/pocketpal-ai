@@ -1,11 +1,6 @@
 import type {ReactNode} from 'react';
 import React, {useContext} from 'react';
-import {View, TouchableOpacity, Animated} from 'react-native';
-
-import {Text} from 'react-native-paper';
-import Clipboard from '@react-native-clipboard/clipboard';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
+import {View, Animated} from 'react-native';
 
 import {useTheme} from '../../hooks';
 import {uiStore} from '../../store';
@@ -14,15 +9,9 @@ import {LiquidGlass} from '../LiquidGlass';
 import {styles} from './styles';
 import {PlayButton} from '../TextMessage/PlayButton';
 
-import {UserContext, L10nContext} from '../../utils';
+import {UserContext} from '../../utils';
 import {assistant} from '../../utils/chat';
 import {MessageType} from '../../utils/types';
-import {t} from '../../locales';
-
-const hapticOptions = {
-  enableVibrateFallback: true,
-  ignoreAndroidSystemSettings: false,
-};
 
 export const Bubble = ({
   child,
@@ -38,53 +27,17 @@ export const Bubble = ({
 }) => {
   const theme = useTheme();
   const user = useContext(UserContext);
-  const l10n = useContext(L10nContext);
   const currentUserIsAuthor = user?.id === message.author.id;
-  const {copyable, timings} = message.metadata || {};
 
-  // Build timing string from whichever parts are available
-  const timingParts: string[] = [];
-  if (timings?.predicted_per_token_ms != null) {
-    timingParts.push(
-      t(l10n.components.bubble.msPerToken, {
-        value: timings.predicted_per_token_ms.toFixed(),
-      }),
-    );
-  }
-  if (timings?.predicted_per_second != null) {
-    timingParts.push(
-      t(l10n.components.bubble.tokensPerSec, {
-        value: timings.predicted_per_second.toFixed(2),
-      }),
-    );
-  }
-  if (timings?.time_to_first_token_ms != null) {
-    timingParts.push(
-      t(l10n.components.bubble.ttft, {
-        value: timings.time_to_first_token_ms,
-      }),
-    );
-  }
-  const fullTimingsString = timingParts.join(', ');
-
-  const {contentContainer, dateHeaderContainer, dateHeader, iconContainer} =
-    styles({
-      currentUserIsAuthor,
-      message,
-      roundBorder: true,
-      theme,
-    });
-
-  const copyToClipboard = () => {
-    if (message.type === 'text') {
-      ReactNativeHapticFeedback.trigger('impactLight', hapticOptions);
-      Clipboard.setString(message.text.trim());
-    }
-  };
+  const {contentContainer, dateHeaderContainer} = styles({
+    currentUserIsAuthor,
+    message,
+    roundBorder: true,
+    theme,
+  });
 
   const isAssistantText =
     message.author?.id === assistant.id && message.type === 'text';
-  const showFooter = timings || isAssistantText;
 
   const bubbleContent = (
     <Animated.View
@@ -97,17 +50,9 @@ export const Bubble = ({
         {transform: [{scale}]},
       ]}>
       {child}
-      {showFooter && (
-        <View style={dateHeaderContainer} testID="message-timing">
-          {isAssistantText && <PlayButton message={message} />}
-          {timings && copyable && (
-            <TouchableOpacity onPress={copyToClipboard}>
-              <Icon name="content-copy" style={iconContainer} />
-            </TouchableOpacity>
-          )}
-          {timings && fullTimingsString ? (
-            <Text style={dateHeader}>{fullTimingsString}</Text>
-          ) : null}
+      {isAssistantText && (
+        <View style={dateHeaderContainer} testID="message-footer">
+          <PlayButton message={message} />
         </View>
       )}
     </Animated.View>

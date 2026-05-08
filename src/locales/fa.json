@@ -902,9 +902,6 @@
       "importError": "وارد کردن پَل‌ها انجام نشد. لطفاً فرمت فایل را بررسی کنید."
     },
     "bubble": {
-      "msPerToken": "{{value}}ms/توکن",
-      "tokensPerSec": "{{value}} توکن/ثانیه",
-      "ttft": "{{value}}ms TTFT"
     }
   },
   "palsScreen": {

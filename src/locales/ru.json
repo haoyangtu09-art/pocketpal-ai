@@ -637,9 +637,6 @@
       "importError": "Не удалось импортировать Pal. Проверьте формат файла."
     },
     "bubble": {
-      "msPerToken": "{{value}} мс/ток",
-      "tokensPerSec": "{{value}} ток/сек",
-      "ttft": "{{value}} мс TTFT"
     }
   },
   "feedback": {

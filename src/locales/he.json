@@ -902,9 +902,6 @@
       "importError": "ייבוא ה-Pals נכשל. אנא בדוק את פורמט הקובץ."
     },
     "bubble": {
-      "msPerToken": "{{value}}מ.ש./טוקן",
-      "tokensPerSec": "{{value}} טוקנים/שנ'",
-      "ttft": "{{value}}מ.ש. TTFT"
     }
   },
   "palsScreen": {

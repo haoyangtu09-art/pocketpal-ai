@@ -487,9 +487,6 @@
       "attachmentButtonAccessibilityLabel": "Send media"
     },
     "bubble": {
-      "msPerToken": "{{value}}ms/token",
-      "tokensPerSec": "{{value}} tokens/sec",
-      "ttft": "{{value}}ms TTFT"
     },
     "exportUtils": {
       "fileSaved": "File Saved",

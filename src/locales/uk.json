@@ -488,9 +488,6 @@
       "attachmentButtonAccessibilityLabel": "Надіслати медіафайли"
     },
     "bubble": {
-      "msPerToken": "{{value}} мс/токен",
-      "tokensPerSec": "{{value}} токенів/сек",
-      "ttft": "{{value}} мс TTFT"
     },
     "exportUtils": {
       "fileSaved": "Файл збережено",

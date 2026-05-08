@@ -637,9 +637,6 @@
       "importError": "Pal을 가져오지 못했습니다. 파일 형식을 확인해 주세요."
     },
     "bubble": {
-      "msPerToken": "{{value}}ms/토큰",
-      "tokensPerSec": "{{value}} 토큰/초",
-      "ttft": "{{value}}ms TTFT"
     }
   },
   "feedback": {
