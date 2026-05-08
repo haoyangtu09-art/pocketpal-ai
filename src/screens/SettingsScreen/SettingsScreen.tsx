@@ -491,11 +491,11 @@ export const SettingsScreen: React.FC = observer(() => {
                       color={theme.colors.onSurface}
                     />
                     <Text variant="titleMedium" style={styles.textLabel}>
-                      亚光玻璃效果
+                      动态视效
                     </Text>
                   </View>
                   <Text variant="labelSmall" style={styles.textDescription}>
-                    Skia 渲染的亚光玻璃效果，流畅设备推荐开启
+                    开启 Skia 动态玻璃效果，关闭后使用普通毛玻璃
                   </Text>
                 </View>
                 <Switch
