@@ -2,6 +2,7 @@ export * from './AttachmentButton';
 export * from './Avatar';
 export * from './Bubble';
 export * from './ChatGenerationSettingsSheet';
+export * from './BackgroundLayer';
 export * from './ChatInput';
 export * from './ChatView';
 export * from './ChatHeader';
@@ -54,6 +55,7 @@ export * from './UsageStats';
 export * from './VideoPalEmptyPlaceholder';
 export * from './VoiceChip';
 export * from './VisionDownloadSheet';
+export * from './LiquidGlass';
 export * from './WelcomeDialog';
 
 export * from './PalHeaderRight';

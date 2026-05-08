@@ -2,13 +2,15 @@ import React, {useRef, ReactNode, useState} from 'react';
 
 import {observer} from 'mobx-react';
 
-import {ImageBackground, StyleSheet} from 'react-native';
+import {ImageBackground, StyleSheet, View} from 'react-native';
+import {Text, Button} from 'react-native-paper';
 
 import {
   Bubble,
   ChatView,
   ErrorSnackbar,
   ModelErrorReportSheet,
+  BackgroundLayer,
 } from '../../components';
 import {PalSheet} from '../../components/PalsSheets';
 
@@ -16,7 +18,13 @@ import {useChatSession} from '../../hooks';
 import {usePendingMessage} from '../../hooks/useDeepLinking';
 import {Pal} from '../../types/pal';
 
-import {modelStore, chatSessionStore, palStore, uiStore} from '../../store';
+import {
+  modelStore,
+  chatSessionStore,
+  palStore,
+  uiStore,
+  backgroundStore,
+} from '../../store';
 import {hasVideoCapability} from '../../utils/pal-capabilities';
 
 import {L10nContext} from '../../utils';
@@ -171,6 +179,30 @@ export const ChatScreen: React.FC = observer(() => {
       style={styles.container}
       imageStyle={styles.backgroundImage}
       resizeMode="contain">
+      {/* Background image layers (user-uploaded) */}
+      {backgroundStore.images.map(img => (
+        <BackgroundLayer
+          key={img.id}
+          image={img}
+          isEditing={uiStore.isBackgroundEditMode}
+          globalOpacity={backgroundStore.globalOpacity}
+        />
+      ))}
+
+      {/* Edit mode top bar */}
+      {uiStore.isBackgroundEditMode && (
+        <View style={styles.editBar}>
+          <Text variant="titleMedium" style={styles.editBarTitle}>
+            编辑背景图
+          </Text>
+          <Button
+            mode="contained"
+            onPress={() => uiStore.setBackgroundEditMode(false)}>
+            完成
+          </Button>
+        </View>
+      )}
+
       <ChatView
         renderBubble={renderBubble}
         messages={chatSessionStore.currentSessionMessages}
@@ -241,5 +273,22 @@ const styles = StyleSheet.create({
     right: 0,
     left: undefined,
     bottom: undefined,
+  },
+  editBar: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 10,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    paddingTop: 50,
+    backgroundColor: 'rgba(0,0,0,0.75)',
+  },
+  editBarTitle: {
+    color: '#fff',
   },
 });

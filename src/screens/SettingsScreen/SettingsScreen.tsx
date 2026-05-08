@@ -8,12 +8,15 @@ import {
   Alert,
   Linking,
   TouchableOpacity,
+  Image,
 } from 'react-native';
 
 import {debounce} from 'lodash';
 import {observer} from 'mobx-react-lite';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {Switch, Text, Button, Icon, SegmentedButtons} from 'react-native-paper';
+import {launchImageLibrary} from 'react-native-image-picker';
+import {useNavigation} from '@react-navigation/native';
 
 import {GlobeIcon, MoonIcon, LinkExternalIcon} from '../../assets/icons';
 
@@ -30,7 +33,13 @@ import {useTheme} from '../../hooks';
 
 import {createStyles} from './styles';
 
-import {modelStore, uiStore, hfStore, serverStore} from '../../store';
+import {
+  modelStore,
+  uiStore,
+  hfStore,
+  serverStore,
+  backgroundStore,
+} from '../../store';
 import {languageDisplayNames} from '../../locales';
 
 import {L10nContext} from '../../utils';
@@ -46,6 +55,7 @@ export const SettingsScreen: React.FC = observer(() => {
   const l10n = useContext(L10nContext);
   const theme = useTheme();
   const styles = createStyles(theme);
+  const navigation = useNavigation<any>();
   const [contextSize, setContextSize] = useState(
     modelStore.contextInitParams.n_ctx.toString(),
   );
@@ -470,6 +480,31 @@ export const SettingsScreen: React.FC = observer(() => {
                 />
               </View>
 
+              {/* Liquid Glass Effect Toggle */}
+              <Divider />
+              <View style={styles.switchContainer}>
+                <View style={styles.textContainer}>
+                  <View style={styles.labelWithIconContainer}>
+                    <Icon
+                      source="water"
+                      size={20}
+                      color={theme.colors.onSurface}
+                    />
+                    <Text variant="titleMedium" style={styles.textLabel}>
+                      液态玻璃效果
+                    </Text>
+                  </View>
+                  <Text variant="labelSmall" style={styles.textDescription}>
+                    Skia 渲染的液态玻璃效果，流畅设备推荐开启
+                  </Text>
+                </View>
+                <Switch
+                  testID="liquid-glass-switch"
+                  value={uiStore.useLiquidGlass}
+                  onValueChange={value => uiStore.setUseLiquidGlass(value)}
+                />
+              </View>
+
               {/* Default System Prompt */}
               <Divider />
               <View style={styles.settingItemContainer}>
@@ -599,6 +634,133 @@ export const SettingsScreen: React.FC = observer(() => {
                 />
               </View>
             </View>
+          </View>
+        </GlassCard>
+
+        {/* Card 5 — 背景图管理 */}
+        <GlassCard style={styles.card}>
+          <View style={styles.cardTitle}>
+            <Text variant="titleMedium">背景图管理</Text>
+          </View>
+          <View style={styles.cardContent}>
+            {/* Global opacity slider */}
+            <View style={styles.settingItemContainer}>
+              <Text variant="titleMedium" style={styles.textLabel}>
+                全局透明度
+              </Text>
+              <Text variant="labelSmall" style={styles.textDescription}>
+                {Math.round(backgroundStore.globalOpacity * 100)}%
+              </Text>
+              <View style={styles.slider}>
+                <InputSlider
+                  label=""
+                  value={backgroundStore.globalOpacity}
+                  onValueChange={v => backgroundStore.setGlobalOpacity(v)}
+                  min={0.05}
+                  max={1}
+                  step={0.05}
+                  precision={2}
+                  testID="bg-global-opacity-slider"
+                />
+              </View>
+            </View>
+
+            <Divider />
+
+            {/* Add images button */}
+            <Button
+              mode="outlined"
+              icon="image-plus"
+              onPress={async () => {
+                try {
+                  const result = await launchImageLibrary({
+                    mediaType: 'photo',
+                    selectionLimit: 10,
+                  });
+                  if (result.assets && result.assets.length > 0) {
+                    const uris = result.assets
+                      .map(a => a.uri)
+                      .filter((u): u is string => !!u);
+                    if (uris.length > 0) {
+                      backgroundStore.addImages(uris);
+                      // Navigate to chat in edit mode
+                      uiStore.setBackgroundEditMode(true);
+                      navigation.navigate('Chat');
+                    }
+                  }
+                } catch {
+                  // User cancelled or error — ignore
+                }
+              }}
+              style={styles.marginTop8}>
+              添加背景图片
+            </Button>
+
+            {/* Image list */}
+            {backgroundStore.images.length > 0 && (
+              <>
+                <Divider />
+                {backgroundStore.images.map(img => (
+                  <View
+                    key={img.id}
+                    style={[styles.switchContainer, styles.bgImageRow]}>
+                    <Image
+                      source={{uri: img.uri}}
+                      style={styles.bgThumbnail}
+                      resizeMode="cover"
+                    />
+                    <Text
+                      variant="labelSmall"
+                      style={styles.bgFileName}
+                      numberOfLines={1}>
+                      {img.uri.split('/').pop() ?? '未知'}
+                    </Text>
+                    <Button
+                      mode="text"
+                      icon="delete"
+                      textColor={theme.colors.error}
+                      onPress={() =>
+                        Alert.alert('删除背景图', '确定要删除这张背景图吗？', [
+                          {text: '取消', style: 'cancel'},
+                          {
+                            text: '删除',
+                            style: 'destructive',
+                            onPress: () => backgroundStore.removeImage(img.id),
+                          },
+                        ])
+                      }>
+                      删除
+                    </Button>
+                  </View>
+                ))}
+              </>
+            )}
+
+            {/* Clear all */}
+            {backgroundStore.images.length > 0 && (
+              <>
+                <Divider />
+                <Button
+                  mode="text"
+                  textColor={theme.colors.error}
+                  onPress={() =>
+                    Alert.alert(
+                      '清空全部背景图',
+                      '确定要删除所有背景图吗？此操作不可撤销。',
+                      [
+                        {text: '取消', style: 'cancel'},
+                        {
+                          text: '清空',
+                          style: 'destructive',
+                          onPress: () => backgroundStore.clearAll(),
+                        },
+                      ],
+                    )
+                  }>
+                  清空全部背景图
+                </Button>
+              </>
+            )}
           </View>
         </GlassCard>
       </ScrollView>

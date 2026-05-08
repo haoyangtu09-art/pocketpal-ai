@@ -1,5 +1,6 @@
 module.exports = {
   preset: 'react-native',
+  testEnvironment: '@shopify/react-native-skia/jestEnv.js',
   collectCoverage: true,
   collectCoverageFrom: [
     'src/**/*.{ts,tsx}',
@@ -22,9 +23,12 @@ module.exports = {
   },
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
   setupFiles: ['./jest/setup.ts'],
-  setupFilesAfterEnv: ['./jest/setupFilesAfterEnv.ts'],
+  setupFilesAfterEnv: [
+    './jest/setupFilesAfterEnv.ts',
+    '@shopify/react-native-skia/jestSetup.js',
+  ],
   transformIgnorePatterns: [
-    'node_modules/(?!(@supabase|isows|@react-native-google-signin|@flyerhq|@react-native|react-native|uuid|react-native-reanimated|react-native-gesture-handler|react-native-vector-icons|react-native-image-viewing|react-native-parsed-text|@react-navigation/.*|@react-native-masked-view/masked-view|react-native-linear-gradient|react-native-picker-select|react-native-paper|react-native-keyboard-controller|react-native-drawer-layout|marked|react-native-code-highlighter|react-syntax-highlighter|trim-newlines|react-native-worklets)/)',
+    'node_modules/(?!(@supabase|isows|@react-native-google-signin|@flyerhq|@react-native|react-native|uuid|react-native-reanimated|react-native-gesture-handler|react-native-vector-icons|react-native-image-viewing|react-native-parsed-text|@react-navigation/.*|@react-native-masked-view/masked-view|react-native-linear-gradient|react-native-picker-select|react-native-paper|react-native-keyboard-controller|react-native-drawer-layout|marked|react-native-code-highlighter|react-syntax-highlighter|trim-newlines|react-native-worklets|@shopify/react-native-skia)/)',
   ],
   testMatch: [
     '**/__tests__/**/*.test.[jt]s?(x)',

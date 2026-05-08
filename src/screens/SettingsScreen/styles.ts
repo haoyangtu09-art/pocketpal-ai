@@ -124,4 +124,19 @@ export const createStyles = (theme: Theme) =>
       gap: 8,
       marginTop: 8,
     },
+    bgImageRow: {
+      marginVertical: 4,
+      paddingVertical: 8,
+    },
+    bgThumbnail: {
+      width: 48,
+      height: 48,
+      borderRadius: 8,
+      backgroundColor: 'rgba(255,255,255,0.1)',
+    },
+    bgFileName: {
+      flex: 1,
+      marginLeft: 12,
+      opacity: 0.7,
+    },
   });
