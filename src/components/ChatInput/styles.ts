@@ -83,7 +83,7 @@ export const createStyles = ({
     inputContainer: {
       flex: 1,
       flexDirection: 'column',
-      borderRadius: 12,
+      borderRadius: 24,
       overflow: 'hidden',
     },
     textInputArea: {

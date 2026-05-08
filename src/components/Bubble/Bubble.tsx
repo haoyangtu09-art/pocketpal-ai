@@ -1,6 +1,7 @@
 import type {ReactNode} from 'react';
 import React, {useContext} from 'react';
 import {View, Animated} from 'react-native';
+import LinearGradient from 'react-native-linear-gradient';
 
 import {useTheme} from '../../hooks';
 import {uiStore} from '../../store';
@@ -58,16 +59,30 @@ export const Bubble = ({
     </Animated.View>
   );
 
-  if (uiStore.useLiquidGlass && currentUserIsAuthor) {
+  if (currentUserIsAuthor) {
+    if (uiStore.useLiquidGlass) {
+      return (
+        <LiquidGlass
+          cornerRadius={theme.borders.messageBorderRadius}
+          blurAmount={8}
+          tintColor={
+            theme.dark ? 'rgba(30,30,40,0.60)' : 'rgba(235,235,245,0.45)'
+          }>
+          {bubbleContent}
+        </LiquidGlass>
+      );
+    }
     return (
-      <LiquidGlass
-        cornerRadius={theme.borders.messageBorderRadius}
-        blurAmount={8}
-        tintColor={
-          theme.dark ? 'rgba(30,30,40,0.60)' : 'rgba(235,235,245,0.45)'
-        }>
+      <LinearGradient
+        colors={theme.dark ? ['#2a1a5e', '#141430'] : ['#d8d8f8', '#e8e8f8']}
+        start={{x: 0, y: 0}}
+        end={{x: 1, y: 1}}
+        style={{
+          borderRadius: theme.borders.messageBorderRadius,
+          overflow: 'hidden',
+        }}>
         {bubbleContent}
-      </LiquidGlass>
+      </LinearGradient>
     );
   }
 

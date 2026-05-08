@@ -200,7 +200,7 @@ const createSemanticColors = (
   menuDangerText: baseColors.error,
 
   // Message specific
-  authorBubbleBackground: isDark ? '#212121' : '#f2f2f2',
+  authorBubbleBackground: isDark ? '#1a1a3a' : '#e8e8f8',
   receivedMessageDocumentIcon: baseColors.primary,
   sentMessageDocumentIcon: baseColors.onSurface,
   userAvatarImageBackground: 'transparent',
@@ -235,13 +235,13 @@ const createSemanticColors = (
   btnPrimaryBorder: isDark ? '#192645' : '#bfdbff',
   btnPrimaryText: isDark ? '#93c5fd' : '#1447e6',
 
-  btnReadyBg: isDark ? '#052e16' : '#ecfdf5',
-  btnReadyBorder: isDark ? '#166534' : '#bbf7d0',
-  btnReadyText: isDark ? '#6ee7b7' : '#047857',
+  btnReadyBg: isDark ? '#1a0f3a' : '#f5f0ff',
+  btnReadyBorder: isDark ? '#3a2066' : '#d0c0f0',
+  btnReadyText: isDark ? '#a78bfa' : '#6d28d9',
 
-  btnDownloadBg: isDark ? '#0a1f17' : '#ecfdf5',
-  btnDownloadBorder: isDark ? '#143d2d' : '#bbf7d0',
-  btnDownloadText: isDark ? '#34d399' : '#047857',
+  btnDownloadBg: isDark ? '#1a1035' : '#f5f0ff',
+  btnDownloadBorder: isDark ? '#3a2066' : '#d0c0f0',
+  btnDownloadText: isDark ? '#a78bfa' : '#6d28d9',
 
   iconModelTypeText: isDark ? '#93c5fd' : '#3b82f6',
   iconModelTypeVision: isDark ? '#c4b5fd' : '#9810fa',
