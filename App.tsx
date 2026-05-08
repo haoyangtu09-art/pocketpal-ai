@@ -28,6 +28,7 @@ import {
   HeaderLeft,
   AppWithMigration,
   TTSSetupSheet,
+  WelcomeDialog,
 } from './src/components';
 import {AutomationBridge, BenchmarkRunnerScreen} from './src/__automation__';
 import {
@@ -79,6 +80,7 @@ const App = observer(() => {
         <KeyboardProvider statusBarTranslucent navigationBarTranslucent>
           <PaperProvider theme={theme}>
             <L10nContext.Provider value={currentL10n}>
+              <WelcomeDialog />
               <NavigationContainer>
                 <DeepLinkHandler />
                 <BottomSheetModalProvider>

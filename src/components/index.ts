@@ -54,6 +54,7 @@ export * from './UsageStats';
 export * from './VideoPalEmptyPlaceholder';
 export * from './VoiceChip';
 export * from './VisionDownloadSheet';
+export * from './WelcomeDialog';
 
 export * from './PalHeaderRight';
 export * from './InputSlider';

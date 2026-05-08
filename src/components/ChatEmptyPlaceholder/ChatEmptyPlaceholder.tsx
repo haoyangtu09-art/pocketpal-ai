@@ -1,7 +1,8 @@
 import React, {useContext} from 'react';
-import {Image, View} from 'react-native';
+import {View} from 'react-native';
 import {Button, Text} from 'react-native-paper';
 import {observer} from 'mobx-react';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 import {useTheme} from '../../hooks';
 import {createStyles} from './styles';
@@ -54,10 +55,11 @@ export const ChatEmptyPlaceholder = observer(
     return (
       <View
         style={[styles.container, {marginBottom: bottomComponentHeight + 100}]}>
-        <Image
-          source={require('../../assets/background.png')}
+        <Icon
+          name="star-four-points-outline"
+          size={80}
+          color={theme.colors.primary}
           style={styles.logo}
-          resizeMode="contain"
         />
         <View>
           <Text style={styles.title}>{title}</Text>

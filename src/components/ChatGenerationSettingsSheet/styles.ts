@@ -2,7 +2,7 @@ import {StyleSheet} from 'react-native';
 
 export const styles = StyleSheet.create({
   scrollviewContainer: {
-    padding: 16,
+    padding: 12,
   },
   secondaryButtons: {
     flexDirection: 'row',
@@ -34,12 +34,12 @@ export const styles = StyleSheet.create({
     flex: 1,
   },
   settingsSourceContainer: {
-    marginBottom: 16,
-    paddingHorizontal: 12,
+    marginBottom: 12,
+    paddingHorizontal: 4,
     borderRadius: 8,
   },
-  settingsSourceTitle: {
-    marginBottom: 8,
+  accordionTitle: {
+    fontSize: 14,
     fontWeight: '500',
   },
 });

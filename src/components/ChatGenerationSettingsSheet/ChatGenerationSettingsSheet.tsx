@@ -14,15 +14,15 @@ import {
   COMPLETION_PARAMS_METADATA,
   validateCompletionSettings,
 } from '../../utils/modelSettings';
-import {Button, SegmentedButtons, Text} from 'react-native-paper';
+import {Button, List, SegmentedButtons, Text} from 'react-native-paper';
 import {L10nContext} from '../../utils';
 import {ChevronDownIcon} from '../../assets/icons';
 import {Menu} from '../Menu';
 
 const sheetStyles = StyleSheet.create({
   systemPromptContainer: {
-    marginTop: 16,
-    marginBottom: 8,
+    marginBottom: 12,
+    paddingHorizontal: 2,
   },
   systemPromptLabel: {
     marginBottom: 4,
@@ -33,12 +33,16 @@ const sheetStyles = StyleSheet.create({
   },
   systemPromptInput: {
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.2)',
+    borderColor: 'rgba(255,255,255,0.15)',
     borderRadius: 8,
     padding: 10,
-    minHeight: 100,
-    fontSize: 14,
-    backgroundColor: 'rgba(255,255,255,0.05)',
+    minHeight: 80,
+    fontSize: 13,
+    backgroundColor: 'rgba(255,255,255,0.04)',
+  },
+  accordion: {
+    paddingHorizontal: 0,
+    marginTop: 8,
   },
 });
 interface ResetButtonProps {
@@ -123,6 +127,7 @@ export const ChatGenerationSettingsSheet = ({
     defaultCompletionSettings,
   );
   const [resetMenuVisible, setResetMenuVisible] = useState(false);
+  const [advancedExpanded, setAdvancedExpanded] = useState(false);
   // Only use local state for sessions with active pal, otherwise derive from session
   const [localSettingsSource, setLocalSettingsSource] = useState<
     'pal' | 'custom' | null
@@ -322,12 +327,32 @@ export const ChatGenerationSettingsSheet = ({
       <Sheet.ScrollView
         bottomOffset={16}
         contentContainerStyle={styles.scrollviewContainer}>
+        {/* Per-session system prompt — at top */}
+        <View style={sheetStyles.systemPromptContainer}>
+          <Text variant="labelMedium" style={sheetStyles.systemPromptLabel}>
+            对话系统提示词
+          </Text>
+          <Text variant="bodySmall" style={sheetStyles.systemPromptDesc}>
+            设置后将覆盖默认提示词，可用于塑造AI人格
+          </Text>
+          <TextInput
+            style={[
+              sheetStyles.systemPromptInput,
+              {color: theme.colors.onSurface},
+            ]}
+            multiline
+            numberOfLines={3}
+            value={settings.session_system_prompt ?? ''}
+            onChangeText={v => updateSettings('session_system_prompt', v)}
+            placeholder="例：你是一个温柔体贴的伙伴，专注倾听用户的内心..."
+            placeholderTextColor={theme.colors.onSurfaceDisabled}
+            textAlignVertical="top"
+          />
+        </View>
+
         {/* Settings Source Toggle */}
         {showSettingsToggle && (
           <View style={styles.settingsSourceContainer}>
-            <Text variant="labelMedium" style={styles.settingsSourceTitle}>
-              {l10n.components.chatGenerationSettingsSheet.settingsSource}
-            </Text>
             <SegmentedButtons
               value={effectiveSettingsSource || 'pal'}
               onValueChange={async value => {
@@ -335,18 +360,15 @@ export const ChatGenerationSettingsSheet = ({
                 setLocalSettingsSource(newSource);
 
                 if (session) {
-                  // Existing session - update session settings source
                   await chatSessionStore.updateSessionSettingsSource(newSource);
                 } else {
-                  // New chat session - store the choice for when session is created
                   chatSessionStore.setNewChatSettingsSource(newSource);
                 }
 
-                // Immediately reload settings for the new source
                 if (newSource === 'pal' && effectivePalId) {
                   const resolved =
                     await chatSessionStore.resolveCompletionSettings(
-                      session?.id, // Can be undefined for new sessions
+                      session?.id,
                       effectivePalId,
                     );
                   setSettings(resolved);
@@ -372,33 +394,19 @@ export const ChatGenerationSettingsSheet = ({
           </View>
         )}
 
-        <CompletionSettings
-          settings={settings}
-          onChange={updateSettings}
-          disabled={isUsingPalSettings}
-        />
-
-        {/* Per-session system prompt */}
-        <View style={sheetStyles.systemPromptContainer}>
-          <Text variant="labelMedium" style={sheetStyles.systemPromptLabel}>
-            对话系统提示词
-          </Text>
-          <Text variant="labelSmall" style={sheetStyles.systemPromptDesc}>
-            设置后将覆盖默认提示词，可用于塑造AI人格
-          </Text>
-          <TextInput
-            style={[
-              sheetStyles.systemPromptInput,
-              {color: theme.colors.onSurface},
-            ]}
-            multiline
-            value={settings.session_system_prompt ?? ''}
-            onChangeText={v => updateSettings('session_system_prompt', v)}
-            placeholder="例：你是一个温柔体贴的伙伴，专注倾听用户的内心..."
-            placeholderTextColor={theme.colors.onSurfaceDisabled}
-            textAlignVertical="top"
+        {/* Advanced Settings Accordion */}
+        <List.Accordion
+          title="高级设置"
+          titleStyle={styles.accordionTitle}
+          style={sheetStyles.accordion}
+          expanded={advancedExpanded}
+          onPress={() => setAdvancedExpanded(!advancedExpanded)}>
+          <CompletionSettings
+            settings={settings}
+            onChange={updateSettings}
+            disabled={isUsingPalSettings}
           />
-        </View>
+        </List.Accordion>
       </Sheet.ScrollView>
       <Sheet.Actions>
         <View style={styles.actionsContainer}>

@@ -99,11 +99,13 @@ describe('ChatGenerationSettingsSheet', () => {
   });
 
   it('renders correctly when visible', () => {
-    const {getByTestId} = render(
+    const {getByTestId, getByText} = render(
       <ChatGenerationSettingsSheet {...defaultProps} />,
     );
 
     expect(getByTestId('sheet')).toBeTruthy();
+    // Expand accordion to reveal completion-settings
+    fireEvent.press(getByText('高级设置'));
     expect(getByTestId('completion-settings')).toBeTruthy();
   });
 
@@ -116,27 +118,27 @@ describe('ChatGenerationSettingsSheet', () => {
   });
 
   it('loads active session settings when available', () => {
-    const {getByTestId} = render(
+    const {getByTestId, getByText} = render(
       <ChatGenerationSettingsSheet {...defaultProps} />,
     );
 
+    fireEvent.press(getByText('高级设置'));
     expect(getByTestId('completion-settings')).toBeTruthy();
     // Settings from active session should be loaded
   });
 
   it('loads new chat settings when no active session', () => {
-    // Temporarily modify the mock to simulate no active session
     const originalSessions = chatSessionStore.sessions;
     chatSessionStore.sessions = [];
 
-    const {getByTestId} = render(
+    const {getByTestId, getByText} = render(
       <ChatGenerationSettingsSheet {...defaultProps} />,
     );
 
+    fireEvent.press(getByText('高级设置'));
     expect(getByTestId('completion-settings')).toBeTruthy();
     // New chat settings should be loaded
 
-    // Restore the original sessions
     chatSessionStore.sessions = originalSessions;
   });
 
@@ -145,6 +147,7 @@ describe('ChatGenerationSettingsSheet', () => {
       <ChatGenerationSettingsSheet {...defaultProps} />,
     );
 
+    fireEvent.press(getByText('高级设置'));
     await act(async () => {
       fireEvent.press(getByText('Save'));
     });
@@ -154,7 +157,6 @@ describe('ChatGenerationSettingsSheet', () => {
   });
 
   it('handles save settings correctly for new chat', async () => {
-    // Temporarily modify the mock to simulate no active session
     const originalSessions = chatSessionStore.sessions;
     chatSessionStore.sessions = [];
 
@@ -162,6 +164,7 @@ describe('ChatGenerationSettingsSheet', () => {
       <ChatGenerationSettingsSheet {...defaultProps} />,
     );
 
+    fireEvent.press(getByText('高级设置'));
     await act(async () => {
       fireEvent.press(getByText('Save Changes'));
     });
@@ -169,7 +172,6 @@ describe('ChatGenerationSettingsSheet', () => {
     expect(chatSessionStore.setNewChatCompletionSettings).toHaveBeenCalled();
     expect(defaultProps.onClose).toHaveBeenCalled();
 
-    // Restore the original sessions
     chatSessionStore.sessions = originalSessions;
   });
 
@@ -178,6 +180,7 @@ describe('ChatGenerationSettingsSheet', () => {
       <ChatGenerationSettingsSheet {...defaultProps} />,
     );
 
+    fireEvent.press(getByText('高级设置'));
     await act(async () => {
       fireEvent.press(getByText('Reset'));
     });
@@ -186,7 +189,6 @@ describe('ChatGenerationSettingsSheet', () => {
       fireEvent.press(getByText('Reset to System Defaults'));
     });
 
-    // After reset, saving should use default settings
     await act(async () => {
       fireEvent.press(getByText('Save'));
     });
@@ -197,7 +199,6 @@ describe('ChatGenerationSettingsSheet', () => {
   });
 
   it('validates numeric values before saving', async () => {
-    // Mock validation to return an error for this specific test
     (validateCompletionSettings as jest.Mock).mockReturnValueOnce({
       errors: {
         temperature: 'Must be between 0 and 2',
@@ -208,16 +209,15 @@ describe('ChatGenerationSettingsSheet', () => {
       <ChatGenerationSettingsSheet {...defaultProps} />,
     );
 
-    // Trigger an invalid update
+    fireEvent.press(getByText('高级设置'));
     await act(async () => {
-      fireEvent.press(getByTestId('mock-settings-update')); // This sets temperature to '3.0'
+      fireEvent.press(getByTestId('mock-settings-update'));
     });
 
     await act(async () => {
       fireEvent.press(getByText('Save'));
     });
 
-    // Should show alert for invalid value
     expect(Alert.alert).toHaveBeenCalledWith(
       'Invalid Values',
       expect.stringContaining('temperature: Must be between 0 and 2'),

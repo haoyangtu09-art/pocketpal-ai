@@ -25,8 +25,7 @@ export const createStyles = ({theme}: {theme: Theme}) =>
       minWidth: 200,
     },
     logo: {
-      width: 112,
-      height: 112,
-      borderRadius: 30,
+      opacity: 0.7,
+      marginBottom: 16,
     },
   });
