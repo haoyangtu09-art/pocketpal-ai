@@ -1,5 +1,5 @@
 {
-  "name": "PocketPal",
+  "name": "lumo",
   "version": "1.14.0",
   "private": true,
   "scripts": {
@@ -133,7 +133,7 @@
   },
   "packageManager": "yarn@1.22.22",
   "codegenConfig": {
-    "name": "PocketPalSpecs",
+    "name": "LumoSpecs",
     "type": "all",
     "jsSrcsDir": "src/specs",
     "android": {

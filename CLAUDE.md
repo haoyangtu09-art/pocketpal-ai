@@ -2,7 +2,7 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## What is PocketPal AI
+## What is Lumo AI
 
 A React Native (iOS + Android) app that runs small language models (SLMs) fully on-device via [llama.rn](https://github.com/mybigday/llama.rn) (llama.cpp bindings). Models are downloaded from HuggingFace Hub and stored locally. No inference data leaves the device.
 
