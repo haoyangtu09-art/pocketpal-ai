@@ -494,14 +494,6 @@ export interface GGUFSpecs {
     eos_token?: string;
   };
 }
-export type BenchmarkConfig = {
-  pp: number;
-  tg: number;
-  pl: number;
-  nr: number;
-  label: string;
-};
-
 // Define which fields we always want to be required in ContextInitParams
 type RequiredContextFields =
   | 'n_ctx'
@@ -585,74 +577,6 @@ export interface LegacyContextInitParams {
   n_context?: number;
   no_gpu_devices?: boolean;
 }
-
-export interface BenchmarkResult {
-  config: BenchmarkConfig;
-  modelDesc: string;
-  modelSize: number;
-  modelNParams: number;
-  ppAvg: number;
-  ppStd: number;
-  tgAvg: number;
-  tgStd: number;
-  timestamp: string;
-  modelId: string;
-  modelName: string;
-  oid?: string;
-  rfilename?: string;
-  filename?: string;
-  peakMemoryUsage?: {
-    total: number;
-    used: number;
-    percentage: number;
-  };
-  wallTimeMs?: number;
-  uuid: string;
-  submitted?: boolean;
-  initSettings?: ContextInitParams | LegacyContextInitParams;
-}
-
-export type DeviceInfo = {
-  model: string;
-  systemName: string;
-  systemVersion: string;
-  brand: string;
-  cpuArch: string[];
-  isEmulator: boolean;
-  version: string;
-  buildNumber: string;
-  device: string;
-  deviceId: string;
-  totalMemory: number;
-  chipset: string;
-  cpu: string;
-  cpuDetails: {
-    cores: number;
-    processors: Array<{
-      processor: string;
-      'model name': string;
-      'cpu MHz': string;
-      vendor_id: string;
-    }>;
-    socModel: string;
-    features: string[];
-    hasFp16: boolean;
-    hasDotProd: boolean;
-    hasSve: boolean;
-    hasI8mm: boolean;
-  };
-  gpuDetails?: {
-    renderer: string;
-    vendor: string;
-    version: string;
-    hasAdreno: boolean;
-    hasMali: boolean;
-    hasPowerVR: boolean;
-    supportsOpenCL: boolean; // Note: On Android, this only checks for Adreno GPU. Full OpenCL support also requires i8mm and dotprod CPU features.
-    gpuType: string;
-  };
-};
-
 export enum CacheType {
   F16 = 'f16',
   F32 = 'f32',

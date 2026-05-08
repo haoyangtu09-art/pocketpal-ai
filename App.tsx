@@ -30,12 +30,11 @@ import {
   TTSSetupSheet,
   WelcomeDialog,
 } from './src/components';
-import {AutomationBridge, BenchmarkRunnerScreen} from './src/__automation__';
+import {AutomationBridge} from './src/__automation__';
 import {
   ChatScreen,
   ModelsScreen,
   SettingsScreen,
-  BenchmarkScreen,
   AboutScreen,
 
   // Dev tools screen. Only available in debug mode.
@@ -120,16 +119,6 @@ const App = observer(() => {
                       }}
                     />
                     <Drawer.Screen
-                      name={ROUTES.BENCHMARK}
-                      component={gestureHandlerRootHOC(BenchmarkScreen)}
-                      // @ts-ignore sceneStyle exists at runtime
-                      options={{
-                        headerStyle: styles.headerWithoutDivider,
-                        title: currentL10n.screenTitles.benchmark,
-                        sceneStyle: styles.transparent,
-                      }}
-                    />
-                    <Drawer.Screen
                       name={ROUTES.SETTINGS}
                       component={gestureHandlerRootHOC(SettingsScreen)}
                       // @ts-ignore sceneStyle exists at runtime
@@ -159,28 +148,6 @@ const App = observer(() => {
                         options={{
                           headerStyle: styles.headerWithoutDivider,
                           title: 'Dev Tools',
-                          sceneStyle: styles.transparent,
-                        }}
-                      />
-                    )}
-
-                    {/*
-                      E2E-only deep-link-driven benchmark matrix runner.
-                      Hidden from the drawer sidebar via
-                      drawerItemStyle:{display:'none'}; reachable only by
-                      the deep link pocketpal://e2e/benchmark in the e2e
-                      flavor build (see useDeepLinking cold-launch effect
-                      and android/app/src/e2e/AndroidManifest.xml).
-                    */}
-                    {__E2E__ && (
-                      <Drawer.Screen
-                        name={ROUTES.BENCHMARK_RUNNER}
-                        component={gestureHandlerRootHOC(BenchmarkRunnerScreen)}
-                        // @ts-ignore sceneStyle exists at runtime
-                        options={{
-                          headerStyle: styles.headerWithoutDivider,
-                          title: 'Benchmark Runner',
-                          drawerItemStyle: {display: 'none'},
                           sceneStyle: styles.transparent,
                         }}
                       />

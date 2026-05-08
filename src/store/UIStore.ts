@@ -44,10 +44,6 @@ export class UIStore {
 
   iOSBackgroundDownloading = true;
 
-  benchmarkShareDialog = {
-    shouldShow: true,
-  };
-
   // Toggle Skia matte glass effect (off for low-end devices)
   useLiquidGlass = true;
 
@@ -87,7 +83,6 @@ export class UIStore {
         'autoNavigatetoChat',
         'displayMemUsage',
         'defaultSystemPrompt',
-        'benchmarkShareDialog',
         'useLiquidGlass',
         'showDefaultBackground',
         '_language',
@@ -173,12 +168,6 @@ export class UIStore {
   setiOSBackgroundDownloading(value: boolean) {
     runInAction(() => {
       this.iOSBackgroundDownloading = value;
-    });
-  }
-
-  setBenchmarkShareDialogPreference(shouldShow: boolean) {
-    runInAction(() => {
-      this.benchmarkShareDialog.shouldShow = shouldShow;
     });
   }
 }

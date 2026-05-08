@@ -5,21 +5,12 @@
  * Supported protocols in v1:
  *   lumo://memory?cmd=snap::<label>
  *   lumo://memory?cmd=clear::snapshots
- *   lumo://e2e/benchmark   (Android: cold-launch path lives in
- *                                useDeepLinking.ts since RN's Android side
- *                                doesn't deliver the URL via DeepLinkService)
  */
 import type {DeepLinkParams} from '../services/DeepLinkService';
-import {ROUTES, isBenchmarkRunnerUrl} from '../utils/navigationConstants';
-
-interface NavigationLike {
-  navigate: (route: string) => void;
-}
 
 /** Returns true if handled; false if caller should fall through. */
 export async function dispatchAutomationDeepLink(
   params: DeepLinkParams,
-  navigation?: NavigationLike,
 ): Promise<boolean> {
   if (params.host === 'memory' && params.queryParams?.cmd) {
     const {
@@ -33,13 +24,6 @@ export async function dispatchAutomationDeepLink(
     } else if (cmd === 'clear::snapshots') {
       await clearMemorySnapshots();
     }
-    return true;
-  }
-  // lumo://e2e/benchmark — bench host. Match against the raw URL via
-  // the shared helper so both deep-link sites (this dispatcher and the
-  // useDeepLinking cold/warm-launch effect) accept the exact same shape.
-  if (isBenchmarkRunnerUrl(params.url)) {
-    navigation?.navigate(ROUTES.BENCHMARK_RUNNER);
     return true;
   }
   return false;
