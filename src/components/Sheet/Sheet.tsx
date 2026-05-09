@@ -13,7 +13,13 @@ import {CloseIcon} from '../../assets/icons';
 import {useTheme} from '../../hooks';
 import {styles} from './styles';
 import BottomSheetKeyboardAwareScrollView from './BottomSheetAwareScrollview';
-import {Dimensions, Platform, StyleSheet, TouchableOpacity, View} from 'react-native';
+import {
+  Dimensions,
+  Platform,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import {CustomBackdrop} from './CustomBackdrop';
 import {Actions} from './Actions';
 import {SheetHandle} from './SheetHandle';
@@ -28,7 +34,9 @@ const isGlassSupported =
     typeof Platform.Version === 'number' &&
     Platform.Version >= 33);
 
-const LiquidSheetBackground: React.FC<BottomSheetBackgroundProps> = ({style}) => (
+const LiquidSheetBackground: React.FC<BottomSheetBackgroundProps> = ({
+  style,
+}) => (
   <LiquidGlassView
     {...LIQUID_GLASS_FROSTED}
     noiseIntensity={0.02}
@@ -114,7 +122,9 @@ export const Sheet = forwardRef(
         keyboardBlurBehavior="restore"
         activeOffsetY={[-1, 1]}
         failOffsetX={[-5, 5]}
-        backgroundComponent={isGlassSupported ? LiquidSheetBackground : undefined}
+        backgroundComponent={
+          isGlassSupported ? LiquidSheetBackground : undefined
+        }
         backgroundStyle={
           isGlassSupported
             ? {backgroundColor: 'transparent'}

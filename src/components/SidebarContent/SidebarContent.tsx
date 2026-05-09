@@ -1,5 +1,11 @@
 import React, {useContext, useEffect, useState} from 'react';
-import {Platform, TouchableOpacity, View, Alert, SectionList} from 'react-native';
+import {
+  Platform,
+  TouchableOpacity,
+  View,
+  Alert,
+  SectionList,
+} from 'react-native';
 import {observer} from 'mobx-react';
 import {Divider, Drawer, Text} from 'react-native-paper';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
@@ -572,45 +578,45 @@ export const SidebarContent: React.FC<DrawerContentComponentProps> = observer(
             {chatSessionStore.isSelectionMode ? (
               <>
                 <SelectionModeHeader
-                selectedCount={chatSessionStore.selectedCount}
-                onCancel={handleExitSelectionMode}
-                onExport={handleBulkExport}
-                onDelete={handleBulkDelete}
-                l10n={l10n}
-                theme={theme}
-                styles={styles}
-              />
-              <SelectAllRow
-                allSelected={chatSessionStore.allSelected}
-                onToggle={() =>
-                  chatSessionStore.allSelected
-                    ? chatSessionStore.deselectAllSessions()
-                    : chatSessionStore.selectAllSessions()
-                }
-                l10n={l10n}
-                styles={styles}
-              />
-              <Divider style={styles.selectAllDivider} />
+                  selectedCount={chatSessionStore.selectedCount}
+                  onCancel={handleExitSelectionMode}
+                  onExport={handleBulkExport}
+                  onDelete={handleBulkDelete}
+                  l10n={l10n}
+                  theme={theme}
+                  styles={styles}
+                />
+                <SelectAllRow
+                  allSelected={chatSessionStore.allSelected}
+                  onToggle={() =>
+                    chatSessionStore.allSelected
+                      ? chatSessionStore.deselectAllSessions()
+                      : chatSessionStore.selectAllSessions()
+                  }
+                  l10n={l10n}
+                  styles={styles}
+                />
+                <Divider style={styles.selectAllDivider} />
+                <SectionList
+                  sections={sections}
+                  keyExtractor={keyExtractor}
+                  renderItem={renderItem}
+                  renderSectionHeader={renderSectionHeader}
+                  stickySectionHeadersEnabled={false}
+                  contentContainerStyle={styles.scrollViewContent}
+                />
+              </>
+            ) : (
               <SectionList
                 sections={sections}
                 keyExtractor={keyExtractor}
                 renderItem={renderItem}
                 renderSectionHeader={renderSectionHeader}
+                ListHeaderComponent={ListHeaderComponent}
                 stickySectionHeadersEnabled={false}
                 contentContainerStyle={styles.scrollViewContent}
               />
-            </>
-          ) : (
-            <SectionList
-              sections={sections}
-              keyExtractor={keyExtractor}
-              renderItem={renderItem}
-              renderSectionHeader={renderSectionHeader}
-              ListHeaderComponent={ListHeaderComponent}
-              stickySectionHeadersEnabled={false}
-              contentContainerStyle={styles.scrollViewContent}
-            />
-          )}
+            )}
           </LiquidGlassView>
         ) : (
           <View
