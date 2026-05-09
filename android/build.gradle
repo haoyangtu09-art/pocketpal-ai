@@ -22,13 +22,12 @@ buildscript {
 
 apply plugin: "com.facebook.react.rootproject"
 
-// Force consistent Guava ListenableFuture version across all modules
+// Force consistent Guava version across all modules
 // (Glide and WorkManager/concurrent-futures both pull it in, causing classpath conflicts)
 allprojects {
     configurations.all {
         resolutionStrategy {
             force "com.google.guava:guava:32.1.3-android"
-            force "com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava"
         }
     }
 }
