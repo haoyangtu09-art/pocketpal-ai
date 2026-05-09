@@ -13,34 +13,19 @@ import {CloseIcon} from '../../assets/icons';
 import {useTheme} from '../../hooks';
 import {styles} from './styles';
 import BottomSheetKeyboardAwareScrollView from './BottomSheetAwareScrollview';
-import {
-  Dimensions,
-  Platform,
-  StyleSheet,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import {Dimensions, StyleSheet, TouchableOpacity, View} from 'react-native';
 import {CustomBackdrop} from './CustomBackdrop';
 import {Actions} from './Actions';
 import {SheetHandle} from './SheetHandle';
-import {
-  LiquidGlassView,
-  LIQUID_GLASS_FROSTED,
-} from '@uginy/react-native-liquid-glass';
-
-const isGlassSupported =
-  Platform.OS === 'ios' ||
-  (Platform.OS === 'android' &&
-    typeof Platform.Version === 'number' &&
-    Platform.Version >= 33);
+import {LiquidGlass} from '..';
+import {uiStore} from '../../store';
 
 const LiquidSheetBackground: React.FC<BottomSheetBackgroundProps> = ({
   style,
 }) => (
-  <LiquidGlassView
-    {...LIQUID_GLASS_FROSTED}
-    noiseIntensity={0.02}
+  <LiquidGlass
     cornerRadius={16}
+    blurAmount={16}
     style={[StyleSheet.absoluteFill, style as object]}
   />
 );
@@ -123,10 +108,10 @@ export const Sheet = forwardRef(
         activeOffsetY={[-1, 1]}
         failOffsetX={[-5, 5]}
         backgroundComponent={
-          isGlassSupported ? LiquidSheetBackground : undefined
+          uiStore.useLiquidGlass ? LiquidSheetBackground : undefined
         }
         backgroundStyle={
-          isGlassSupported
+          uiStore.useLiquidGlass
             ? {backgroundColor: 'transparent'}
             : {backgroundColor: theme.colors.background}
         }

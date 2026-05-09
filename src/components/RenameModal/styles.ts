@@ -11,7 +11,7 @@ export const createStyles = (theme: MD3Theme) =>
     },
     modalContent: {
       width: '80%',
-      backgroundColor: 'transparent',
+      backgroundColor: theme.colors.surface,
       borderRadius: 14,
       overflow: 'hidden',
       borderWidth: StyleSheet.hairlineWidth,

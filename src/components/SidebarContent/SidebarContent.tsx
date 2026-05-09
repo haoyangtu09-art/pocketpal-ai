@@ -1,31 +1,15 @@
 import React, {useContext, useEffect, useState} from 'react';
-import {
-  Platform,
-  TouchableOpacity,
-  View,
-  Alert,
-  SectionList,
-} from 'react-native';
+import {TouchableOpacity, View, Alert, SectionList} from 'react-native';
 import {observer} from 'mobx-react';
 import {Divider, Drawer, Text} from 'react-native-paper';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import {DrawerContentComponentProps} from '@react-navigation/drawer';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {
-  LiquidGlassView,
-  LIQUID_GLASS_FROSTED,
-} from '@uginy/react-native-liquid-glass';
-
-const isGlassSupported =
-  Platform.OS === 'ios' ||
-  (Platform.OS === 'android' &&
-    typeof Platform.Version === 'number' &&
-    Platform.Version >= 33);
 
 import {useTheme} from '../../hooks';
 import {createStyles} from './styles';
-import {chatSessionStore, SessionMetaData} from '../../store';
-import {Menu, RenameModal, Checkbox} from '..';
+import {chatSessionStore, uiStore, SessionMetaData} from '../../store';
+import {Menu, RenameModal, Checkbox, LiquidGlass} from '..';
 import {
   ChatIcon,
   EditIcon,
@@ -566,11 +550,10 @@ export const SidebarContent: React.FC<DrawerContentComponentProps> = observer(
 
     return (
       <GestureHandlerRootView style={styles.sidebarContainer}>
-        {isGlassSupported ? (
-          <LiquidGlassView
-            {...LIQUID_GLASS_FROSTED}
-            noiseIntensity={0.02}
+        {uiStore.useLiquidGlass ? (
+          <LiquidGlass
             cornerRadius={0}
+            blurAmount={16}
             style={[
               styles.contentWrapper,
               {paddingTop: insets.top, paddingBottom: insets.bottom},
@@ -617,7 +600,7 @@ export const SidebarContent: React.FC<DrawerContentComponentProps> = observer(
                 contentContainerStyle={styles.scrollViewContent}
               />
             )}
-          </LiquidGlassView>
+          </LiquidGlass>
         ) : (
           <View
             style={[
