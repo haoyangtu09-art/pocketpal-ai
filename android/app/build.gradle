@@ -178,6 +178,13 @@ android {
     }
 }
 
+// Glide (via FastImage) pulls in com.google.guava:guava which conflicts with
+// the standalone com.google.guava:listenablefuture used by concurrent-futures-ktx.
+// Exclude guava from all configurations so only the standalone listenablefuture is used.
+configurations.all {
+    exclude group: "com.google.guava", module: "guava"
+}
+
 dependencies {
     // The version of react-native is set by the React Native Gradle Plugin
     implementation("com.facebook.react:react-android")
