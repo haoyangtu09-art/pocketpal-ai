@@ -1,5 +1,5 @@
 import React, {useMemo} from 'react';
-import {Image, StyleSheet, useWindowDimensions} from 'react-native';
+import {Image, StyleSheet} from 'react-native';
 import {Gesture, GestureDetector} from 'react-native-gesture-handler';
 import Animated, {
   useSharedValue,
@@ -22,7 +22,6 @@ function safeNum(v: number | undefined, fallback: number): number {
 
 export const BackgroundLayer = observer(
   ({image, isEditing, globalOpacity}: Props) => {
-    const {width: screenWidth, height: screenHeight} = useWindowDimensions();
     const translateX = useSharedValue(safeNum(image.x, 0));
     const translateY = useSharedValue(safeNum(image.y, 0));
     const scale = useSharedValue(safeNum(image.scale, 1));
@@ -102,9 +101,8 @@ export const BackgroundLayer = observer(
           ]}>
           <Image
             source={imageSource}
-            style={[styles.image, {width: screenWidth, height: screenHeight}]}
+            style={styles.image}
             resizeMode="contain"
-            resizeMethod="resize"
             onError={e => {
               const errorMsg =
                 (e as {nativeEvent?: {error?: string}})?.nativeEvent?.error ??
@@ -129,8 +127,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   image: {
-    width: 200,
-    height: 200,
+    width: 1280,
+    height: 1280,
   },
   editingBorder: {
     borderWidth: 2,

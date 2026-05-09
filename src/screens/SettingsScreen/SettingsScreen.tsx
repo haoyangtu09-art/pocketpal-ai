@@ -688,8 +688,10 @@ export const SettingsScreen: React.FC = observer(() => {
                 try {
                   const result = await launchImageLibrary({
                     mediaType: 'photo',
-                    selectionLimit: 10,
+                    selectionLimit: 4,
                     includeBase64: false,
+                    maxWidth: 1280,
+                    maxHeight: 1280,
                   });
                   if (result.assets && result.assets.length > 0) {
                     const uris = result.assets
