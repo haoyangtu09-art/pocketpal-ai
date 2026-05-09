@@ -238,15 +238,17 @@ export const ChatScreen: React.FC = observer(() => {
         />
       )}
 
-      {/* Background layers & edit UI — rendered AFTER ChatView so they sit ON TOP */}
-      {backgroundStore.images.map(img => (
-        <BackgroundLayer
-          key={img.id}
-          image={img}
-          isEditing={uiStore.isBackgroundEditMode}
-          globalOpacity={backgroundStore.globalOpacity}
-        />
-      ))}
+      {/* Background layers & edit UI — rendered AFTER ChatView so they sit ON TOP.
+           Only render after hydration + validation completes to prevent stale URI crashes. */}
+      {backgroundStore.isReady &&
+        backgroundStore.images.map(img => (
+          <BackgroundLayer
+            key={img.id}
+            image={img}
+            isEditing={uiStore.isBackgroundEditMode}
+            globalOpacity={backgroundStore.globalOpacity}
+          />
+        ))}
       {uiStore.isBackgroundEditMode && (
         <TouchableOpacity
           style={styles.editCloseBtn}

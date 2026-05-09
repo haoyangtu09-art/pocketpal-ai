@@ -17,9 +17,104 @@ function makeId(): string {
   return `bg_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 }
 
+const BG_DIR = `${RNFS.DocumentDirectoryPath}/backgrounds`;
+
+function isContentUri(uri: string): boolean {
+  return uri.startsWith('content://');
+}
+
+function isFileUri(uri: string): boolean {
+  return uri.startsWith('file://');
+}
+
+async function ensureDir() {
+  try {
+    const exists = await RNFS.exists(BG_DIR);
+    if (!exists) {
+      await RNFS.mkdir(BG_DIR);
+    }
+  } catch {
+    // ignore
+  }
+}
+
+/**
+ * Copy a content:// or file:// URI to local app storage.
+ * Uses base64 read/write (proven to work with content URIs, see EmbeddedVideoView).
+ */
+async function copyToLocal(uri: string): Promise<string | null> {
+  try {
+    await ensureDir();
+
+    // Read source as base64
+    const base64 = await RNFS.readFile(uri, 'base64');
+
+    // Generate destination filename
+    const rawName = uri.split('/').pop()?.split('?')[0] ?? 'img';
+    const ext = rawName.includes('.') ? rawName.split('.').pop()! : 'jpg';
+    const destPath = `${BG_DIR}/${makeId()}.${ext}`;
+
+    // Write to local storage
+    await RNFS.writeFile(destPath, base64, 'base64');
+    return `file://${destPath}`;
+  } catch (e) {
+    console.warn(
+      'BackgroundStore: failed to copy image',
+      e instanceof Error ? e.message : e,
+    );
+    return null;
+  }
+}
+
+/**
+ * Validate a single stored image entry. Returns null if invalid.
+ */
+async function validateImage(
+  img: BackgroundImage,
+): Promise<BackgroundImage | null> {
+  // Safety: require all fields
+  if (!img?.id || !img?.uri) {
+    return null;
+  }
+
+  // Reject old content:// URIs (temporary, will crash on restart)
+  if (isContentUri(img.uri)) {
+    console.warn(
+      'BackgroundStore: removing stale content:// URI',
+      img.uri.slice(0, 60),
+    );
+    return null;
+  }
+
+  // If file:// URI, verify the file actually exists
+  if (isFileUri(img.uri)) {
+    const path = img.uri.replace('file://', '');
+    try {
+      const exists = await RNFS.exists(path);
+      if (!exists) {
+        console.warn('BackgroundStore: removing missing file', path.slice(-40));
+        return null;
+      }
+    } catch {
+      return null;
+    }
+  }
+
+  // Sanitize numeric fields
+  return {
+    ...img,
+    x: Number.isFinite(img.x) ? img.x : 180,
+    y: Number.isFinite(img.y) ? img.y : 320,
+    scale: Number.isFinite(img.scale) && img.scale > 0 ? img.scale : 1,
+    rotation: Number.isFinite(img.rotation) ? img.rotation : 0,
+    opacity: Number.isFinite(img.opacity) ? img.opacity : 1,
+  };
+}
+
 export class BackgroundStore {
   images: BackgroundImage[] = [];
   globalOpacity = 0.5;
+  private _hydrated = false;
 
   constructor() {
     makeAutoObservable(this);
@@ -27,44 +122,58 @@ export class BackgroundStore {
       name: 'BackgroundStore',
       properties: ['images', 'globalOpacity'],
       storage: AsyncStorage,
+    }).then(async () => {
+      // Validate and clean up stored images BEFORE marking ready
+      await this._validateStoredImages();
+      runInAction(() => {
+        this._hydrated = true;
+      });
     });
   }
 
   /**
-   * Add images. Copies each URI to the app's local storage so they
-   * survive across app restarts (content:// URIs are temporary).
+   * Run after hydration: remove any invalid entries (stale content URIs,
+   * missing files) to prevent crashes when BackgroundLayer renders them.
    */
-  async addImages(uris: string[]) {
-    const bgDir = `${RNFS.DocumentDirectoryPath}/backgrounds`;
-    try {
-      const dirExists = await RNFS.exists(bgDir);
-      if (!dirExists) {
-        await RNFS.mkdir(bgDir);
-      }
-    } catch {
-      // If mkdir fails (e.g. no permission), try to proceed anyway
+  private async _validateStoredImages() {
+    if (this.images.length === 0) {
+      return;
     }
 
+    const validated: BackgroundImage[] = [];
+    for (const img of this.images) {
+      const valid = await validateImage(img);
+      if (valid) {
+        validated.push(valid);
+      }
+    }
+
+    if (validated.length !== this.images.length) {
+      runInAction(() => {
+        this.images = validated;
+      });
+    }
+  }
+
+  get isReady(): boolean {
+    return this._hydrated;
+  }
+
+  async addImages(uris: string[]) {
     const newImages: BackgroundImage[] = [];
 
     for (const uri of uris) {
-      try {
-        // Copy to local storage so the file survives app restarts
-        const ext = uri.split('.').pop()?.split('?')[0] ?? 'jpg';
-        const destPath = `${bgDir}/${makeId()}.${ext}`;
-        await RNFS.copyFile(uri, destPath);
-
+      const localUri = await copyToLocal(uri);
+      if (localUri) {
         newImages.push({
           id: makeId(),
-          uri: `file://${destPath}`,
+          uri: localUri,
           x: 180,
           y: 320,
           scale: 1,
           rotation: 0,
           opacity: 1,
         });
-      } catch {
-        // If copy fails, skip this image — don't crash
       }
     }
 
@@ -77,9 +186,8 @@ export class BackgroundStore {
 
   removeImage(id: string) {
     const img = this.images.find(i => i.id === id);
-    if (img?.uri.startsWith('file://')) {
-      const path = img.uri.replace('file://', '');
-      RNFS.unlink(path).catch(() => {});
+    if (img && isFileUri(img.uri)) {
+      RNFS.unlink(img.uri.replace('file://', '')).catch(() => {});
     }
     runInAction(() => {
       this.images = this.images.filter(i => i.id !== id);
@@ -102,7 +210,7 @@ export class BackgroundStore {
 
   clearAll() {
     for (const img of this.images) {
-      if (img.uri.startsWith('file://')) {
+      if (isFileUri(img.uri)) {
         RNFS.unlink(img.uri.replace('file://', '')).catch(() => {});
       }
     }
