@@ -1216,6 +1216,11 @@
     "@types/conventional-commits-parser" "^5.0.0"
     chalk "^5.3.0"
 
+"@d11/react-native-fast-image@^8.13.0":
+  version "8.13.0"
+  resolved "https://registry.yarnpkg.com/@d11/react-native-fast-image/-/react-native-fast-image-8.13.0.tgz#ae73d61fdc54b6c0b97cb97860773fb9f8db2b7f"
+  integrity sha512-zfsBtYNttiZVV/NwEnN/PzgW3PGlGYqn0/6DUOQ/tCv1lO0gO7+S0GiANmNDl35oVmh8o0DK81lF8xAhYz/aNA==
+
 "@dr.pogodin/react-native-fs@^2.36.0":
   version "2.36.0"
   resolved "https://registry.npmjs.org/@dr.pogodin/react-native-fs/-/react-native-fs-2.36.0.tgz"

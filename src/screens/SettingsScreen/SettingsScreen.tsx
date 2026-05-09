@@ -690,8 +690,6 @@ export const SettingsScreen: React.FC = observer(() => {
                     mediaType: 'photo',
                     selectionLimit: 4,
                     includeBase64: false,
-                    maxWidth: 1280,
-                    maxHeight: 1280,
                   });
                   if (result.assets && result.assets.length > 0) {
                     const uris = result.assets
