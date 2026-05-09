@@ -22,7 +22,11 @@ if (ErrorUtils) {
         error instanceof Error ? error.message : String(error ?? 'unknown');
       const stack =
         error instanceof Error ? error.stack?.slice(0, 2000) : undefined;
-      saveCrashLog({message, stack, context: `globalHandler isFatal=${isFatal}`});
+      saveCrashLog({
+        message,
+        stack,
+        context: `globalHandler isFatal=${isFatal}`,
+      });
     } catch {
       // swallow — don't let the error handler itself crash
     }
