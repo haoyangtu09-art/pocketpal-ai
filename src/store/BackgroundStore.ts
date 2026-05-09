@@ -2,6 +2,7 @@ import {makePersistable} from 'mobx-persist-store';
 import {makeAutoObservable, runInAction} from 'mobx';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as RNFS from '@dr.pogodin/react-native-fs';
+import {saveCrashLog} from '../utils/crashLog';
 
 export interface BackgroundImage {
   id: string;
@@ -39,29 +40,55 @@ async function ensureDir() {
 }
 
 /**
- * Copy a content:// or file:// URI to local app storage.
- * Uses base64 read/write (proven to work with content URIs, see EmbeddedVideoView).
+ * Write base64 image data to local app storage.
+ * This is the primary path — avoids reading content:// URIs via RNFS.readFile
+ * which can cause native SIGSEGV on some Android content providers.
  */
-async function copyToLocal(uri: string): Promise<string | null> {
+async function copyToLocal(
+  base64: string,
+  sourceUri: string,
+): Promise<string | null> {
   try {
     await ensureDir();
 
-    // Read source as base64
-    const base64 = await RNFS.readFile(uri, 'base64');
-
-    // Generate destination filename
-    const rawName = uri.split('/').pop()?.split('?')[0] ?? 'img';
+    const rawName = sourceUri.split('/').pop()?.split('?')[0] ?? 'img';
     const ext = rawName.includes('.') ? rawName.split('.').pop()! : 'jpg';
     const destPath = `${BG_DIR}/${makeId()}.${ext}`;
 
-    // Write to local storage
     await RNFS.writeFile(destPath, base64, 'base64');
     return `file://${destPath}`;
   } catch (e) {
-    console.warn(
-      'BackgroundStore: failed to copy image',
-      e instanceof Error ? e.message : e,
-    );
+    const message = e instanceof Error ? e.message : String(e);
+    console.warn('BackgroundStore: failed to write background image', message);
+    saveCrashLog({
+      message: `BackgroundStore.copyToLocal failed: ${message}`,
+      context: `sourceUri=${sourceUri.slice(0, 80)}`,
+    });
+    return null;
+  }
+}
+
+/**
+ * Fallback: read a content:// URI via RNFS base64 read.
+ * Kept only for cases where base64 data is not pre-provided.
+ * WARNING: this can crash natively on some Android content providers.
+ */
+async function copyContentUriToLocal(uri: string): Promise<string | null> {
+  try {
+    await ensureDir();
+    const base64 = await RNFS.readFile(uri, 'base64');
+    const rawName = uri.split('/').pop()?.split('?')[0] ?? 'img';
+    const ext = rawName.includes('.') ? rawName.split('.').pop()! : 'jpg';
+    const destPath = `${BG_DIR}/${makeId()}.${ext}`;
+    await RNFS.writeFile(destPath, base64, 'base64');
+    return `file://${destPath}`;
+  } catch (e) {
+    const message = e instanceof Error ? e.message : String(e);
+    console.warn('BackgroundStore: failed to copy content URI', message);
+    saveCrashLog({
+      message: `BackgroundStore.copyContentUriToLocal failed: ${message}`,
+      context: `uri=${uri.slice(0, 80)}`,
+    });
     return null;
   }
 }
@@ -159,11 +186,33 @@ export class BackgroundStore {
     return this._hydrated;
   }
 
-  async addImages(uris: string[]) {
+  /**
+   * Add background images. Assets should include base64 data when sourced from
+   * the image picker — this avoids reading content:// URIs via RNFS which can
+   * cause native crashes on Android.
+   */
+  async addImages(assets: Array<{uri: string; base64?: string}>) {
     const newImages: BackgroundImage[] = [];
 
-    for (const uri of uris) {
-      const localUri = await copyToLocal(uri);
+    for (const asset of assets) {
+      let localUri: string | null = null;
+
+      if (asset.base64) {
+        // Preferred path: write pre-provided base64 data (safe, no content-URI read)
+        localUri = await copyToLocal(asset.base64, asset.uri);
+      } else if (isContentUri(asset.uri)) {
+        // Fallback: read content:// URI via RNFS (may crash on some providers)
+        saveCrashLog({
+          message:
+            'BackgroundStore.addImages: no base64 provided for content URI, using fallback',
+          context: `uri=${asset.uri.slice(0, 80)}`,
+        });
+        localUri = await copyContentUriToLocal(asset.uri);
+      } else if (isFileUri(asset.uri)) {
+        // file:// URIs are safe to read via RNFS
+        localUri = await copyContentUriToLocal(asset.uri);
+      }
+
       if (localUri) {
         newImages.push({
           id: makeId(),

@@ -8,6 +8,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import {observer} from 'mobx-react';
 import {backgroundStore, type BackgroundImage} from '../../store';
+import {saveCrashLog} from '../../utils/crashLog';
 
 interface Props {
   image: BackgroundImage;
@@ -102,7 +103,16 @@ export const BackgroundLayer = observer(
             source={imageSource}
             style={styles.image}
             resizeMode="contain"
-            onError={() => {}}
+            onError={e => {
+              const errorMsg =
+                (e as {nativeEvent?: {error?: string}})?.nativeEvent?.error ??
+                'unknown load error';
+              console.warn('BackgroundLayer: Image load failed', errorMsg);
+              saveCrashLog({
+                message: `BackgroundLayer Image load failed: ${errorMsg}`,
+                context: `uri=${image.uri?.slice(0, 80)}, id=${image.id}`,
+              });
+            }}
           />
         </Animated.View>
       </GestureDetector>

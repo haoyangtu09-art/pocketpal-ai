@@ -1,7 +1,8 @@
 import * as React from 'react';
-import {Dimensions, StyleSheet} from 'react-native';
+import {Alert, Dimensions, StyleSheet} from 'react-native';
 
 import {observer} from 'mobx-react';
+import {readCrashLogs, clearCrashLogs} from './src/utils/crashLog';
 import {NavigationContainer} from '@react-navigation/native';
 import {Provider as PaperProvider} from 'react-native-paper';
 import {BottomSheetModalProvider} from '@gorhom/bottom-sheet';
@@ -70,6 +71,40 @@ const App = observer(() => {
     ttsStore.init().catch(() => {
       // init() swallows its own errors; catch to satisfy no-floating-promises.
     });
+  }, []);
+
+  // Check for crash logs from previous app session and show dialog
+  React.useEffect(() => {
+    let cancelled = false;
+    const checkCrashLogs = async () => {
+      try {
+        const logs = await readCrashLogs();
+        if (cancelled || logs.length === 0) return;
+        const latest = logs[logs.length - 1];
+        const time = new Date(latest.timestamp).toLocaleString();
+        const body =
+          `Time: ${time}\n\n` +
+          `Error: ${latest.message}\n` +
+          (latest.stack ? `\nStack:\n${latest.stack.slice(0, 500)}` : '') +
+          (latest.context ? `\nContext: ${latest.context}` : '') +
+          (logs.length > 1 ? `\n\n(+ ${logs.length - 1} more errors)` : '');
+        Alert.alert(
+          'App 上次崩溃了',
+          body,
+          [
+            {text: '清除日志', onPress: () => clearCrashLogs()},
+            {text: '知道了', style: 'cancel'},
+          ],
+          {cancelable: true},
+        );
+      } catch {
+        // ignore
+      }
+    };
+    checkCrashLogs();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   return (

@@ -17,7 +17,7 @@ interface GlassCardProps {
 /**
  * Glass card component.
  *
- * When the user has "亚光玻璃效果" enabled in settings, renders a Skia-based
+ * When the user has "动态视效" enabled in settings, renders a Skia-based
  * matte glass surface. Otherwise falls back to the CSS shimmer-card style
  * for low-end devices.
  */

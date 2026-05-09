@@ -689,13 +689,14 @@ export const SettingsScreen: React.FC = observer(() => {
                   const result = await launchImageLibrary({
                     mediaType: 'photo',
                     selectionLimit: 10,
+                    includeBase64: true,
                   });
                   if (result.assets && result.assets.length > 0) {
-                    const uris = result.assets
-                      .map(a => a.uri)
-                      .filter((u): u is string => !!u);
-                    if (uris.length > 0) {
-                      await backgroundStore.addImages(uris);
+                    const assets = result.assets
+                      .filter(a => a.uri)
+                      .map(a => ({uri: a.uri!, base64: a.base64}));
+                    if (assets.length > 0) {
+                      await backgroundStore.addImages(assets);
                       // Navigate to chat in edit mode
                       uiStore.setBackgroundEditMode(true);
                       navigation.navigate('Chat');
@@ -710,7 +711,7 @@ export const SettingsScreen: React.FC = observer(() => {
             </Button>
 
             {/* Edit mode button */}
-            {backgroundStore.images.length > 0 && (
+            {backgroundStore.isReady && backgroundStore.images.length > 0 && (
               <Button
                 mode="outlined"
                 icon="pencil"
@@ -741,7 +742,7 @@ export const SettingsScreen: React.FC = observer(() => {
             </View>
 
             {/* Image list */}
-            {backgroundStore.images.length > 0 && (
+            {backgroundStore.isReady && backgroundStore.images.length > 0 && (
               <>
                 <Divider />
                 {backgroundStore.images.map(img => (
@@ -781,7 +782,7 @@ export const SettingsScreen: React.FC = observer(() => {
             )}
 
             {/* Clear all */}
-            {backgroundStore.images.length > 0 && (
+            {backgroundStore.isReady && backgroundStore.images.length > 0 && (
               <>
                 <Divider />
                 <Button
