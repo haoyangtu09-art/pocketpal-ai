@@ -1,0 +1,67 @@
+{
+  "current_account_index": 0,
+  "accounts": {
+    "/data/data/com.termux/files/usr/var/lib/proot-distro/installed-rootfs/debian/root/.local/share/kiro-cli/data.sqlite3": {
+      "failures": 0,
+      "last_failure_time": 0.0,
+      "models_cached_at": 1778136132.1263623,
+      "stats": {
+        "total_requests": 21,
+        "successful_requests": 21,
+        "failed_requests": 0
+      }
+    }
+  },
+  "model_to_accounts": {
+    "auto-kiro": {
+      "accounts": [
+        "/data/data/com.termux/files/usr/var/lib/proot-distro/installed-rootfs/debian/root/.local/share/kiro-cli/data.sqlite3"
+      ]
+    },
+    "claude-3.7-sonnet": {
+      "accounts": [
+        "/data/data/com.termux/files/usr/var/lib/proot-distro/installed-rootfs/debian/root/.local/share/kiro-cli/data.sqlite3"
+      ]
+    },
+    "claude-haiku-4.5": {
+      "accounts": [
+        "/data/data/com.termux/files/usr/var/lib/proot-distro/installed-rootfs/debian/root/.local/share/kiro-cli/data.sqlite3"
+      ]
+    },
+    "claude-sonnet-4": {
+      "accounts": [
+        "/data/data/com.termux/files/usr/var/lib/proot-distro/installed-rootfs/debian/root/.local/share/kiro-cli/data.sqlite3"
+      ]
+    },
+    "claude-sonnet-4.5": {
+      "accounts": [
+        "/data/data/com.termux/files/usr/var/lib/proot-distro/installed-rootfs/debian/root/.local/share/kiro-cli/data.sqlite3"
+      ]
+    },
+    "deepseek-3.2": {
+      "accounts": [
+        "/data/data/com.termux/files/usr/var/lib/proot-distro/installed-rootfs/debian/root/.local/share/kiro-cli/data.sqlite3"
+      ]
+    },
+    "glm-5": {
+      "accounts": [
+        "/data/data/com.termux/files/usr/var/lib/proot-distro/installed-rootfs/debian/root/.local/share/kiro-cli/data.sqlite3"
+      ]
+    },
+    "minimax-m2.1": {
+      "accounts": [
+        "/data/data/com.termux/files/usr/var/lib/proot-distro/installed-rootfs/debian/root/.local/share/kiro-cli/data.sqlite3"
+      ]
+    },
+    "minimax-m2.5": {
+      "accounts": [
+        "/data/data/com.termux/files/usr/var/lib/proot-distro/installed-rootfs/debian/root/.local/share/kiro-cli/data.sqlite3"
+      ]
+    },
+    "qwen3-coder-next": {
+      "accounts": [
+        "/data/data/com.termux/files/usr/var/lib/proot-distro/installed-rootfs/debian/root/.local/share/kiro-cli/data.sqlite3"
+      ]
+    }
+  }
+}

@@ -1,6 +1,5 @@
 import React, {useMemo} from 'react';
-import {StyleSheet, useWindowDimensions} from 'react-native';
-import FastImage from '@d11/react-native-fast-image';
+import {Image, StyleSheet, useWindowDimensions} from 'react-native';
 import {Gesture, GestureDetector} from 'react-native-gesture-handler';
 import Animated, {
   useSharedValue,
@@ -43,7 +42,6 @@ export const BackgroundLayer = observer(
       }
     };
 
-    // Stable gesture objects — only recreated when isEditing changes
     const composed = useMemo(() => {
       const pan = Gesture.Pan()
         .enabled(isEditing)
@@ -101,13 +99,16 @@ export const BackgroundLayer = observer(
             animatedStyle,
             isEditing && styles.editingBorder,
           ]}>
-          <FastImage
+          <Image
             source={imageSource}
             style={[styles.image, {width: screenWidth, height: screenHeight}]}
-            resizeMode={FastImage.resizeMode.contain}
-            onError={() => {
+            resizeMode="contain"
+            onError={e => {
+              const errorMsg =
+                (e as {nativeEvent?: {error?: string}})?.nativeEvent?.error ??
+                'unknown';
               saveCrashLog({
-                message: `BackgroundLayer Image load failed`,
+                message: `BackgroundLayer Image load failed: ${errorMsg}`,
                 context: `uri=${image.uri?.slice(0, 80)}, id=${image.id}`,
               });
             }}
