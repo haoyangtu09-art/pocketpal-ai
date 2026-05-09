@@ -6,7 +6,7 @@ export const createStyles = (theme: MD3Theme) =>
   StyleSheet.create({
     sidebarContainer: {
       flex: 1,
-      backgroundColor: theme.colors.surface,
+      backgroundColor: 'transparent',
     },
     divider: {
       marginHorizontal: 16,

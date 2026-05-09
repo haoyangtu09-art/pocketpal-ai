@@ -4,6 +4,7 @@ import {
   BottomSheetTextInput,
   BottomSheetView,
 } from '@gorhom/bottom-sheet';
+import type {BottomSheetBackgroundProps} from '@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackground/types';
 import React, {forwardRef, useEffect, useMemo, useRef} from 'react';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {BottomSheetModalMethods} from '@gorhom/bottom-sheet/lib/typescript/types';
@@ -12,10 +13,29 @@ import {CloseIcon} from '../../assets/icons';
 import {useTheme} from '../../hooks';
 import {styles} from './styles';
 import BottomSheetKeyboardAwareScrollView from './BottomSheetAwareScrollview';
-import {Dimensions, TouchableOpacity, View} from 'react-native';
+import {Dimensions, Platform, StyleSheet, TouchableOpacity, View} from 'react-native';
 import {CustomBackdrop} from './CustomBackdrop';
 import {Actions} from './Actions';
 import {SheetHandle} from './SheetHandle';
+import {
+  LiquidGlassView,
+  LIQUID_GLASS_FROSTED,
+} from '@uginy/react-native-liquid-glass';
+
+const isGlassSupported =
+  Platform.OS === 'ios' ||
+  (Platform.OS === 'android' &&
+    typeof Platform.Version === 'number' &&
+    Platform.Version >= 33);
+
+const LiquidSheetBackground: React.FC<BottomSheetBackgroundProps> = ({style}) => (
+  <LiquidGlassView
+    {...LIQUID_GLASS_FROSTED}
+    noiseIntensity={0.02}
+    cornerRadius={16}
+    style={[StyleSheet.absoluteFill, style as object]}
+  />
+);
 
 export interface SheetProps extends Partial<BottomSheetModalProps> {
   children?: React.ReactNode;
@@ -94,9 +114,12 @@ export const Sheet = forwardRef(
         keyboardBlurBehavior="restore"
         activeOffsetY={[-1, 1]}
         failOffsetX={[-5, 5]}
-        backgroundStyle={{
-          backgroundColor: theme.colors.background,
-        }}
+        backgroundComponent={isGlassSupported ? LiquidSheetBackground : undefined}
+        backgroundStyle={
+          isGlassSupported
+            ? {backgroundColor: 'transparent'}
+            : {backgroundColor: theme.colors.background}
+        }
         snapPoints={snapPoints}
         onDismiss={onDismiss}
         // Disable accessible to allow Appium/e2e tests to access child elements on iOS

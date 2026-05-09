@@ -40,53 +40,24 @@ async function ensureDir() {
 }
 
 /**
- * Write base64 image data to local app storage.
- * This is the primary path — avoids reading content:// URIs via RNFS.readFile
- * which can cause native SIGSEGV on some Android content providers.
+ * Copy a file:// or content:// URI to local app storage using RNFS.copyFile.
+ * Never reads file contents into the JS heap — avoids OOM on large photos.
  */
-async function copyToLocal(
-  base64: string,
-  sourceUri: string,
-): Promise<string | null> {
+async function copyUriToLocal(uri: string): Promise<string | null> {
   try {
     await ensureDir();
-
-    const rawName = sourceUri.split('/').pop()?.split('?')[0] ?? 'img';
-    const ext = rawName.includes('.') ? rawName.split('.').pop()! : 'jpg';
-    const destPath = `${BG_DIR}/${makeId()}.${ext}`;
-
-    await RNFS.writeFile(destPath, base64, 'base64');
-    return `file://${destPath}`;
-  } catch (e) {
-    const message = e instanceof Error ? e.message : String(e);
-    console.warn('BackgroundStore: failed to write background image', message);
-    saveCrashLog({
-      message: `BackgroundStore.copyToLocal failed: ${message}`,
-      context: `sourceUri=${sourceUri.slice(0, 80)}`,
-    });
-    return null;
-  }
-}
-
-/**
- * Fallback: read a content:// URI via RNFS base64 read.
- * Kept only for cases where base64 data is not pre-provided.
- * WARNING: this can crash natively on some Android content providers.
- */
-async function copyContentUriToLocal(uri: string): Promise<string | null> {
-  try {
-    await ensureDir();
-    const base64 = await RNFS.readFile(uri, 'base64');
     const rawName = uri.split('/').pop()?.split('?')[0] ?? 'img';
     const ext = rawName.includes('.') ? rawName.split('.').pop()! : 'jpg';
     const destPath = `${BG_DIR}/${makeId()}.${ext}`;
-    await RNFS.writeFile(destPath, base64, 'base64');
+    // RNFS.copyFile handles both file:// and content:// URIs natively
+    const src = isFileUri(uri) ? uri.replace('file://', '') : uri;
+    await RNFS.copyFile(src, destPath);
     return `file://${destPath}`;
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);
-    console.warn('BackgroundStore: failed to copy content URI', message);
+    console.warn('BackgroundStore: failed to copy image', message);
     saveCrashLog({
-      message: `BackgroundStore.copyContentUriToLocal failed: ${message}`,
+      message: `BackgroundStore.copyUriToLocal failed: ${message}`,
       context: `uri=${uri.slice(0, 80)}`,
     });
     return null;
@@ -187,30 +158,17 @@ export class BackgroundStore {
   }
 
   /**
-   * Add background images. Assets should include base64 data when sourced from
-   * the image picker — this avoids reading content:// URIs via RNFS which can
-   * cause native crashes on Android.
+   * Add background images from URIs (file:// or content://).
+   * Uses RNFS.copyFile — never reads image data into the JS heap.
    */
-  async addImages(assets: Array<{uri: string; base64?: string}>) {
+  async addImages(uris: string[]) {
     const newImages: BackgroundImage[] = [];
 
-    for (const asset of assets) {
+    for (const uri of uris) {
       let localUri: string | null = null;
 
-      if (asset.base64) {
-        // Preferred path: write pre-provided base64 data (safe, no content-URI read)
-        localUri = await copyToLocal(asset.base64, asset.uri);
-      } else if (isContentUri(asset.uri)) {
-        // Fallback: read content:// URI via RNFS (may crash on some providers)
-        saveCrashLog({
-          message:
-            'BackgroundStore.addImages: no base64 provided for content URI, using fallback',
-          context: `uri=${asset.uri.slice(0, 80)}`,
-        });
-        localUri = await copyContentUriToLocal(asset.uri);
-      } else if (isFileUri(asset.uri)) {
-        // file:// URIs are safe to read via RNFS
-        localUri = await copyContentUriToLocal(asset.uri);
+      if (isFileUri(uri) || isContentUri(uri)) {
+        localUri = await copyUriToLocal(uri);
       }
 
       if (localUri) {

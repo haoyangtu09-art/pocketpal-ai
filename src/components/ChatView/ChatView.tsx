@@ -4,12 +4,23 @@ import {
   FlatListProps,
   InteractionManager,
   LayoutAnimation,
+  Platform,
   StatusBar,
   StatusBarProps,
   View,
   TouchableOpacity,
   Keyboard,
 } from 'react-native';
+import {
+  LiquidGlassView,
+  LIQUID_GLASS_FROSTED,
+} from '@uginy/react-native-liquid-glass';
+
+const isGlassSupported =
+  Platform.OS === 'ios' ||
+  (Platform.OS === 'android' &&
+    typeof Platform.Version === 'number' &&
+    Platform.Version >= 33);
 
 import dayjs from 'dayjs';
 import {observer} from 'mobx-react';
@@ -62,7 +73,6 @@ import {
   ChatEmptyPlaceholder,
   VideoPalEmptyPlaceholder,
   ContentReportSheet,
-  LiquidGlass,
 } from '..';
 import {
   AlertIcon,
@@ -974,17 +984,13 @@ export const ChatView = observer(
                     }}
                   />
                 );
-                return uiStore.useLiquidGlass ? (
-                  <LiquidGlass
-                    cornerRadius={12}
-                    blurAmount={12}
-                    tintColor={
-                      theme.dark
-                        ? 'rgba(7,7,11,0.55)'
-                        : 'rgba(240,240,248,0.45)'
-                    }>
+                return isGlassSupported && uiStore.useLiquidGlass ? (
+                  <LiquidGlassView
+                    {...LIQUID_GLASS_FROSTED}
+                    noiseIntensity={0.02}
+                    cornerRadius={12}>
                     {chatInputElement}
-                  </LiquidGlass>
+                  </LiquidGlassView>
                 ) : (
                   chatInputElement
                 );

@@ -1,10 +1,20 @@
 import React, {useContext, useEffect, useState} from 'react';
-import {TouchableOpacity, View, Alert, SectionList} from 'react-native';
+import {Platform, TouchableOpacity, View, Alert, SectionList} from 'react-native';
 import {observer} from 'mobx-react';
 import {Divider, Drawer, Text} from 'react-native-paper';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import {DrawerContentComponentProps} from '@react-navigation/drawer';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import {
+  LiquidGlassView,
+  LIQUID_GLASS_FROSTED,
+} from '@uginy/react-native-liquid-glass';
+
+const isGlassSupported =
+  Platform.OS === 'ios' ||
+  (Platform.OS === 'android' &&
+    typeof Platform.Version === 'number' &&
+    Platform.Version >= 33);
 
 import {useTheme} from '../../hooks';
 import {createStyles} from './styles';
@@ -550,14 +560,18 @@ export const SidebarContent: React.FC<DrawerContentComponentProps> = observer(
 
     return (
       <GestureHandlerRootView style={styles.sidebarContainer}>
-        <View
-          style={[
-            styles.contentWrapper,
-            {paddingTop: insets.top, paddingBottom: insets.bottom},
-          ]}>
-          {chatSessionStore.isSelectionMode ? (
-            <>
-              <SelectionModeHeader
+        {isGlassSupported ? (
+          <LiquidGlassView
+            {...LIQUID_GLASS_FROSTED}
+            noiseIntensity={0.02}
+            cornerRadius={0}
+            style={[
+              styles.contentWrapper,
+              {paddingTop: insets.top, paddingBottom: insets.bottom},
+            ]}>
+            {chatSessionStore.isSelectionMode ? (
+              <>
+                <SelectionModeHeader
                 selectedCount={chatSessionStore.selectedCount}
                 onCancel={handleExitSelectionMode}
                 onExport={handleBulkExport}
@@ -597,7 +611,57 @@ export const SidebarContent: React.FC<DrawerContentComponentProps> = observer(
               contentContainerStyle={styles.scrollViewContent}
             />
           )}
-        </View>
+          </LiquidGlassView>
+        ) : (
+          <View
+            style={[
+              styles.contentWrapper,
+              {paddingTop: insets.top, paddingBottom: insets.bottom},
+            ]}>
+            {chatSessionStore.isSelectionMode ? (
+              <>
+                <SelectionModeHeader
+                  selectedCount={chatSessionStore.selectedCount}
+                  onCancel={handleExitSelectionMode}
+                  onExport={handleBulkExport}
+                  onDelete={handleBulkDelete}
+                  l10n={l10n}
+                  theme={theme}
+                  styles={styles}
+                />
+                <SelectAllRow
+                  allSelected={chatSessionStore.allSelected}
+                  onToggle={() =>
+                    chatSessionStore.allSelected
+                      ? chatSessionStore.deselectAllSessions()
+                      : chatSessionStore.selectAllSessions()
+                  }
+                  l10n={l10n}
+                  styles={styles}
+                />
+                <Divider style={styles.selectAllDivider} />
+                <SectionList
+                  sections={sections}
+                  keyExtractor={keyExtractor}
+                  renderItem={renderItem}
+                  renderSectionHeader={renderSectionHeader}
+                  stickySectionHeadersEnabled={false}
+                  contentContainerStyle={styles.scrollViewContent}
+                />
+              </>
+            ) : (
+              <SectionList
+                sections={sections}
+                keyExtractor={keyExtractor}
+                renderItem={renderItem}
+                renderSectionHeader={renderSectionHeader}
+                ListHeaderComponent={ListHeaderComponent}
+                stickySectionHeadersEnabled={false}
+                contentContainerStyle={styles.scrollViewContent}
+              />
+            )}
+          </View>
+        )}
         <RenameModal
           visible={sessionToRename !== null}
           onClose={() => setSessionToRename(null)}

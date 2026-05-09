@@ -689,21 +689,23 @@ export const SettingsScreen: React.FC = observer(() => {
                   const result = await launchImageLibrary({
                     mediaType: 'photo',
                     selectionLimit: 10,
-                    includeBase64: true,
+                    includeBase64: false,
                   });
                   if (result.assets && result.assets.length > 0) {
-                    const assets = result.assets
+                    const uris = result.assets
                       .filter(a => a.uri)
-                      .map(a => ({uri: a.uri!, base64: a.base64}));
-                    if (assets.length > 0) {
-                      await backgroundStore.addImages(assets);
+                      .map(a => a.uri!);
+                    if (uris.length > 0) {
+                      await backgroundStore.addImages(uris);
                       // Navigate to chat in edit mode
                       uiStore.setBackgroundEditMode(true);
                       navigation.navigate('Chat');
                     }
                   }
-                } catch {
-                  // User cancelled or error — ignore
+                } catch (e) {
+                  const msg =
+                    e instanceof Error ? e.message : '导入图片失败，请重试';
+                  Alert.alert('导入失败', msg);
                 }
               }}
               style={styles.marginTop8}>
