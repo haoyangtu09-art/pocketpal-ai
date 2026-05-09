@@ -116,6 +116,15 @@ export const createStyles = (theme: Theme) =>
       textAlignVertical: 'top' as const,
       paddingTop: 8,
     },
+    glassTextInput: {
+      borderWidth: 1,
+      borderColor: 'rgba(100,130,200,0.25)',
+      borderRadius: 10,
+      paddingHorizontal: 14,
+      paddingVertical: 10,
+      backgroundColor: 'rgba(100,130,200,0.06)',
+      fontSize: 14,
+    },
     marginTop8: {
       marginTop: 8,
     },

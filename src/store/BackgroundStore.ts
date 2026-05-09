@@ -1,7 +1,7 @@
 import {makePersistable} from 'mobx-persist-store';
 import {makeAutoObservable, runInAction} from 'mobx';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {v4 as uuidv4} from 'uuid';
+import * as RNFS from '@dr.pogodin/react-native-fs';
 
 export interface BackgroundImage {
   id: string;
@@ -11,6 +11,10 @@ export interface BackgroundImage {
   scale: number;
   rotation: number;
   opacity: number;
+}
+
+function makeId(): string {
+  return `bg_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 }
 
 export class BackgroundStore {
@@ -26,27 +30,59 @@ export class BackgroundStore {
     });
   }
 
-  addImages(uris: string[]) {
-    runInAction(() => {
-      const screenW = 360; // will be centered on screen
-      const screenH = 640;
-      for (const uri of uris) {
-        this.images.push({
-          id: uuidv4(),
-          uri,
-          x: screenW / 2,
-          y: screenH / 2,
+  /**
+   * Add images. Copies each URI to the app's local storage so they
+   * survive across app restarts (content:// URIs are temporary).
+   */
+  async addImages(uris: string[]) {
+    const bgDir = `${RNFS.DocumentDirectoryPath}/backgrounds`;
+    try {
+      const dirExists = await RNFS.exists(bgDir);
+      if (!dirExists) {
+        await RNFS.mkdir(bgDir);
+      }
+    } catch {
+      // If mkdir fails (e.g. no permission), try to proceed anyway
+    }
+
+    const newImages: BackgroundImage[] = [];
+
+    for (const uri of uris) {
+      try {
+        // Copy to local storage so the file survives app restarts
+        const ext = uri.split('.').pop()?.split('?')[0] ?? 'jpg';
+        const destPath = `${bgDir}/${makeId()}.${ext}`;
+        await RNFS.copyFile(uri, destPath);
+
+        newImages.push({
+          id: makeId(),
+          uri: `file://${destPath}`,
+          x: 180,
+          y: 320,
           scale: 1,
           rotation: 0,
           opacity: 1,
         });
+      } catch {
+        // If copy fails, skip this image — don't crash
       }
-    });
+    }
+
+    if (newImages.length > 0) {
+      runInAction(() => {
+        this.images.push(...newImages);
+      });
+    }
   }
 
   removeImage(id: string) {
+    const img = this.images.find(i => i.id === id);
+    if (img?.uri.startsWith('file://')) {
+      const path = img.uri.replace('file://', '');
+      RNFS.unlink(path).catch(() => {});
+    }
     runInAction(() => {
-      this.images = this.images.filter(img => img.id !== id);
+      this.images = this.images.filter(i => i.id !== id);
     });
   }
 
@@ -65,6 +101,11 @@ export class BackgroundStore {
   }
 
   clearAll() {
+    for (const img of this.images) {
+      if (img.uri.startsWith('file://')) {
+        RNFS.unlink(img.uri.replace('file://', '')).catch(() => {});
+      }
+    }
     runInAction(() => {
       this.images = [];
     });

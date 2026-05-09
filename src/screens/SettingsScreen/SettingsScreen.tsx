@@ -374,7 +374,11 @@ export const SettingsScreen: React.FC = observer(() => {
               <TextInput
                 ref={inputRef}
                 testID="context-size-input"
-                style={[styles.textInput, !isValidInput && styles.invalidInput]}
+                style={[
+                  styles.textInput,
+                  styles.glassTextInput,
+                  !isValidInput && styles.invalidInput,
+                ]}
                 keyboardType="numeric"
                 value={contextSize}
                 onChangeText={handleContextSizeChange}
@@ -519,6 +523,7 @@ export const SettingsScreen: React.FC = observer(() => {
                   style={[
                     styles.textInput,
                     styles.systemPromptInput,
+                    styles.glassTextInput,
                     styles.textLabel,
                   ]}
                   multiline
@@ -545,7 +550,11 @@ export const SettingsScreen: React.FC = observer(() => {
                 API 地址
               </Text>
               <RNTextInput
-                style={[styles.textInput, styles.textLabel]}
+                style={[
+                  styles.textInput,
+                  styles.glassTextInput,
+                  styles.textLabel,
+                ]}
                 value={apiUrl}
                 onChangeText={setApiUrl}
                 placeholder="http://192.168.1.100:1234"
@@ -560,7 +569,11 @@ export const SettingsScreen: React.FC = observer(() => {
                 API Key
               </Text>
               <RNTextInput
-                style={[styles.textInput, styles.textLabel]}
+                style={[
+                  styles.textInput,
+                  styles.glassTextInput,
+                  styles.textLabel,
+                ]}
                 value={apiKeyInput}
                 onChangeText={setApiKeyInput}
                 placeholder="sk-..."
@@ -682,7 +695,7 @@ export const SettingsScreen: React.FC = observer(() => {
                       .map(a => a.uri)
                       .filter((u): u is string => !!u);
                     if (uris.length > 0) {
-                      backgroundStore.addImages(uris);
+                      await backgroundStore.addImages(uris);
                       // Navigate to chat in edit mode
                       uiStore.setBackgroundEditMode(true);
                       navigation.navigate('Chat');

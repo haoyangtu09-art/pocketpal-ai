@@ -48,6 +48,11 @@ export const Bubble = ({
         currentUserIsAuthor && {backgroundColor: 'transparent'},
         {transform: [{scale}]},
         currentUserIsAuthor && glowStyles.glow,
+        !currentUserIsAuthor &&
+          isAssistantText && {
+            borderWidth: 0.5,
+            borderColor: 'rgba(130,150,220,0.12)',
+          },
       ]}>
       {child}
       {isAssistantText && (

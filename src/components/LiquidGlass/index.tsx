@@ -91,6 +91,7 @@ export const LiquidGlass: React.FC<LiquidGlassProps> = ({
                 uniforms={{
                   iResolution: [size.width, size.height],
                   cornerRadius: safeCornerRadius,
+                  iTime: Date.now() / 1000,
                 }}
               />
             </Fill>
