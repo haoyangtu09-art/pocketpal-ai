@@ -89,5 +89,7 @@ module.exports = {
       '<rootDir>/__mocks__/external/@react-native-community/blur.js',
     '@uginy/react-native-liquid-glass':
       '<rootDir>/__mocks__/external/@uginy/react-native-liquid-glass.js',
+    '../specs/NativeImageResize':
+      '<rootDir>/__mocks__/external/NativeImageResize.ts',
   },
 };

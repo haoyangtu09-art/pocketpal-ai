@@ -1,9 +1,10 @@
 import {makePersistable} from 'mobx-persist-store';
 import {makeAutoObservable, runInAction} from 'mobx';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {Platform, NativeModules} from 'react-native';
+import {Platform} from 'react-native';
 import * as RNFS from '@dr.pogodin/react-native-fs';
 import {saveCrashLog} from '../utils/crashLog';
+import NativeImageResize from '../specs/NativeImageResize';
 
 export interface BackgroundImage {
   id: string;
@@ -52,9 +53,8 @@ async function copyUriToLocal(uri: string): Promise<string | null> {
     const destPath = `${BG_DIR}/${makeId()}.jpg`;
 
     if (Platform.OS === 'android') {
-      const {ImageResizeModule} = NativeModules;
-      if (ImageResizeModule?.resizeImage) {
-        await ImageResizeModule.resizeImage(uri, destPath);
+      if (NativeImageResize) {
+        await NativeImageResize.resizeImage(uri, destPath);
         return `file://${destPath}`;
       }
       // Fallback: stream copy (no resize, but no JS heap spike)

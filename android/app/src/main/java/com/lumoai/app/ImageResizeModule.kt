@@ -6,39 +6,33 @@ import android.graphics.BitmapFactory
 import android.net.Uri
 import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext
-import com.facebook.react.bridge.ReactContextBaseJavaModule
-import com.facebook.react.bridge.ReactMethod
+import com.facebook.react.module.annotations.ReactModule
+import com.lumoai.app.specs.NativeImageResizeSpec
 import java.io.File
 import java.io.FileOutputStream
 
 /**
- * Decodes an image URI to at most [MAX_DIM]×[MAX_DIM] using BitmapFactory.inSampleSize
+ * Decodes an image URI to at most MAX_DIM×MAX_DIM using BitmapFactory.inSampleSize
  * (never loads the full bitmap into memory), compresses to JPEG, and writes the result
- * to the app's backgrounds directory.  The stored file is always small, so Fresco can
- * render it without OOM regardless of display resolution.
+ * to the given destination path.
  */
-class ImageResizeModule(private val reactContext: ReactApplicationContext) :
-    ReactContextBaseJavaModule(reactContext) {
+@ReactModule(name = NativeImageResizeSpec.NAME)
+class ImageResizeModule(reactContext: ReactApplicationContext) :
+    NativeImageResizeSpec(reactContext) {
 
     companion object {
-        const val NAME = "ImageResizeModule"
         private const val MAX_DIM = 1280
         private const val JPEG_QUALITY = 85
     }
 
-    override fun getName(): String = NAME
+    override fun getName(): String = NativeImageResizeSpec.NAME
 
-    /**
-     * @param uri        file:// or content:// URI of the source image
-     * @param destPath   absolute path where the resized JPEG should be written
-     */
-    @ReactMethod
-    fun resizeImage(uri: String, destPath: String, promise: Promise) {
+    override fun resizeImage(uri: String, destPath: String, promise: Promise) {
         try {
             val parsedUri = Uri.parse(uri)
-            val resolver: ContentResolver = reactContext.contentResolver
+            val resolver: ContentResolver = reactApplicationContext.contentResolver
 
-            // Step 1: read only dimensions (inJustDecodeBounds=true — zero heap cost)
+            // Step 1: read only dimensions (zero heap cost)
             val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
             openStream(resolver, parsedUri)?.use { stream ->
                 BitmapFactory.decodeStream(stream, null, bounds)

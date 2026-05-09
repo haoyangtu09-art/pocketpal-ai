@@ -1,14 +1,34 @@
 package com.lumoai.app
 
-import com.facebook.react.ReactPackage
+import com.facebook.react.TurboReactPackage
 import com.facebook.react.bridge.NativeModule
 import com.facebook.react.bridge.ReactApplicationContext
-import com.facebook.react.uimanager.ViewManager
+import com.facebook.react.module.model.ReactModuleInfo
+import com.facebook.react.module.model.ReactModuleInfoProvider
+import com.lumoai.app.specs.NativeImageResizeSpec
 
-class ImageResizePackage : ReactPackage {
-    override fun createNativeModules(reactContext: ReactApplicationContext): List<NativeModule> =
-        listOf(ImageResizeModule(reactContext))
+class ImageResizePackage : TurboReactPackage() {
+    override fun getModule(name: String, reactContext: ReactApplicationContext): NativeModule? {
+        return if (name == NativeImageResizeSpec.NAME) {
+            ImageResizeModule(reactContext)
+        } else {
+            null
+        }
+    }
 
-    override fun createViewManagers(reactContext: ReactApplicationContext): List<ViewManager<*, *>> =
-        emptyList()
+    override fun getReactModuleInfoProvider(): ReactModuleInfoProvider {
+        return ReactModuleInfoProvider {
+            mapOf(
+                NativeImageResizeSpec.NAME to ReactModuleInfo(
+                    NativeImageResizeSpec.NAME,
+                    NativeImageResizeSpec.NAME,
+                    false, // canOverrideExistingModule
+                    false, // needsEagerInit
+                    false, // hasConstants
+                    false, // isCxxModule
+                    true   // isTurboModule
+                )
+            )
+        }
+    }
 }
