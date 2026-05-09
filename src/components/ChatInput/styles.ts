@@ -20,6 +20,7 @@ export const createStyles = ({
       alignItems: 'center',
       justifyContent: 'center',
       borderRadius: 100,
+      opacity: 0.7,
     },
     plusButton: {
       height: 28,
@@ -27,7 +28,7 @@ export const createStyles = ({
       alignItems: 'center',
       justifyContent: 'center',
       borderRadius: 100,
-      opacity: 0.9,
+      opacity: 0.5,
     },
     thinkingToggle: {
       height: 28,

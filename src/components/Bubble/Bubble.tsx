@@ -1,6 +1,6 @@
 import type {ReactNode} from 'react';
-import React, {useContext} from 'react';
-import {View, Animated} from 'react-native';
+import React, {useContext, useEffect, useRef} from 'react';
+import {View, Animated, Easing} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 
 import {useTheme} from '../../hooks';
@@ -45,15 +45,15 @@ export const Bubble = ({
       testID={currentUserIsAuthor ? 'user-message' : 'ai-message'}
       style={[
         contentContainer,
-        // When LiquidGlass wraps this bubble, content bg must be transparent
-        uiStore.useLiquidGlass &&
-          currentUserIsAuthor && {backgroundColor: 'transparent'},
+        currentUserIsAuthor && {backgroundColor: 'transparent'},
         {transform: [{scale}]},
+        currentUserIsAuthor && glowStyles.glow,
       ]}>
       {child}
       {isAssistantText && (
         <View style={dateHeaderContainer} testID="message-footer">
           <PlayButton message={message} />
+          <AIPresenceIndicator />
         </View>
       )}
     </Animated.View>
@@ -80,6 +80,7 @@ export const Bubble = ({
         style={{
           borderRadius: theme.borders.messageBorderRadius,
           overflow: 'hidden',
+          ...glowStyles.glow,
         }}>
         {bubbleContent}
       </LinearGradient>
@@ -88,3 +89,50 @@ export const Bubble = ({
 
   return bubbleContent;
 };
+
+// Minimal AI presence indicator — tiny pulsing dot replacing old t/s debug info
+const AIPresenceIndicator: React.FC = () => {
+  const pulseAnim = useRef(new Animated.Value(0.4)).current;
+
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, {
+          toValue: 1,
+          duration: 2000,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseAnim, {
+          toValue: 0.4,
+          duration: 2000,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+      ]),
+    ).start();
+  }, [pulseAnim]);
+
+  return <Animated.View style={[presenceStyles.dot, {opacity: pulseAnim}]} />;
+};
+
+const presenceStyles = {
+  dot: {
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: 'rgba(130,150,220,0.7)',
+    marginLeft: 8,
+  },
+};
+
+// Shared glow style for user bubbles
+const glowStyles = {
+  glow: {
+    shadowColor: '#5a4ae3',
+    shadowOffset: {width: 0, height: 0},
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+} as const;

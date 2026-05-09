@@ -1,6 +1,8 @@
-import React, {useCallback, useState, useEffect, useMemo} from 'react';
+import React, {useCallback, useState, useEffect, useMemo, useRef} from 'react';
 import {
   Alert,
+  Animated,
+  Easing,
   Linking,
   View,
   TouchableOpacity,
@@ -305,15 +307,13 @@ export const ModelCard: React.FC<ModelCardProps> = observer(
       if (!isDownloaded) {
         return null;
       }
-      return (
+      return isActiveModel ? (
+        <BreathingDot color={theme.colors.bgStatusActive} />
+      ) : (
         <View
           style={[
             styles.statusDot,
-            {
-              backgroundColor: isActiveModel
-                ? theme.colors.bgStatusActive
-                : theme.colors.bgStatusIdle,
-            },
+            {backgroundColor: theme.colors.bgStatusIdle},
           ]}
         />
       );
@@ -952,3 +952,37 @@ export const ModelCard: React.FC<ModelCardProps> = observer(
     );
   },
 );
+
+// Breathing blue dot for active model status
+const BreathingDot: React.FC<{color: string}> = ({color}) => {
+  const anim = useRef(new Animated.Value(0.4)).current;
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(anim, {
+          toValue: 1,
+          duration: 1200,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+        Animated.timing(anim, {
+          toValue: 0.4,
+          duration: 1200,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+      ]),
+    ).start();
+  }, [anim]);
+  return (
+    <Animated.View
+      style={{
+        width: 8,
+        height: 8,
+        borderRadius: 4,
+        backgroundColor: color,
+        opacity: anim,
+      }}
+    />
+  );
+};
