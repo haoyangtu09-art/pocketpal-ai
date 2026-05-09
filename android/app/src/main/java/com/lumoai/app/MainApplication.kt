@@ -28,6 +28,7 @@ class MainApplication : Application(), ReactApplication {
               add(HardwareInfoPackage())
               add(StorefrontPackage())
               add(DownloadPackage())
+              add(ImageResizePackage())
             }
 
         override fun getJSMainModuleName(): String = "index"

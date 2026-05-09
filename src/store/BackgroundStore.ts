@@ -1,6 +1,7 @@
 import {makePersistable} from 'mobx-persist-store';
 import {makeAutoObservable, runInAction} from 'mobx';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {Platform, NativeModules} from 'react-native';
 import * as RNFS from '@dr.pogodin/react-native-fs';
 import {saveCrashLog} from '../utils/crashLog';
 
@@ -40,16 +41,29 @@ async function ensureDir() {
 }
 
 /**
- * Copy a file:// or content:// URI to local app storage using RNFS.copyFile.
- * Never reads file contents into the JS heap — avoids OOM on large photos.
+ * Copy a file:// or content:// URI to local app storage.
+ * On Android: uses native ImageResizeModule to decode at reduced resolution
+ * (BitmapFactory.inSampleSize) and save as JPEG — never loads full bitmap into memory.
+ * On iOS: uses RNFS.copyFile (native stream, no JS heap involvement).
  */
 async function copyUriToLocal(uri: string): Promise<string | null> {
   try {
     await ensureDir();
-    const rawName = uri.split('/').pop()?.split('?')[0] ?? 'img';
-    const ext = rawName.includes('.') ? rawName.split('.').pop()! : 'jpg';
-    const destPath = `${BG_DIR}/${makeId()}.${ext}`;
-    // RNFS.copyFile handles both file:// and content:// URIs natively
+    const destPath = `${BG_DIR}/${makeId()}.jpg`;
+
+    if (Platform.OS === 'android') {
+      const {ImageResizeModule} = NativeModules;
+      if (ImageResizeModule?.resizeImage) {
+        await ImageResizeModule.resizeImage(uri, destPath);
+        return `file://${destPath}`;
+      }
+      // Fallback: stream copy (no resize, but no JS heap spike)
+      const src = isFileUri(uri) ? uri.replace('file://', '') : uri;
+      await RNFS.copyFile(src, destPath);
+      return `file://${destPath}`;
+    }
+
+    // iOS: stream copy is sufficient; iOS image picker already downsamples
     const src = isFileUri(uri) ? uri.replace('file://', '') : uri;
     await RNFS.copyFile(src, destPath);
     return `file://${destPath}`;
