@@ -57,9 +57,7 @@ import {getDeviceOptions, DeviceOption} from '../../utils/deviceSelection';
 const OPENCL_DOCS_URL =
   'https://github.com/ggml-org/llama.cpp/blob/master/docs/backend/OPENCL.md#model-preparation';
 
-function getBackgroundImportCandidates(
-  file: DocumentPickerResponse,
-): string[] {
+function getBackgroundImportCandidates(file: DocumentPickerResponse): string[] {
   return file.uri ? [file.uri] : [];
 }
 
