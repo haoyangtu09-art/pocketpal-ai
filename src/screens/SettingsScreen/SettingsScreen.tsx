@@ -8,7 +8,6 @@ import {
   Alert,
   Linking,
   TouchableOpacity,
-  Image,
 } from 'react-native';
 
 import {debounce} from 'lodash';
@@ -86,6 +85,8 @@ export const SettingsScreen: React.FC = observer(() => {
   const [backgroundImportError, setBackgroundImportError] = useState<
     string | null
   >(null);
+  const [backgroundImportSuccessCount, setBackgroundImportSuccessCount] =
+    useState(0);
   const [gpuSupported, setGpuSupported] = useState(false);
   const [languageAnchor, setLanguageAnchor] = useState<{x: number; y: number}>({
     x: 0.0,
@@ -736,9 +737,7 @@ export const SettingsScreen: React.FC = observer(() => {
                     }
 
                     if (addedCount > 0) {
-                      // Navigate to chat in edit mode
-                      uiStore.setBackgroundEditMode(true);
-                      navigation.navigate('Chat');
+                      setBackgroundImportSuccessCount(addedCount);
                     } else {
                       setBackgroundImportError(
                         '未能导入所选背景图，请重试或选择其他图片',
@@ -794,11 +793,9 @@ export const SettingsScreen: React.FC = observer(() => {
                   <View
                     key={img.id}
                     style={[styles.switchContainer, styles.bgImageRow]}>
-                    <Image
-                      source={{uri: img.uri}}
-                      style={styles.bgThumbnail}
-                      resizeMode="cover"
-                    />
+                    <View style={styles.bgThumbnail}>
+                      <Icon source="image" size={24} />
+                    </View>
                     <Text
                       variant="labelSmall"
                       style={styles.bgFileName}
@@ -871,6 +868,29 @@ export const SettingsScreen: React.FC = observer(() => {
           },
         ]}>
         <Text variant="bodyMedium">{backgroundImportError}</Text>
+      </Dialog>
+      <Dialog
+        visible={backgroundImportSuccessCount > 0}
+        onDismiss={() => setBackgroundImportSuccessCount(0)}
+        title="导入完成"
+        actions={[
+          {
+            label: '稍后编辑',
+            onPress: () => setBackgroundImportSuccessCount(0),
+          },
+          {
+            label: '去编辑',
+            onPress: () => {
+              setBackgroundImportSuccessCount(0);
+              uiStore.setBackgroundEditMode(true);
+              navigation.navigate('Chat');
+            },
+            mode: 'contained',
+          },
+        ]}>
+        <Text variant="bodyMedium">
+          已导入 {backgroundImportSuccessCount} 张背景图。
+        </Text>
       </Dialog>
     </SafeAreaView>
   );
