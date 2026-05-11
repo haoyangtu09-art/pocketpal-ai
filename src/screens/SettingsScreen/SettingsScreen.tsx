@@ -14,7 +14,13 @@ import {debounce} from 'lodash';
 import {observer} from 'mobx-react-lite';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {Switch, Text, Button, Icon, SegmentedButtons} from 'react-native-paper';
-import {launchImageLibrary, type Asset} from 'react-native-image-picker';
+import {
+  errorCodes,
+  isErrorWithCode,
+  pick,
+  types,
+  type DocumentPickerResponse,
+} from '@react-native-documents/picker';
 import {useNavigation} from '@react-navigation/native';
 
 import {GlobeIcon, MoonIcon, LinkExternalIcon} from '../../assets/icons';
@@ -51,20 +57,10 @@ import {getDeviceOptions, DeviceOption} from '../../utils/deviceSelection';
 const OPENCL_DOCS_URL =
   'https://github.com/ggml-org/llama.cpp/blob/master/docs/backend/OPENCL.md#model-preparation';
 
-function getBackgroundImportCandidates(asset: Asset): string[] {
-  if (asset.uri) {
-    return [asset.uri];
-  }
-
-  if (!asset.originalPath) {
-    return [];
-  }
-
-  return [
-    asset.originalPath.startsWith('/')
-      ? `file://${asset.originalPath}`
-      : asset.originalPath,
-  ];
+function getBackgroundImportCandidates(
+  file: DocumentPickerResponse,
+): string[] {
+  return file.uri ? [file.uri] : [];
 }
 
 export const SettingsScreen: React.FC = observer(() => {
@@ -707,24 +703,16 @@ export const SettingsScreen: React.FC = observer(() => {
               icon="image-plus"
               onPress={async () => {
                 try {
-                  const result = await launchImageLibrary({
-                    mediaType: 'photo',
-                    selectionLimit: 4,
-                    includeBase64: false,
-                    maxWidth: 1280,
-                    maxHeight: 1280,
-                    quality: 0.8,
-                    assetRepresentationMode: 'compatible',
+                  const files = await pick({
+                    type: Platform.OS === 'ios' ? 'public.image' : types.images,
+                    allowMultiSelection: true,
+                    mode: 'import',
                   });
-                  if (result.errorMessage) {
-                    setBackgroundImportError(result.errorMessage);
-                    return;
-                  }
-                  if (result.assets && result.assets.length > 0) {
+                  if (files.length > 0) {
                     let addedCount = 0;
 
-                    for (const asset of result.assets) {
-                      const candidates = getBackgroundImportCandidates(asset);
+                    for (const file of files.slice(0, 4)) {
+                      const candidates = getBackgroundImportCandidates(file);
                       for (const uri of candidates) {
                         const addedImages = await backgroundStore.addImages([
                           uri,
@@ -745,6 +733,12 @@ export const SettingsScreen: React.FC = observer(() => {
                     }
                   }
                 } catch (e) {
+                  if (
+                    isErrorWithCode(e) &&
+                    e.code === errorCodes.OPERATION_CANCELED
+                  ) {
+                    return;
+                  }
                   const msg =
                     e instanceof Error ? e.message : '导入图片失败，请重试';
                   setBackgroundImportError(msg);
