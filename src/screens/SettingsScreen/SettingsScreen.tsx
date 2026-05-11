@@ -53,19 +53,19 @@ const OPENCL_DOCS_URL =
   'https://github.com/ggml-org/llama.cpp/blob/master/docs/backend/OPENCL.md#model-preparation';
 
 function getBackgroundImportCandidates(asset: Asset): string[] {
-  const candidates = [asset.uri];
-
-  if (asset.originalPath) {
-    candidates.push(
-      asset.originalPath.startsWith('/')
-        ? `file://${asset.originalPath}`
-        : asset.originalPath,
-    );
+  if (asset.uri) {
+    return [asset.uri];
   }
 
-  return Array.from(
-    new Set(candidates.filter((uri): uri is string => Boolean(uri))),
-  );
+  if (!asset.originalPath) {
+    return [];
+  }
+
+  return [
+    asset.originalPath.startsWith('/')
+      ? `file://${asset.originalPath}`
+      : asset.originalPath,
+  ];
 }
 
 export const SettingsScreen: React.FC = observer(() => {
@@ -710,6 +710,10 @@ export const SettingsScreen: React.FC = observer(() => {
                     mediaType: 'photo',
                     selectionLimit: 4,
                     includeBase64: false,
+                    maxWidth: 1280,
+                    maxHeight: 1280,
+                    quality: 0.8,
+                    assetRepresentationMode: 'compatible',
                   });
                   if (result.errorMessage) {
                     setBackgroundImportError(result.errorMessage);

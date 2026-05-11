@@ -46,9 +46,8 @@ async function ensureDir() {
 
 /**
  * Copy a file:// or content:// URI to local app storage.
- * On Android: uses native ImageResizeModule to decode at reduced resolution
- * (BitmapFactory.inSampleSize) and save as JPEG — never loads full bitmap into memory.
- * On iOS: uses RNFS.copyFile (native stream, no JS heap involvement).
+ * File paths are copied directly; picker output is already size-limited.
+ * Android content:// URIs are decoded through the native resize module.
  */
 async function copyUriToLocal(uri: string): Promise<string | null> {
   try {
@@ -76,9 +75,7 @@ async function copyUriToLocal(uri: string): Promise<string | null> {
         }
       }
 
-      // Fallback for content URIs that RNFS can handle.
-      await RNFS.copyFile(src, destPath);
-      return `file://${destPath}`;
+      return null;
     }
 
     // iOS: stream copy is sufficient; iOS image picker already downsamples
