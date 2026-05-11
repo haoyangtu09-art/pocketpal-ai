@@ -6,7 +6,8 @@ export class BackgroundStore {
 export const backgroundStore = {
   images: [],
   globalOpacity: 0.5,
-  addImages: jest.fn(),
+  isReady: true,
+  addImages: jest.fn().mockResolvedValue([]),
   removeImage: jest.fn(),
   updateImageTransform: jest.fn(),
   clearAll: jest.fn(),

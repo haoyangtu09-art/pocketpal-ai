@@ -167,9 +167,44 @@ export const ChatScreen: React.FC = observer(() => {
     }
   };
 
+  const backgroundControls = (
+    <>
+      {/* Only render after hydration + validation completes to prevent stale URI crashes. */}
+      {backgroundStore.isReady &&
+        backgroundStore.images.map(img => (
+          <BackgroundLayer
+            key={img.id}
+            image={img}
+            isEditing={uiStore.isBackgroundEditMode}
+            globalOpacity={backgroundStore.globalOpacity}
+          />
+        ))}
+      {uiStore.isBackgroundEditMode && (
+        <TouchableOpacity
+          style={styles.editCloseBtn}
+          onPress={() => uiStore.setBackgroundEditMode(false)}>
+          <Icon name="close" size={22} color="#fff" />
+        </TouchableOpacity>
+      )}
+    </>
+  );
+
   // If the active pal is a video pal, show the video pal screen
   if (isVideoPal) {
-    return <VideoPalScreen activePal={activePal} />;
+    return (
+      <ImageBackground
+        source={
+          uiStore.showDefaultBackground
+            ? require('../../assets/background.png')
+            : undefined
+        }
+        style={styles.container}
+        imageStyle={styles.backgroundImage}
+        resizeMode="contain">
+        <VideoPalScreen activePal={activePal} />
+        {backgroundControls}
+      </ImageBackground>
+    );
   }
 
   // Otherwise, show the regular chat view
@@ -238,24 +273,8 @@ export const ChatScreen: React.FC = observer(() => {
         />
       )}
 
-      {/* Background layers & edit UI — rendered AFTER ChatView so they sit ON TOP.
-           Only render after hydration + validation completes to prevent stale URI crashes. */}
-      {backgroundStore.isReady &&
-        backgroundStore.images.map(img => (
-          <BackgroundLayer
-            key={img.id}
-            image={img}
-            isEditing={uiStore.isBackgroundEditMode}
-            globalOpacity={backgroundStore.globalOpacity}
-          />
-        ))}
-      {uiStore.isBackgroundEditMode && (
-        <TouchableOpacity
-          style={styles.editCloseBtn}
-          onPress={() => uiStore.setBackgroundEditMode(false)}>
-          <Icon name="close" size={22} color="#fff" />
-        </TouchableOpacity>
-      )}
+      {/* Background layers & edit UI are rendered after ChatView so edit gestures work. */}
+      {backgroundControls}
     </ImageBackground>
   );
 });

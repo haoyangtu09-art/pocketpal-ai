@@ -10,10 +10,17 @@ import {
 } from '../../../../jest/test-utils';
 import {ChatScreen} from '../ChatScreen';
 
-import {chatSessionStore, modelStore} from '../../../store';
+import {
+  backgroundStore,
+  chatSessionStore,
+  modelStore,
+  palStore,
+  uiStore,
+} from '../../../store';
 
 import {l10n} from '../../../locales';
 import {mockLlamaContextParams} from '../../../../jest/fixtures/models';
+import type {Pal} from '../../../types/pal';
 
 const render = (ui: React.ReactElement, options: any = {}) =>
   baseRender(ui, {withBottomSheetProvider: true, ...options});
@@ -24,6 +31,16 @@ describe('ChatScreen', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     llamaRN = require('llama.rn');
+    (backgroundStore as any).images = [];
+    (backgroundStore as any).isReady = true;
+    (backgroundStore as any).globalOpacity = 0.5;
+    (palStore as any).pals = [];
+    (uiStore as any).isBackgroundEditMode = false;
+    (uiStore as any).showDefaultBackground = true;
+    Object.defineProperty(chatSessionStore, 'activePalId', {
+      get: jest.fn(() => null),
+      configurable: true,
+    });
   });
 
   it('renders correctly when model is not loaded', () => {
@@ -228,5 +245,68 @@ describe('ChatScreen', () => {
     });
 
     expect(modelStore.engine?.stopCompletion).toHaveBeenCalled();
+  });
+
+  it('shows imported backgrounds and edit close button for normal chat', () => {
+    (backgroundStore as any).images = [
+      {
+        id: 'bg-1',
+        uri: 'file://background.jpg',
+        x: 0,
+        y: 0,
+        scale: 1,
+        rotation: 0,
+        opacity: 1,
+      },
+    ];
+    (uiStore as any).isBackgroundEditMode = true;
+
+    const {getByTestId} = render(<ChatScreen />, {
+      withNavigation: true,
+    });
+
+    expect(getByTestId('background-layer')).toBeTruthy();
+    expect(getByTestId('background-layer').props.pointerEvents).toBe('auto');
+  });
+
+  it('shows imported backgrounds while a video pal is active', () => {
+    const videoPal = {
+      type: 'local',
+      id: 'video-pal',
+      name: 'Video Pal',
+      description: '',
+      systemPrompt: '',
+      isSystemPromptChanged: false,
+      useAIPrompt: false,
+      parameterSchema: [],
+      parameters: {},
+      source: 'local',
+      capabilities: {video: true, multimodal: true},
+    } as Pal;
+    (palStore as any).pals = [videoPal];
+    Object.defineProperty(chatSessionStore, 'activePalId', {
+      get: jest.fn(() => videoPal.id),
+      configurable: true,
+    });
+    (backgroundStore as any).images = [
+      {
+        id: 'bg-1',
+        uri: 'file://background.jpg',
+        x: 0,
+        y: 0,
+        scale: 1,
+        rotation: 0,
+        opacity: 1,
+      },
+    ];
+    (uiStore as any).isBackgroundEditMode = true;
+
+    const {getByTestId} = render(<ChatScreen />, {
+      withNavigation: true,
+      withSafeArea: true,
+    });
+
+    expect(getByTestId('background-layer')).toBeTruthy();
+    expect(getByTestId('background-layer').props.pointerEvents).toBe('auto');
   });
 });

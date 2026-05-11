@@ -696,7 +696,11 @@ export const SettingsScreen: React.FC = observer(() => {
                       .filter(a => a.uri)
                       .map(a => a.uri!);
                     if (uris.length > 0) {
-                      await backgroundStore.addImages(uris);
+                      const addedImages = await backgroundStore.addImages(uris);
+                      if (addedImages.length === 0) {
+                        Alert.alert('导入失败', '未能导入所选背景图，请重试');
+                        return;
+                      }
                       // Navigate to chat in edit mode
                       uiStore.setBackgroundEditMode(true);
                       navigation.navigate('Chat');

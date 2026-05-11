@@ -94,6 +94,8 @@ export const BackgroundLayer = observer(
     return (
       <GestureDetector gesture={composed}>
         <Animated.View
+          testID="background-layer"
+          pointerEvents={isEditing ? 'auto' : 'none'}
           style={[
             styles.layer,
             animatedStyle,
@@ -122,6 +124,8 @@ export const BackgroundLayer = observer(
 const styles = StyleSheet.create({
   layer: {
     position: 'absolute',
+    top: 0,
+    left: 0,
     alignItems: 'center',
     justifyContent: 'center',
   },

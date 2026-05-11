@@ -115,8 +115,8 @@ async function validateImage(
   // Sanitize numeric fields
   return {
     ...img,
-    x: Number.isFinite(img.x) ? img.x : 180,
-    y: Number.isFinite(img.y) ? img.y : 320,
+    x: Number.isFinite(img.x) ? img.x : 0,
+    y: Number.isFinite(img.y) ? img.y : 0,
     scale: Number.isFinite(img.scale) && img.scale > 0 ? img.scale : 1,
     rotation: Number.isFinite(img.rotation) ? img.rotation : 0,
     opacity: Number.isFinite(img.opacity) ? img.opacity : 1,
@@ -173,9 +173,9 @@ export class BackgroundStore {
 
   /**
    * Add background images from URIs (file:// or content://).
-   * Uses RNFS.copyFile — never reads image data into the JS heap.
+   * Uses native file operations — never reads image data into the JS heap.
    */
-  async addImages(uris: string[]) {
+  async addImages(uris: string[]): Promise<BackgroundImage[]> {
     const newImages: BackgroundImage[] = [];
 
     for (const uri of uris) {
@@ -189,8 +189,8 @@ export class BackgroundStore {
         newImages.push({
           id: makeId(),
           uri: localUri,
-          x: 180,
-          y: 320,
+          x: 0,
+          y: 0,
           scale: 1,
           rotation: 0,
           opacity: 1,
@@ -203,6 +203,8 @@ export class BackgroundStore {
         this.images.push(...newImages);
       });
     }
+
+    return newImages;
   }
 
   removeImage(id: string) {
