@@ -3,7 +3,6 @@ import {makeAutoObservable, runInAction} from 'mobx';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {Platform} from 'react-native';
 import * as RNFS from '@dr.pogodin/react-native-fs';
-import {saveCrashLog} from '../utils/crashLog';
 import NativeImageResize from '../specs/NativeImageResize';
 
 export interface BackgroundImage {
@@ -55,8 +54,15 @@ async function copyUriToLocal(uri: string): Promise<string | null> {
   try {
     await ensureDir();
     const destPath = `${BG_DIR}/${makeId()}.jpg`;
+    const isLocalFile = isFileUri(uri) || isLocalFilePath(uri);
+    const src = isFileUri(uri) ? uri.replace('file://', '') : uri;
 
-    if (Platform.OS === 'android') {
+    if (isLocalFile) {
+      await RNFS.copyFile(src, destPath);
+      return `file://${destPath}`;
+    }
+
+    if (Platform.OS === 'android' && isContentUri(uri)) {
       if (NativeImageResize) {
         try {
           await NativeImageResize.resizeImage(uri, destPath);
@@ -69,23 +75,18 @@ async function copyUriToLocal(uri: string): Promise<string | null> {
           );
         }
       }
-      // Fallback: stream copy (no resize, but no JS heap spike)
-      const src = isFileUri(uri) ? uri.replace('file://', '') : uri;
+
+      // Fallback for content URIs that RNFS can handle.
       await RNFS.copyFile(src, destPath);
       return `file://${destPath}`;
     }
 
     // iOS: stream copy is sufficient; iOS image picker already downsamples
-    const src = isFileUri(uri) ? uri.replace('file://', '') : uri;
     await RNFS.copyFile(src, destPath);
     return `file://${destPath}`;
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);
     console.warn('BackgroundStore: failed to copy image', message);
-    saveCrashLog({
-      message: `BackgroundStore.copyUriToLocal failed: ${message}`,
-      context: `uri=${uri.slice(0, 80)}`,
-    });
     return null;
   }
 }

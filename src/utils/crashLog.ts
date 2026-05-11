@@ -47,6 +47,28 @@ export async function readCrashLogs(): Promise<CrashLogEntry[]> {
   }
 }
 
+export async function clearCrashLogsByMessagePrefix(
+  prefix: string,
+): Promise<void> {
+  try {
+    const raw = await AsyncStorage.getItem(CRASH_LOG_KEY);
+    if (!raw) return;
+
+    const logs = (JSON.parse(raw) as CrashLogEntry[]).filter(
+      entry => !entry.message.startsWith(prefix),
+    );
+
+    if (logs.length === 0) {
+      await AsyncStorage.removeItem(CRASH_LOG_KEY);
+      return;
+    }
+
+    await AsyncStorage.setItem(CRASH_LOG_KEY, JSON.stringify(logs));
+  } catch {
+    // ignore
+  }
+}
+
 /**
  * Clear all stored crash logs.
  */
