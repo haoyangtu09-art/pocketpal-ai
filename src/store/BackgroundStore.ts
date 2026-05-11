@@ -45,23 +45,22 @@ async function ensureDir() {
 }
 
 /**
- * Copy a file:// or content:// URI to local app storage.
- * File paths are copied directly; picker output is already size-limited.
+ * Normalize an image URI for storage.
+ * File paths from the picker are already app-readable and size-limited, so
+ * keep them as-is to avoid device-specific native copy/decode crashes.
  * Android content:// URIs are decoded through the native resize module.
  */
 async function copyUriToLocal(uri: string): Promise<string | null> {
   try {
-    await ensureDir();
-    const destPath = `${BG_DIR}/${makeId()}.jpg`;
     const isLocalFile = isFileUri(uri) || isLocalFilePath(uri);
-    const src = isFileUri(uri) ? uri.replace('file://', '') : uri;
 
     if (isLocalFile) {
-      await RNFS.copyFile(src, destPath);
-      return `file://${destPath}`;
+      return isFileUri(uri) ? uri : `file://${uri}`;
     }
 
     if (Platform.OS === 'android' && isContentUri(uri)) {
+      await ensureDir();
+      const destPath = `${BG_DIR}/${makeId()}.jpg`;
       if (NativeImageResize) {
         try {
           await NativeImageResize.resizeImage(uri, destPath);
@@ -78,9 +77,7 @@ async function copyUriToLocal(uri: string): Promise<string | null> {
       return null;
     }
 
-    // iOS: stream copy is sufficient; iOS image picker already downsamples
-    await RNFS.copyFile(src, destPath);
-    return `file://${destPath}`;
+    return null;
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);
     console.warn('BackgroundStore: failed to copy image', message);
