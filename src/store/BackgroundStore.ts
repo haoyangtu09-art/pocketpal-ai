@@ -30,6 +30,10 @@ function isFileUri(uri: string): boolean {
   return uri.startsWith('file://');
 }
 
+function isLocalFilePath(uri: string): boolean {
+  return uri.startsWith('/');
+}
+
 async function ensureDir() {
   try {
     const exists = await RNFS.exists(BG_DIR);
@@ -54,8 +58,16 @@ async function copyUriToLocal(uri: string): Promise<string | null> {
 
     if (Platform.OS === 'android') {
       if (NativeImageResize) {
-        await NativeImageResize.resizeImage(uri, destPath);
-        return `file://${destPath}`;
+        try {
+          await NativeImageResize.resizeImage(uri, destPath);
+          return `file://${destPath}`;
+        } catch (e) {
+          const message = e instanceof Error ? e.message : String(e);
+          console.warn(
+            'BackgroundStore: native resize failed, trying file copy',
+            message,
+          );
+        }
       }
       // Fallback: stream copy (no resize, but no JS heap spike)
       const src = isFileUri(uri) ? uri.replace('file://', '') : uri;
@@ -181,7 +193,7 @@ export class BackgroundStore {
     for (const uri of uris) {
       let localUri: string | null = null;
 
-      if (isFileUri(uri) || isContentUri(uri)) {
+      if (isFileUri(uri) || isContentUri(uri) || isLocalFilePath(uri)) {
         localUri = await copyUriToLocal(uri);
       }
 

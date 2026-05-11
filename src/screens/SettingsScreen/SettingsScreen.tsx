@@ -15,7 +15,7 @@ import {debounce} from 'lodash';
 import {observer} from 'mobx-react-lite';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {Switch, Text, Button, Icon, SegmentedButtons} from 'react-native-paper';
-import {launchImageLibrary} from 'react-native-image-picker';
+import {launchImageLibrary, type Asset} from 'react-native-image-picker';
 import {useNavigation} from '@react-navigation/native';
 
 import {GlobeIcon, MoonIcon, LinkExternalIcon} from '../../assets/icons';
@@ -27,6 +27,7 @@ import {
   HFTokenSheet,
   InputSlider,
   GlassCard,
+  Dialog,
 } from '../../components';
 
 import {useTheme} from '../../hooks';
@@ -51,6 +52,22 @@ import {getDeviceOptions, DeviceOption} from '../../utils/deviceSelection';
 const OPENCL_DOCS_URL =
   'https://github.com/ggml-org/llama.cpp/blob/master/docs/backend/OPENCL.md#model-preparation';
 
+function getBackgroundImportCandidates(asset: Asset): string[] {
+  const candidates = [asset.uri];
+
+  if (asset.originalPath) {
+    candidates.push(
+      asset.originalPath.startsWith('/')
+        ? `file://${asset.originalPath}`
+        : asset.originalPath,
+    );
+  }
+
+  return Array.from(
+    new Set(candidates.filter((uri): uri is string => Boolean(uri))),
+  );
+}
+
 export const SettingsScreen: React.FC = observer(() => {
   const l10n = useContext(L10nContext);
   const theme = useTheme();
@@ -66,6 +83,9 @@ export const SettingsScreen: React.FC = observer(() => {
   const [apiUrl, setApiUrl] = useState('');
   const [apiKeyInput, setApiKeyInput] = useState('');
   const [isApplyingServer, setIsApplyingServer] = useState(false);
+  const [backgroundImportError, setBackgroundImportError] = useState<
+    string | null
+  >(null);
   const [gpuSupported, setGpuSupported] = useState(false);
   const [languageAnchor, setLanguageAnchor] = useState<{x: number; y: number}>({
     x: 0.0,
@@ -691,25 +711,40 @@ export const SettingsScreen: React.FC = observer(() => {
                     selectionLimit: 4,
                     includeBase64: false,
                   });
+                  if (result.errorMessage) {
+                    setBackgroundImportError(result.errorMessage);
+                    return;
+                  }
                   if (result.assets && result.assets.length > 0) {
-                    const uris = result.assets
-                      .filter(a => a.uri)
-                      .map(a => a.uri!);
-                    if (uris.length > 0) {
-                      const addedImages = await backgroundStore.addImages(uris);
-                      if (addedImages.length === 0) {
-                        Alert.alert('导入失败', '未能导入所选背景图，请重试');
-                        return;
+                    let addedCount = 0;
+
+                    for (const asset of result.assets) {
+                      const candidates = getBackgroundImportCandidates(asset);
+                      for (const uri of candidates) {
+                        const addedImages = await backgroundStore.addImages([
+                          uri,
+                        ]);
+                        if (addedImages.length > 0) {
+                          addedCount += addedImages.length;
+                          break;
+                        }
                       }
+                    }
+
+                    if (addedCount > 0) {
                       // Navigate to chat in edit mode
                       uiStore.setBackgroundEditMode(true);
                       navigation.navigate('Chat');
+                    } else {
+                      setBackgroundImportError(
+                        '未能导入所选背景图，请重试或选择其他图片',
+                      );
                     }
                   }
                 } catch (e) {
                   const msg =
                     e instanceof Error ? e.message : '导入图片失败，请重试';
-                  Alert.alert('导入失败', msg);
+                  setBackgroundImportError(msg);
                 }
               }}
               style={styles.marginTop8}>
@@ -820,6 +855,19 @@ export const SettingsScreen: React.FC = observer(() => {
         onDismiss={() => setShowHfTokenDialog(false)}
         onSave={() => setShowHfTokenDialog(false)}
       />
+      <Dialog
+        visible={Boolean(backgroundImportError)}
+        onDismiss={() => setBackgroundImportError(null)}
+        title="导入失败"
+        actions={[
+          {
+            label: l10n.common.ok,
+            onPress: () => setBackgroundImportError(null),
+            mode: 'contained',
+          },
+        ]}>
+        <Text variant="bodyMedium">{backgroundImportError}</Text>
+      </Dialog>
     </SafeAreaView>
   );
 });
