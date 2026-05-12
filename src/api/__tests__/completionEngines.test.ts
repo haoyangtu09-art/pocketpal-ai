@@ -204,7 +204,7 @@ describe('OpenAICompletionEngine', () => {
     await engine.stopCompletion();
   });
 
-  it('creates engine without api key', () => {
+  it('creates engine without api key', async () => {
     const noKeyEngine = new OpenAICompletionEngine(
       'http://localhost:1234',
       'model-id',
@@ -212,7 +212,7 @@ describe('OpenAICompletionEngine', () => {
 
     mockedStreamChat.mockResolvedValueOnce({text: '', content: ''});
 
-    noKeyEngine.completion({messages: [{role: 'user', content: 'Hi'}]} as any);
+    await noKeyEngine.completion({messages: [{role: 'user', content: 'Hi'}]} as any);
 
     expect(mockedStreamChat).toHaveBeenCalledWith(
       expect.any(Object),
