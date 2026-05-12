@@ -58,9 +58,7 @@ import {getDeviceOptions, DeviceOption} from '../../utils/deviceSelection';
 const OPENCL_DOCS_URL =
   'https://github.com/ggml-org/llama.cpp/blob/master/docs/backend/OPENCL.md#model-preparation';
 
-function getSafeBackgroundFileName(file: {
-  name: string | null;
-}): string {
+function getSafeBackgroundFileName(file: {name: string | null}): string {
   const fallback = `background-${Date.now()}.jpg`;
   const name = file.name?.trim() || fallback;
 
@@ -164,7 +162,10 @@ export const SettingsScreen: React.FC = observer(() => {
     try {
       searchStore.setSearchUrl(searchUrlInput);
       await searchStore.setApiKey(searchKeyInput);
-      Alert.alert('✓ 已保存', '搜索引擎配置已生效，将在 API 模型对话中自动注入提示词。');
+      Alert.alert(
+        '✓ 已保存',
+        '搜索引擎配置已生效，将在 API 模型对话中自动注入提示词。',
+      );
     } catch (e: any) {
       Alert.alert('✗ 保存失败', e.message || '未知错误');
     } finally {
@@ -660,7 +661,8 @@ export const SettingsScreen: React.FC = observer(() => {
           <View style={styles.cardContent}>
             <View style={styles.settingItemContainer}>
               <Text variant="labelSmall" style={styles.textDescription}>
-                配置后，使用 API 模型时将自动注入搜索工具提示词（本地模型不受影响）
+                配置后，使用 API
+                模型时将自动注入搜索工具提示词（本地模型不受影响）
               </Text>
               <Text
                 variant="titleMedium"
