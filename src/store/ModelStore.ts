@@ -2503,6 +2503,11 @@ class ModelStore {
    * @returns Promise<boolean> - True if multimodal is enabled, false otherwise
    */
   isMultimodalEnabled = async (): Promise<boolean> => {
+    // Remote models always support multimodal (vision is model-dependent on the server side)
+    if (this.activeModel?.origin === ModelOrigin.REMOTE) {
+      return true;
+    }
+
     // First check our cached flag for quick responses
     if (this.isMultimodalActive) {
       return true;

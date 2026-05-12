@@ -12,9 +12,10 @@ import {
   palStore,
   ttsStore,
   uiStore,
+  searchStore,
 } from '../store';
 
-import {MessageType, User} from '../utils/types';
+import {MessageType, ModelOrigin, User} from '../utils/types';
 import {createMultimodalWarning} from '../utils/errors';
 import {resolveSystemMessages} from '../utils/systemPromptResolver';
 import {convertToChatMessages, removeThinkingParts} from '../utils/chat';
@@ -257,6 +258,11 @@ export const useChatSession = (
       sessionCustom:
         activeSession?.completionSettings?.session_system_prompt ??
         chatSessionStore.newChatCompletionSettings?.session_system_prompt,
+      searchUrl:
+        modelStore.activeModel?.origin === ModelOrigin.REMOTE &&
+        searchStore.isConfigured
+          ? searchStore.searchUrl
+          : undefined,
     });
 
     // Prepare completion parameters and create message record

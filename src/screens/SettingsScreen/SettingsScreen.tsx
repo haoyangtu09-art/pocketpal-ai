@@ -17,9 +17,9 @@ import {Switch, Text, Button, Icon, SegmentedButtons} from 'react-native-paper';
 import {
   errorCodes,
   isErrorWithCode,
+  keepLocalCopy,
   pick,
   types,
-  type DocumentPickerResponse,
 } from '@react-native-documents/picker';
 import {useNavigation} from '@react-navigation/native';
 
@@ -45,6 +45,7 @@ import {
   hfStore,
   serverStore,
   backgroundStore,
+  searchStore,
 } from '../../store';
 import {languageDisplayNames} from '../../locales';
 
@@ -57,8 +58,13 @@ import {getDeviceOptions, DeviceOption} from '../../utils/deviceSelection';
 const OPENCL_DOCS_URL =
   'https://github.com/ggml-org/llama.cpp/blob/master/docs/backend/OPENCL.md#model-preparation';
 
-function getBackgroundImportCandidates(file: DocumentPickerResponse): string[] {
-  return file.uri ? [file.uri] : [];
+function getSafeBackgroundFileName(file: {
+  name: string | null;
+}): string {
+  const fallback = `background-${Date.now()}.jpg`;
+  const name = file.name?.trim() || fallback;
+
+  return name.replace(/[^\w.-]/g, '_');
 }
 
 export const SettingsScreen: React.FC = observer(() => {
@@ -76,6 +82,9 @@ export const SettingsScreen: React.FC = observer(() => {
   const [apiUrl, setApiUrl] = useState('');
   const [apiKeyInput, setApiKeyInput] = useState('');
   const [isApplyingServer, setIsApplyingServer] = useState(false);
+  const [searchUrlInput, setSearchUrlInput] = useState('');
+  const [searchKeyInput, setSearchKeyInput] = useState('');
+  const [isApplyingSearch, setIsApplyingSearch] = useState(false);
   const [backgroundImportError, setBackgroundImportError] = useState<
     string | null
   >(null);
@@ -140,6 +149,35 @@ export const SettingsScreen: React.FC = observer(() => {
     };
     loadServerConfig();
   }, []);
+
+  useEffect(() => {
+    const loadSearchConfig = async () => {
+      setSearchUrlInput(searchStore.searchUrl);
+      const key = await searchStore.getApiKey();
+      setSearchKeyInput(key);
+    };
+    loadSearchConfig();
+  }, []);
+
+  const handleApplySearch = async () => {
+    setIsApplyingSearch(true);
+    try {
+      searchStore.setSearchUrl(searchUrlInput);
+      await searchStore.setApiKey(searchKeyInput);
+      Alert.alert('✓ 已保存', '搜索引擎配置已生效，将在 API 模型对话中自动注入提示词。');
+    } catch (e: any) {
+      Alert.alert('✗ 保存失败', e.message || '未知错误');
+    } finally {
+      setIsApplyingSearch(false);
+    }
+  };
+
+  const handleClearSearch = async () => {
+    await searchStore.clear();
+    setSearchUrlInput('');
+    setSearchKeyInput('');
+    Alert.alert('已清除', '搜索引擎配置已清除。');
+  };
 
   const handleOutsidePress = () => {
     Keyboard.dismiss();
@@ -612,6 +650,81 @@ export const SettingsScreen: React.FC = observer(() => {
           </View>
         </GlassCard>
 
+        {/* Card 3.5 — 搜索引擎配置 */}
+        <GlassCard style={styles.card}>
+          <Text
+            variant="titleMedium"
+            style={[styles.cardTitle, styles.textLabel]}>
+            AI 搜索引擎
+          </Text>
+          <View style={styles.cardContent}>
+            <View style={styles.settingItemContainer}>
+              <Text variant="labelSmall" style={styles.textDescription}>
+                配置后，使用 API 模型时将自动注入搜索工具提示词（本地模型不受影响）
+              </Text>
+              <Text
+                variant="titleMedium"
+                style={[styles.textLabel, styles.marginTop8]}>
+                搜索 API 地址
+              </Text>
+              <RNTextInput
+                style={[
+                  styles.textInput,
+                  styles.glassTextInput,
+                  styles.textLabel,
+                ]}
+                value={searchUrlInput}
+                onChangeText={setSearchUrlInput}
+                placeholder="https://api.tavily.com"
+                placeholderTextColor={theme.colors.onSurfaceDisabled}
+                autoCapitalize="none"
+                autoCorrect={false}
+                keyboardType="url"
+              />
+              <Text
+                variant="titleMedium"
+                style={[styles.textLabel, styles.marginTop8]}>
+                搜索 API Key
+              </Text>
+              <RNTextInput
+                style={[
+                  styles.textInput,
+                  styles.glassTextInput,
+                  styles.textLabel,
+                ]}
+                value={searchKeyInput}
+                onChangeText={setSearchKeyInput}
+                placeholder="tvly-..."
+                placeholderTextColor={theme.colors.onSurfaceDisabled}
+                secureTextEntry
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
+              <View style={styles.buttonRow}>
+                <Button
+                  mode="outlined"
+                  loading={isApplyingSearch}
+                  onPress={handleApplySearch}>
+                  保存
+                </Button>
+                {searchStore.isConfigured && (
+                  <Button
+                    mode="outlined"
+                    textColor={theme.colors.error}
+                    onPress={handleClearSearch}>
+                    清除
+                  </Button>
+                )}
+              </View>
+              {searchStore.isConfigured && (
+                <Text variant="labelSmall" style={styles.textDescription}>
+                  已配置：{searchStore.searchUrl}
+                </Text>
+              )}
+            </View>
+          </View>
+        </GlassCard>
+
         {/* Card 4 — HuggingFace Token */}
         <GlassCard style={styles.card}>
           <Text
@@ -708,9 +821,23 @@ export const SettingsScreen: React.FC = observer(() => {
                   });
                   if (files.length > 0) {
                     let addedCount = 0;
+                    const localCopies = await keepLocalCopy({
+                      files: files.slice(0, 4).map(file => ({
+                        uri: file.uri,
+                        fileName: getSafeBackgroundFileName(file),
+                      })) as [
+                        {uri: string; fileName: string},
+                        ...{uri: string; fileName: string}[],
+                      ],
+                      destination: 'documentDirectory',
+                    });
 
-                    for (const file of files.slice(0, 4)) {
-                      const candidates = getBackgroundImportCandidates(file);
+                    for (const copyResult of localCopies) {
+                      if (copyResult.status !== 'success') {
+                        continue;
+                      }
+
+                      const candidates = [copyResult.localUri];
                       for (const uri of candidates) {
                         const addedImages = await backgroundStore.addImages([
                           uri,

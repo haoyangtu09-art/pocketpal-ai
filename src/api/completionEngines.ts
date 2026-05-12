@@ -1,12 +1,63 @@
 import {LlamaContext} from 'llama.rn';
+import * as RNFS from '@dr.pogodin/react-native-fs';
 
-import {streamChatCompletion} from './openai';
+import {streamChatCompletion, OpenAIChatMessage} from './openai';
 import {
   ApiCompletionParams,
   CompletionEngine,
   CompletionResult,
   CompletionStreamData,
 } from '../utils/completionTypes';
+
+/**
+ * Convert a local file:// URI to a base64 data URL for remote API consumption.
+ * Remote APIs (OpenAI, etc.) cannot access device-local file paths.
+ */
+async function fileUriToDataUrl(uri: string): Promise<string> {
+  // Already a data URL or remote URL — pass through
+  if (uri.startsWith('data:') || uri.startsWith('http')) {
+    return uri;
+  }
+  const filePath = uri.startsWith('file://') ? uri.slice(7) : uri;
+  const ext = filePath.split('.').pop()?.toLowerCase() ?? 'jpeg';
+  const mimeMap: Record<string, string> = {
+    jpg: 'image/jpeg',
+    jpeg: 'image/jpeg',
+    png: 'image/png',
+    gif: 'image/gif',
+    webp: 'image/webp',
+  };
+  const mime = mimeMap[ext] ?? 'image/jpeg';
+  const base64 = await RNFS.readFile(filePath, 'base64');
+  return `data:${mime};base64,${base64}`;
+}
+
+/**
+ * Rewrite image_url entries in messages from file:// URIs to base64 data URLs.
+ */
+async function rewriteImageUris(
+  messages: OpenAIChatMessage[],
+): Promise<OpenAIChatMessage[]> {
+  return Promise.all(
+    messages.map(async msg => {
+      if (!Array.isArray(msg.content)) {
+        return msg;
+      }
+      const newContent = await Promise.all(
+        msg.content.map(async part => {
+          if (part.type === 'image_url' && part.image_url?.url) {
+            return {
+              ...part,
+              image_url: {url: await fileUriToDataUrl(part.image_url.url)},
+            };
+          }
+          return part;
+        }),
+      );
+      return {...msg, content: newContent};
+    }),
+  );
+}
 
 /**
  * LocalCompletionEngine wraps LlamaContext conforming to the CompletionEngine interface.
@@ -72,9 +123,13 @@ export class OpenAICompletionEngine implements CompletionEngine {
   ): Promise<CompletionResult> {
     this.abortController = new AbortController();
 
+    const messages = await rewriteImageUris(
+      (params.messages || []) as OpenAIChatMessage[],
+    );
+
     return streamChatCompletion(
       {
-        messages: params.messages || [],
+        messages,
         model: this.modelId,
         temperature: params.temperature,
         top_p: params.top_p,

@@ -7,6 +7,8 @@ export interface SystemPromptDependencies {
   model?: Model | null;
   globalDefault?: string;
   sessionCustom?: string;
+  /** Search engine base URL — only injected for remote (API) models */
+  searchUrl?: string;
 }
 
 /**
@@ -52,13 +54,23 @@ export function resolveSystemPrompt(
 }
 
 /**
- * Resolves system prompt and formats it as a system message array
- * Returns empty array if no system prompt is available
+ * Resolves system prompt and formats it as a system message array.
+ * If searchUrl is provided, appends a hidden instruction telling the model
+ * to use it for web search — this is only passed for remote (API) models.
+ * Returns empty array if no system prompt is available.
  */
 export function resolveSystemMessages(
   dependencies: SystemPromptDependencies,
 ): Array<{role: 'system'; content: string}> {
-  const systemPrompt = resolveSystemPrompt(dependencies);
+  const {searchUrl} = dependencies;
+  let systemPrompt = resolveSystemPrompt(dependencies);
+
+  if (searchUrl?.trim()) {
+    const searchInstruction = `\n\n[SEARCH ENGINE]\nYou have access to a web search tool. When the user asks about recent events, real-time data, or anything that may require up-to-date information, call the search API at: ${searchUrl.trim()}\nUse it proactively to provide accurate, current answers. Always cite the source URL when using search results.`;
+    systemPrompt = systemPrompt
+      ? systemPrompt + searchInstruction
+      : searchInstruction.trimStart();
+  }
 
   if (!systemPrompt.trim()) {
     return [];
