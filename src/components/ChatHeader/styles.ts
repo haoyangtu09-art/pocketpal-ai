@@ -40,5 +40,7 @@ export const createStyles = ({
     },
     headerWithDivider: {
       backgroundColor: theme.colors.background,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: theme.colors.outline,
     },
   });

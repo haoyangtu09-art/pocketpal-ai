@@ -1,5 +1,5 @@
 import React, {useContext, useEffect, useState} from 'react';
-import {TouchableOpacity, View, Alert, SectionList} from 'react-native';
+import {TouchableOpacity, View, SectionList} from 'react-native';
 import {observer} from 'mobx-react';
 import {Divider, Drawer, Text} from 'react-native-paper';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
@@ -9,7 +9,7 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useTheme} from '../../hooks';
 import {createStyles} from './styles';
 import {chatSessionStore, uiStore, SessionMetaData} from '../../store';
-import {Menu, RenameModal, Checkbox, LiquidGlass} from '..';
+import {Menu, RenameModal, Checkbox, LiquidGlass, Dialog} from '..';
 import {
   ChatIcon,
   EditIcon,
@@ -263,6 +263,9 @@ export const SidebarContent: React.FC<DrawerContentComponentProps> = observer(
     const [menuPosition, setMenuPosition] = useState({x: 0, y: 0});
     const [sessionToRename, setSessionToRename] =
       useState<SessionMetaData | null>(null);
+    const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+    const [confirmBulkDelete, setConfirmBulkDelete] = useState(false);
+    const [exportError, setExportError] = useState<string | null>(null);
 
     const theme = useTheme();
     const styles = createStyles(theme);
@@ -323,28 +326,11 @@ export const SidebarContent: React.FC<DrawerContentComponentProps> = observer(
     const onPressDelete = React.useCallback(
       (sessionId: string) => {
         if (sessionId) {
-          Alert.alert(
-            l10n.components.sidebarContent.deleteChatTitle,
-            l10n.components.sidebarContent.deleteChatMessage,
-            [
-              {
-                text: l10n.common.cancel,
-                style: 'cancel',
-              },
-              {
-                text: l10n.common.delete,
-                style: 'destructive',
-                onPress: async () => {
-                  chatSessionStore.resetActiveSession();
-                  await chatSessionStore.deleteSession(sessionId);
-                  closeMenu();
-                },
-              },
-            ],
-          );
+          setConfirmDeleteId(sessionId);
+          closeMenu();
         }
       },
-      [l10n, closeMenu],
+      [closeMenu],
     );
 
     const handlePressExport = React.useCallback(
@@ -352,10 +338,7 @@ export const SidebarContent: React.FC<DrawerContentComponentProps> = observer(
         try {
           await exportChatSession(sessionId);
         } catch {
-          Alert.alert(
-            l10n.common.error,
-            l10n.components.sidebarContent.exportError,
-          );
+          setExportError(l10n.components.sidebarContent.exportError);
         }
       },
       [l10n],
@@ -378,44 +361,14 @@ export const SidebarContent: React.FC<DrawerContentComponentProps> = observer(
     }, []);
 
     const handleBulkDelete = React.useCallback(() => {
-      const count = chatSessionStore.selectedCount;
-
-      Alert.alert(
-        l10n.components.sidebarContent.bulkDeleteTitle,
-        t(l10n.components.sidebarContent.bulkDeleteMessage, {
-          count: count.toString(),
-        }),
-        [
-          {
-            text: l10n.common.cancel,
-            style: 'cancel',
-          },
-          {
-            text: l10n.common.delete,
-            style: 'destructive',
-            onPress: async () => {
-              try {
-                await chatSessionStore.bulkDeleteSessions();
-              } catch {
-                Alert.alert(
-                  l10n.common.error,
-                  l10n.components.sidebarContent.bulkDeleteError,
-                );
-              }
-            },
-          },
-        ],
-      );
-    }, [l10n]);
+      setConfirmBulkDelete(true);
+    }, []);
 
     const handleBulkExport = React.useCallback(async () => {
       try {
         await chatSessionStore.bulkExportSessions();
       } catch {
-        Alert.alert(
-          l10n.common.error,
-          l10n.components.sidebarContent.bulkExportError,
-        );
+        setExportError(l10n.components.sidebarContent.bulkExportError);
       }
     }, [l10n]);
 
@@ -656,6 +609,74 @@ export const SidebarContent: React.FC<DrawerContentComponentProps> = observer(
           onClose={() => setSessionToRename(null)}
           session={sessionToRename}
         />
+        <Dialog
+          visible={Boolean(confirmDeleteId)}
+          onDismiss={() => setConfirmDeleteId(null)}
+          title={l10n.components.sidebarContent.deleteChatTitle}
+          actions={[
+            {
+              label: l10n.common.cancel,
+              onPress: () => setConfirmDeleteId(null),
+            },
+            {
+              label: l10n.common.delete,
+              onPress: async () => {
+                if (confirmDeleteId) {
+                  chatSessionStore.resetActiveSession();
+                  await chatSessionStore.deleteSession(confirmDeleteId);
+                }
+                setConfirmDeleteId(null);
+              },
+              mode: 'contained',
+            },
+          ]}>
+          <Text variant="bodyMedium">
+            {l10n.components.sidebarContent.deleteChatMessage}
+          </Text>
+        </Dialog>
+        <Dialog
+          visible={confirmBulkDelete}
+          onDismiss={() => setConfirmBulkDelete(false)}
+          title={l10n.components.sidebarContent.bulkDeleteTitle}
+          actions={[
+            {
+              label: l10n.common.cancel,
+              onPress: () => setConfirmBulkDelete(false),
+            },
+            {
+              label: l10n.common.delete,
+              onPress: async () => {
+                try {
+                  await chatSessionStore.bulkDeleteSessions();
+                } catch {
+                  setExportError(
+                    l10n.components.sidebarContent.bulkDeleteError,
+                  );
+                }
+                setConfirmBulkDelete(false);
+              },
+              mode: 'contained',
+            },
+          ]}>
+          <Text variant="bodyMedium">
+            {t(l10n.components.sidebarContent.bulkDeleteMessage, {
+              count: chatSessionStore.selectedCount.toString(),
+            })}
+          </Text>
+        </Dialog>
+        <Dialog
+          visible={Boolean(exportError)}
+          onDismiss={() => setExportError(null)}
+          title={l10n.common.error}
+          actions={[
+            {
+              label: l10n.common.ok,
+              onPress: () => setExportError(null),
+              mode: 'contained',
+            },
+          ]}>
+          <Text variant="bodyMedium">{exportError}</Text>
+        </Dialog>
       </GestureHandlerRootView>
     );
   },

@@ -141,10 +141,14 @@ export const MarkdownView: React.FC<MarkdownViewProps> = React.memo(
 
     const contentWidth = useMemo(() => _maxWidth, [_maxWidth]);
 
-    const htmlContent = useMemo(
-      () => marked(markdownText) as string,
-      [markdownText],
-    );
+    const htmlContent = useMemo(() => {
+      const raw = marked(markdownText) as string;
+      // Remove blank lines inside <pre><code> blocks that marked injects
+      return raw.replace(
+        /(<pre[^>]*>)([\s\S]*?)(<\/pre>)/g,
+        (_m, open, body, close) => open + body.replace(/\n{2,}/g, '\n') + close,
+      );
+    }, [markdownText]);
     const source = useMemo(() => ({html: htmlContent}), [htmlContent]);
 
     // Render reasoning content as markdown if present

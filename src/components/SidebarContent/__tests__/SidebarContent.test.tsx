@@ -8,6 +8,7 @@ import {
   DrawerContentComponentProps,
 } from '@react-navigation/drawer';
 import {render, fireEvent, waitFor} from '@testing-library/react-native';
+import {PaperProvider} from 'react-native-paper';
 
 import {SidebarContent} from '../SidebarContent';
 
@@ -24,13 +25,15 @@ const renderSidebarContent = (props: DrawerContentComponentProps) => (
 );
 
 const TestNavigator = () => (
-  <NavigationContainer>
-    <Drawer.Navigator drawerContent={renderSidebarContent}>
-      <Drawer.Screen name="Chat" component={ChatScreen} />
-      <Drawer.Screen name="Models" component={ModelsScreen} />
-      <Drawer.Screen name="Settings" component={SettingsScreen} />
-    </Drawer.Navigator>
-  </NavigationContainer>
+  <PaperProvider>
+    <NavigationContainer>
+      <Drawer.Navigator drawerContent={renderSidebarContent}>
+        <Drawer.Screen name="Chat" component={ChatScreen} />
+        <Drawer.Screen name="Models" component={ModelsScreen} />
+        <Drawer.Screen name="Settings" component={SettingsScreen} />
+      </Drawer.Navigator>
+    </NavigationContainer>
+  </PaperProvider>
 );
 
 describe('SidebarContent Component', () => {

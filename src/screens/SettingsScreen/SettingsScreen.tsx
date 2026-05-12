@@ -5,7 +5,6 @@ import {
   Keyboard,
   ScrollView,
   TextInput as RNTextInput,
-  Alert,
   Linking,
   TouchableOpacity,
 } from 'react-native';
@@ -83,11 +82,14 @@ export const SettingsScreen: React.FC = observer(() => {
   const [searchUrlInput, setSearchUrlInput] = useState('');
   const [searchKeyInput, setSearchKeyInput] = useState('');
   const [isApplyingSearch, setIsApplyingSearch] = useState(false);
-  const [backgroundImportError, setBackgroundImportError] = useState<
+  const [infoDialog, setInfoDialog] = useState<{
+    title: string;
+    message: string;
+  } | null>(null);
+  const [confirmDeleteBgDialog, setConfirmDeleteBgDialog] = useState<
     string | null
   >(null);
-  const [backgroundImportSuccessCount, setBackgroundImportSuccessCount] =
-    useState(0);
+  const [confirmClearAllBgDialog, setConfirmClearAllBgDialog] = useState(false);
   const [gpuSupported, setGpuSupported] = useState(false);
   const [languageAnchor, setLanguageAnchor] = useState<{x: number; y: number}>({
     x: 0.0,
@@ -162,12 +164,12 @@ export const SettingsScreen: React.FC = observer(() => {
     try {
       searchStore.setSearchUrl(searchUrlInput);
       await searchStore.setApiKey(searchKeyInput);
-      Alert.alert(
-        '✓ 已保存',
-        '搜索引擎配置已生效，将在 API 模型对话中自动注入提示词。',
-      );
+      setInfoDialog({
+        title: '✓ 已保存',
+        message: '搜索引擎配置已生效，将在 API 模型对话中自动注入提示词。',
+      });
     } catch (e: any) {
-      Alert.alert('✗ 保存失败', e.message || '未知错误');
+      setInfoDialog({title: '✗ 保存失败', message: e.message || '未知错误'});
     } finally {
       setIsApplyingSearch(false);
     }
@@ -177,7 +179,7 @@ export const SettingsScreen: React.FC = observer(() => {
     await searchStore.clear();
     setSearchUrlInput('');
     setSearchKeyInput('');
-    Alert.alert('已清除', '搜索引擎配置已清除。');
+    setInfoDialog({title: '已清除', message: '搜索引擎配置已清除。'});
   };
 
   const handleOutsidePress = () => {
@@ -273,15 +275,15 @@ export const SettingsScreen: React.FC = observer(() => {
       if (models.length > 0) {
         // Auto-add the first model so it appears in the chat model selector immediately
         serverStore.addUserSelectedModel(serverId, models[0].id);
-        Alert.alert(
-          '✓ 已连接',
-          `找到 ${models.length} 个模型，已将「${models[0].id}」加入可用列表。\n\n在聊天界面右上角菜单可切换模型。`,
-        );
+        setInfoDialog({
+          title: '✓ 已连接',
+          message: `找到 ${models.length} 个模型，已将「${models[0].id}」加入可用列表。\n\n在聊天界面右上角菜单可切换模型。`,
+        });
       } else {
-        Alert.alert('✓ 已连接', '该服务器没有返回任何模型');
+        setInfoDialog({title: '✓ 已连接', message: '该服务器没有返回任何模型'});
       }
     } catch (e: any) {
-      Alert.alert('✗ 连接失败', e.message || '未知错误');
+      setInfoDialog({title: '✗ 连接失败', message: e.message || '未知错误'});
     } finally {
       setIsApplyingServer(false);
     }
@@ -303,9 +305,15 @@ export const SettingsScreen: React.FC = observer(() => {
 
     const result = await serverStore.testServerConnection(serverId);
     if (result.ok) {
-      Alert.alert('连接测试', `✓ 连接成功，找到 ${result.modelCount} 个模型`);
+      setInfoDialog({
+        title: '连接测试',
+        message: `✓ 连接成功，找到 ${result.modelCount} 个模型`,
+      });
     } else {
-      Alert.alert('连接测试', `✗ 连接失败: ${result.error ?? '未知错误'}`);
+      setInfoDialog({
+        title: '连接测试',
+        message: `✗ 连接失败: ${result.error ?? '未知错误'}`,
+      });
     }
   };
 
@@ -852,11 +860,15 @@ export const SettingsScreen: React.FC = observer(() => {
                     }
 
                     if (addedCount > 0) {
-                      setBackgroundImportSuccessCount(addedCount);
+                      setInfoDialog({
+                        title: '导入完成',
+                        message: `已导入 ${addedCount} 张背景图。`,
+                      });
                     } else {
-                      setBackgroundImportError(
-                        '未能导入所选背景图，请重试或选择其他图片',
-                      );
+                      setInfoDialog({
+                        title: '导入失败',
+                        message: '未能导入所选背景图，请重试或选择其他图片',
+                      });
                     }
                   }
                 } catch (e) {
@@ -868,7 +880,7 @@ export const SettingsScreen: React.FC = observer(() => {
                   }
                   const msg =
                     e instanceof Error ? e.message : '导入图片失败，请重试';
-                  setBackgroundImportError(msg);
+                  setInfoDialog({title: '导入失败', message: msg});
                 }
               }}
               style={styles.marginTop8}>
@@ -927,16 +939,7 @@ export const SettingsScreen: React.FC = observer(() => {
                       mode="text"
                       icon="delete"
                       textColor={theme.colors.error}
-                      onPress={() =>
-                        Alert.alert('删除背景图', '确定要删除这张背景图吗？', [
-                          {text: '取消', style: 'cancel'},
-                          {
-                            text: '删除',
-                            style: 'destructive',
-                            onPress: () => backgroundStore.removeImage(img.id),
-                          },
-                        ])
-                      }>
+                      onPress={() => setConfirmDeleteBgDialog(img.id)}>
                       删除
                     </Button>
                   </View>
@@ -951,20 +954,7 @@ export const SettingsScreen: React.FC = observer(() => {
                 <Button
                   mode="text"
                   textColor={theme.colors.error}
-                  onPress={() =>
-                    Alert.alert(
-                      '清空全部背景图',
-                      '确定要删除所有背景图吗？此操作不可撤销。',
-                      [
-                        {text: '取消', style: 'cancel'},
-                        {
-                          text: '清空',
-                          style: 'destructive',
-                          onPress: () => backgroundStore.clearAll(),
-                        },
-                      ],
-                    )
-                  }>
+                  onPress={() => setConfirmClearAllBgDialog(true)}>
                   清空全部背景图
                 </Button>
               </>
@@ -978,39 +968,60 @@ export const SettingsScreen: React.FC = observer(() => {
         onSave={() => setShowHfTokenDialog(false)}
       />
       <Dialog
-        visible={Boolean(backgroundImportError)}
-        onDismiss={() => setBackgroundImportError(null)}
-        title="导入失败"
+        visible={Boolean(infoDialog)}
+        onDismiss={() => setInfoDialog(null)}
+        title={infoDialog?.title ?? ''}
         actions={[
           {
             label: l10n.common.ok,
-            onPress: () => setBackgroundImportError(null),
+            onPress: () => setInfoDialog(null),
             mode: 'contained',
           },
         ]}>
-        <Text variant="bodyMedium">{backgroundImportError}</Text>
+        <Text variant="bodyMedium">{infoDialog?.message}</Text>
       </Dialog>
       <Dialog
-        visible={backgroundImportSuccessCount > 0}
-        onDismiss={() => setBackgroundImportSuccessCount(0)}
-        title="导入完成"
+        visible={Boolean(confirmDeleteBgDialog)}
+        onDismiss={() => setConfirmDeleteBgDialog(null)}
+        title="删除背景图"
         actions={[
           {
-            label: '稍后编辑',
-            onPress: () => setBackgroundImportSuccessCount(0),
+            label: '取消',
+            onPress: () => setConfirmDeleteBgDialog(null),
           },
           {
-            label: '去编辑',
+            label: '删除',
             onPress: () => {
-              setBackgroundImportSuccessCount(0);
-              uiStore.setBackgroundEditMode(true);
-              navigation.navigate('Chat');
+              if (confirmDeleteBgDialog) {
+                backgroundStore.removeImage(confirmDeleteBgDialog);
+              }
+              setConfirmDeleteBgDialog(null);
+            },
+            mode: 'contained',
+          },
+        ]}>
+        <Text variant="bodyMedium">确定要删除这张背景图吗？</Text>
+      </Dialog>
+      <Dialog
+        visible={confirmClearAllBgDialog}
+        onDismiss={() => setConfirmClearAllBgDialog(false)}
+        title="清空全部背景图"
+        actions={[
+          {
+            label: '取消',
+            onPress: () => setConfirmClearAllBgDialog(false),
+          },
+          {
+            label: '清空',
+            onPress: () => {
+              backgroundStore.clearAll();
+              setConfirmClearAllBgDialog(false);
             },
             mode: 'contained',
           },
         ]}>
         <Text variant="bodyMedium">
-          已导入 {backgroundImportSuccessCount} 张背景图。
+          确定要删除所有背景图吗？此操作不可撤销。
         </Text>
       </Dialog>
     </SafeAreaView>
