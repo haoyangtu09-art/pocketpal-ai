@@ -9,7 +9,6 @@ import {defaultCompletionParams} from '../utils/completionSettingsVersions';
 import {palStore} from './PalStore';
 
 const NEW_SESSION_TITLE = 'New Session';
-const TITLE_LIMIT = 40;
 
 // Minimum time between streaming UI updates to prevent excessive re-renders
 // Set to 150ms to stay well above the 50ms threshold that triggers React warnings
