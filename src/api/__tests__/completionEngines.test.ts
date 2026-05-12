@@ -212,7 +212,9 @@ describe('OpenAICompletionEngine', () => {
 
     mockedStreamChat.mockResolvedValueOnce({text: '', content: ''});
 
-    await noKeyEngine.completion({messages: [{role: 'user', content: 'Hi'}]} as any);
+    await noKeyEngine.completion({
+      messages: [{role: 'user', content: 'Hi'}],
+    } as any);
 
     expect(mockedStreamChat).toHaveBeenCalledWith(
       expect.any(Object),
