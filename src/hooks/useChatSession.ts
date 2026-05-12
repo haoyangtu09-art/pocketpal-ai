@@ -23,7 +23,43 @@ import {activateKeepAwake, deactivateKeepAwake} from '../utils/keepAwake';
 import {
   toApiCompletionParams,
   CompletionParams,
+  CompletionEngine,
 } from '../utils/completionTypes';
+
+const TITLE_MAX_LENGTH = 30;
+
+/**
+ * Ask the active engine to generate a short title for the first turn.
+ * Fire-and-forget — errors are swallowed so they never affect the chat UX.
+ */
+async function generateSessionTitle(
+  engine: CompletionEngine,
+  userText: string,
+  aiText: string,
+  sessionId: string,
+): Promise<void> {
+  try {
+    const prompt = `Given this conversation, write a concise title (max ${TITLE_MAX_LENGTH} characters, no quotes, no punctuation at end):\nUser: ${userText.slice(0, 200)}\nAssistant: ${aiText.slice(0, 200)}\nTitle:`;
+    const result = await engine.completion({
+      messages: [{role: 'user', content: prompt}],
+      n_predict: 20,
+      temperature: 0.3,
+      stop: ['\n', '.', '。'],
+    } as any);
+    const raw = (result.text || result.content || '').trim();
+    const title = raw.replace(/^["'「『]|["'」』]$/g, '').trim();
+    if (title) {
+      await chatSessionStore.updateSessionTitleBySessionId(
+        sessionId,
+        title.length > TITLE_MAX_LENGTH
+          ? title.slice(0, TITLE_MAX_LENGTH) + '…'
+          : title,
+      );
+    }
+  } catch {
+    // silently ignore — title generation is best-effort
+  }
+}
 
 // Helper function to prepare completion parameters using OpenAI-compatible messages API
 const prepareCompletion = async ({
@@ -442,6 +478,12 @@ export const useChatSession = (
         );
       } catch (ttsErr) {
         console.warn('[useChatSession] TTS complete hook failed:', ttsErr);
+      }
+
+      // Generate AI title for first turn (fire-and-forget)
+      if (currentMessages.length === 0 && result.text) {
+        const sessionId = currentMessageInfo.current.sessionId;
+        generateSessionTitle(engine, message.text, result.text, sessionId);
       }
     } catch (error) {
       // Clear the promise on error too
