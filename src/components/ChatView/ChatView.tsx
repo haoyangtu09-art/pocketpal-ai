@@ -130,6 +130,8 @@ export interface ChatProps extends ChatTopLevelProps {
   isStreaming?: boolean;
   /** Indicates if the AI is currently thinking (processing but not yet streaming) */
   isThinking?: boolean;
+  /** Optional label shown in the loading bubble (e.g. "Searching...") */
+  thinkingLabel?: string;
   messages: MessageType.Any[];
   /** Used for pagination (infinite scroll). Called when user scrolls
    * to the very end of the list (minus `onEndReachedThreshold`).
@@ -175,6 +177,7 @@ export const ChatView = observer(
     isStopVisible,
     isStreaming = false,
     isThinking = false,
+    thinkingLabel,
     messages,
     onEndReached,
     onMessageLongPress: externalOnMessageLongPress,
@@ -811,11 +814,11 @@ export const ChatView = observer(
     const renderListHeaderComponent = React.useCallback(
       () => (
         <>
-          {isThinking && <LoadingBubble />}
+          {isThinking && <LoadingBubble label={thinkingLabel} />}
           {chatMessages.length > 0 && <Reanimated.View style={headerStyle} />}
         </>
       ),
-      [isThinking, chatMessages.length, headerStyle],
+      [isThinking, thinkingLabel, chatMessages.length, headerStyle],
     );
 
     // Render complete chat list with scroll-to-bottom button

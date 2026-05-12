@@ -24,7 +24,9 @@ import {
   palStore,
   uiStore,
   backgroundStore,
+  searchStore,
 } from '../../store';
+import {ModelOrigin} from '../../utils/types';
 import {hasVideoCapability} from '../../utils/pal-capabilities';
 
 import {L10nContext} from '../../utils';
@@ -142,6 +144,12 @@ export const ChatScreen: React.FC = observer(() => {
 
   // Show loading bubble only during the thinking phase (inferencing but not streaming)
   const isThinking = modelStore.inferencing && !modelStore.isStreaming;
+  // Show "Searching..." label when search is configured and we're using a remote model
+  const isSearchActive =
+    isThinking &&
+    modelStore.activeModel?.origin === ModelOrigin.REMOTE &&
+    searchStore.isConfigured;
+  const thinkingLabel = isSearchActive ? 'Searching...' : undefined;
 
   const handleThinkingToggle = async (enabled: boolean) => {
     const currentSession = chatSessionStore.sessions.find(
@@ -228,6 +236,7 @@ export const ChatScreen: React.FC = observer(() => {
         user={user}
         isStopVisible={modelStore.inferencing}
         isThinking={isThinking}
+        thinkingLabel={thinkingLabel}
         isStreaming={modelStore.isStreaming}
         sendButtonVisibilityMode="always"
         showImageUpload={true}

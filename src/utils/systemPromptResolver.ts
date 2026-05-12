@@ -66,7 +66,7 @@ export function resolveSystemMessages(
   let systemPrompt = resolveSystemPrompt(dependencies);
 
   if (searchUrl?.trim()) {
-    const searchInstruction = `\n\n[SEARCH ENGINE]\nYou have access to a web search tool. When the user asks about recent events, real-time data, or anything that may require up-to-date information, call the search API at: ${searchUrl.trim()}\nUse it proactively to provide accurate, current answers. Always cite the source URL when using search results.`;
+    const searchInstruction = `\n\n[SEARCH ENGINE]\nYou have access to a web search tool. When the user asks about recent events, real-time data, or anything that may require up-to-date information, call the search API at: ${searchUrl.trim()}\nIMPORTANT formatting rules:\n- Never output raw JSON, XML tags, or tool-call syntax in your reply\n- Always present search results as natural language\n- Cite sources inline as markdown links, e.g. [Title](URL)\n- Keep your final answer clean and readable`;
     systemPrompt = systemPrompt
       ? systemPrompt + searchInstruction
       : searchInstruction.trimStart();

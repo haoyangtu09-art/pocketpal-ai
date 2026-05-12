@@ -1,4 +1,4 @@
-import {View, Animated} from 'react-native';
+import {View, Animated, Text} from 'react-native';
 import React, {useEffect, useRef} from 'react';
 
 import {useTheme} from '../../hooks';
@@ -46,7 +46,11 @@ const LoadingDot: React.FC<LoadingDotProps> = ({delay, theme}) => {
   );
 };
 
-export const LoadingBubble: React.FC = () => {
+interface LoadingBubbleProps {
+  label?: string;
+}
+
+export const LoadingBubble: React.FC<LoadingBubbleProps> = ({label}) => {
   const theme = useTheme();
 
   return (
@@ -55,6 +59,11 @@ export const LoadingBubble: React.FC = () => {
         styles.container,
         {backgroundColor: theme.colors.surfaceVariant},
       ]}>
+      {label ? (
+        <Text style={[styles.label, {color: theme.colors.outline}]}>
+          {label}
+        </Text>
+      ) : null}
       <LoadingDot delay={0} theme={theme} />
       <LoadingDot delay={200} theme={theme} />
       <LoadingDot delay={400} theme={theme} />
