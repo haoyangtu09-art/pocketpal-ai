@@ -842,14 +842,28 @@ export const SettingsScreen: React.FC = observer(() => {
                     });
 
                     let addedCount = 0;
+                    const errors: string[] = [];
                     for (const copy of localCopies) {
                       if (copy.status !== 'success') {
+                        errors.push(copy.copyError ?? 'unknown copy error');
+                        console.warn(
+                          'BackgroundImport keepLocalCopy failed:',
+                          copy.copyError,
+                          'sourceUri:',
+                          copy.sourceUri,
+                        );
                         continue;
                       }
                       const added = await backgroundStore.addImages([
                         copy.localUri,
                       ]);
                       addedCount += added.length;
+                      if (added.length === 0) {
+                        console.warn(
+                          'BackgroundImport addImages returned 0 for:',
+                          copy.localUri,
+                        );
+                      }
                       // Delete the temp cache copy — addImages wrote a
                       // resized version to BG_DIR already.
                       try {
@@ -868,7 +882,10 @@ export const SettingsScreen: React.FC = observer(() => {
                     } else {
                       setInfoDialog({
                         title: '导入失败',
-                        message: '未能导入所选背景图，请重试或选择其他图片',
+                        message:
+                          errors.length > 0
+                            ? `错误: ${errors[0]}`
+                            : '未能导入所选背景图，请重试或选择其他图片',
                       });
                     }
                   }

@@ -59,22 +59,25 @@ async function copyUriToLocal(uri: string): Promise<string | null> {
       srcUri = `file://${uri}`;
     }
 
+    console.log('BackgroundStore: copyUriToLocal srcUri=', srcUri.slice(0, 80));
+
     if (Platform.OS === 'android') {
-      // Always resize on Android — OOM crashes occur even with file:// URIs
-      // if the source image is large (phones routinely produce 8–20 MB JPEGs).
+      if (!NativeImageResize) {
+        console.warn('BackgroundStore: NativeImageResize module not available');
+        return null;
+      }
       await ensureDir();
       const destPath = `${BG_DIR}/${makeId()}.jpg`;
-      if (NativeImageResize) {
-        try {
-          await NativeImageResize.resizeImage(srcUri, destPath);
-          return `file://${destPath}`;
-        } catch (e) {
-          const message = e instanceof Error ? e.message : String(e);
-          console.warn('BackgroundStore: native resize failed', message);
-          return null;
-        }
+      console.log('BackgroundStore: resizing to', destPath.slice(-40));
+      try {
+        await NativeImageResize.resizeImage(srcUri, destPath);
+        console.log('BackgroundStore: resize success');
+        return `file://${destPath}`;
+      } catch (e) {
+        const message = e instanceof Error ? e.message : String(e);
+        console.warn('BackgroundStore: native resize failed:', message);
+        return null;
       }
-      return null;
     }
 
     // iOS: file:// URIs are fine to reference directly
@@ -82,6 +85,7 @@ async function copyUriToLocal(uri: string): Promise<string | null> {
       return srcUri;
     }
 
+    console.warn('BackgroundStore: unhandled URI scheme', srcUri.slice(0, 40));
     return null;
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);
