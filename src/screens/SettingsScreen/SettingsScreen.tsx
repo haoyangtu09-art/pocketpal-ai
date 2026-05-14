@@ -8,6 +8,7 @@ import {
   Linking,
   TouchableOpacity,
 } from 'react-native';
+import * as RNFS from '@dr.pogodin/react-native-fs';
 
 import {debounce} from 'lodash';
 import {observer} from 'mobx-react-lite';
@@ -16,6 +17,7 @@ import {Switch, Text, Button, Icon, SegmentedButtons} from 'react-native-paper';
 import {
   errorCodes,
   isErrorWithCode,
+  keepLocalCopy,
   pick,
   types,
 } from '@react-native-documents/picker';
@@ -822,14 +824,41 @@ export const SettingsScreen: React.FC = observer(() => {
                     mode: 'import',
                   });
                   if (files.length > 0) {
-                    // Pass picker URIs directly to addImages — it always runs
-                    // NativeImageResize internally to cap file size at 1280px.
-                    // Using keepLocalCopy before addImages was the root cause of
-                    // OOM crashes: it stored the full-resolution file and
-                    // bypassed the resize step.
-                    const uris = files.slice(0, 4).map(f => f.uri);
-                    const addedImages = await backgroundStore.addImages(uris);
-                    const addedCount = addedImages.length;
+                    // On Android, pick() returns a temporary content:// URI
+                    // whose permission may expire across async boundaries.
+                    // keepLocalCopy materialises a stable file:// copy first,
+                    // then addImages runs NativeImageResize to produce a
+                    // ≤1280px JPEG in the app's backgrounds directory.
+                    // The temporary copy is deleted after resize succeeds.
+                    const localCopies = await keepLocalCopy({
+                      files: files.slice(0, 4).map(file => ({
+                        uri: file.uri,
+                        fileName: `bg_${Date.now()}_${Math.random().toString(36).slice(2, 6)}.jpg`,
+                      })) as [
+                        {uri: string; fileName: string},
+                        ...{uri: string; fileName: string}[],
+                      ],
+                      destination: 'cachesDirectory',
+                    });
+
+                    let addedCount = 0;
+                    for (const copy of localCopies) {
+                      if (copy.status !== 'success') {
+                        continue;
+                      }
+                      const added = await backgroundStore.addImages([
+                        copy.localUri,
+                      ]);
+                      addedCount += added.length;
+                      // Delete the temp cache copy — addImages wrote a
+                      // resized version to BG_DIR already.
+                      try {
+                        const path = copy.localUri.replace('file://', '');
+                        await RNFS.unlink(path);
+                      } catch {
+                        // ignore cleanup errors
+                      }
+                    }
 
                     if (addedCount > 0) {
                       setInfoDialog({
