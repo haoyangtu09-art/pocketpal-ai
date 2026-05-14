@@ -45,36 +45,41 @@ async function ensureDir() {
 }
 
 /**
- * Normalize an image URI for storage.
- * File paths from the picker are already app-readable and size-limited, so
- * keep them as-is to avoid device-specific native copy/decode crashes.
- * Android content:// URIs are decoded through the native resize module.
+ * Copy and resize any image URI into the app's private backgrounds directory.
+ * Always runs through NativeImageResize on Android to cap the image at
+ * MAX_DIM×MAX_DIM (1280px) — this is the ONLY entry point for stored images
+ * and must never be bypassed, regardless of URI scheme (file://, content://, /).
+ * On iOS, file:// URIs are returned as-is since the OS handles memory pressure.
  */
 async function copyUriToLocal(uri: string): Promise<string | null> {
   try {
-    const isLocalFile = isFileUri(uri) || isLocalFilePath(uri);
-
-    if (isLocalFile) {
-      return isFileUri(uri) ? uri : `file://${uri}`;
+    // Normalise to a form the native module can open
+    let srcUri = uri;
+    if (isLocalFilePath(uri)) {
+      srcUri = `file://${uri}`;
     }
 
-    if (Platform.OS === 'android' && isContentUri(uri)) {
+    if (Platform.OS === 'android') {
+      // Always resize on Android — OOM crashes occur even with file:// URIs
+      // if the source image is large (phones routinely produce 8–20 MB JPEGs).
       await ensureDir();
       const destPath = `${BG_DIR}/${makeId()}.jpg`;
       if (NativeImageResize) {
         try {
-          await NativeImageResize.resizeImage(uri, destPath);
+          await NativeImageResize.resizeImage(srcUri, destPath);
           return `file://${destPath}`;
         } catch (e) {
           const message = e instanceof Error ? e.message : String(e);
-          console.warn(
-            'BackgroundStore: native resize failed, trying file copy',
-            message,
-          );
+          console.warn('BackgroundStore: native resize failed', message);
+          return null;
         }
       }
-
       return null;
+    }
+
+    // iOS: file:// URIs are fine to reference directly
+    if (isFileUri(srcUri)) {
+      return srcUri;
     }
 
     return null;
@@ -87,6 +92,8 @@ async function copyUriToLocal(uri: string): Promise<string | null> {
 
 /**
  * Validate a single stored image entry. Returns null if invalid.
+ * On Android, also re-encodes large files through NativeImageResize so that
+ * images stored before the resize-on-import fix are automatically migrated.
  */
 async function validateImage(
   img: BackgroundImage,
@@ -113,6 +120,43 @@ async function validateImage(
       if (!exists) {
         console.warn('BackgroundStore: removing missing file', path.slice(-40));
         return null;
+      }
+
+      // Migration: re-encode large files that were stored before the resize fix
+      if (Platform.OS === 'android' && NativeImageResize) {
+        const stat = await RNFS.stat(path);
+        const sizeBytes =
+          typeof stat.size === 'number' ? stat.size : parseInt(stat.size, 10);
+        // Files larger than 2 MB are likely unresized originals — re-encode them
+        if (sizeBytes > 2 * 1024 * 1024) {
+          const inBgDir = path.startsWith(BG_DIR);
+          const destPath = inBgDir ? path : `${BG_DIR}/${makeId()}.jpg`;
+          try {
+            await ensureDir();
+            await NativeImageResize.resizeImage(img.uri, destPath);
+            // If source was outside BG_DIR, delete the original after resize
+            if (!inBgDir) {
+              RNFS.unlink(path).catch(() => {});
+            }
+            return {
+              ...img,
+              uri: `file://${destPath}`,
+              x: Number.isFinite(img.x) ? img.x : 0,
+              y: Number.isFinite(img.y) ? img.y : 0,
+              scale:
+                Number.isFinite(img.scale) && img.scale > 0 ? img.scale : 1,
+              rotation: Number.isFinite(img.rotation) ? img.rotation : 0,
+              opacity: Number.isFinite(img.opacity) ? img.opacity : 1,
+            };
+          } catch {
+            // If re-encode fails, remove the entry — it's safer than keeping it
+            console.warn(
+              'BackgroundStore: removing oversized image that could not be resized',
+              path.slice(-40),
+            );
+            return null;
+          }
+        }
       }
     } catch {
       return null;

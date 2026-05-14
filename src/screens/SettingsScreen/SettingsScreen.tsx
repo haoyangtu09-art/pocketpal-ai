@@ -16,7 +16,6 @@ import {Switch, Text, Button, Icon, SegmentedButtons} from 'react-native-paper';
 import {
   errorCodes,
   isErrorWithCode,
-  keepLocalCopy,
   pick,
   types,
 } from '@react-native-documents/picker';
@@ -56,13 +55,6 @@ import {getDeviceOptions, DeviceOption} from '../../utils/deviceSelection';
 // OpenCL documentation URL (not localized)
 const OPENCL_DOCS_URL =
   'https://github.com/ggml-org/llama.cpp/blob/master/docs/backend/OPENCL.md#model-preparation';
-
-function getSafeBackgroundFileName(file: {name: string | null}): string {
-  const fallback = `background-${Date.now()}.jpg`;
-  const name = file.name?.trim() || fallback;
-
-  return name.replace(/[^\w.-]/g, '_');
-}
 
 export const SettingsScreen: React.FC = observer(() => {
   const l10n = useContext(L10nContext);
@@ -830,34 +822,14 @@ export const SettingsScreen: React.FC = observer(() => {
                     mode: 'import',
                   });
                   if (files.length > 0) {
-                    let addedCount = 0;
-                    const localCopies = await keepLocalCopy({
-                      files: files.slice(0, 4).map(file => ({
-                        uri: file.uri,
-                        fileName: getSafeBackgroundFileName(file),
-                      })) as [
-                        {uri: string; fileName: string},
-                        ...{uri: string; fileName: string}[],
-                      ],
-                      destination: 'documentDirectory',
-                    });
-
-                    for (const copyResult of localCopies) {
-                      if (copyResult.status !== 'success') {
-                        continue;
-                      }
-
-                      const candidates = [copyResult.localUri];
-                      for (const uri of candidates) {
-                        const addedImages = await backgroundStore.addImages([
-                          uri,
-                        ]);
-                        if (addedImages.length > 0) {
-                          addedCount += addedImages.length;
-                          break;
-                        }
-                      }
-                    }
+                    // Pass picker URIs directly to addImages — it always runs
+                    // NativeImageResize internally to cap file size at 1280px.
+                    // Using keepLocalCopy before addImages was the root cause of
+                    // OOM crashes: it stored the full-resolution file and
+                    // bypassed the resize step.
+                    const uris = files.slice(0, 4).map(f => f.uri);
+                    const addedImages = await backgroundStore.addImages(uris);
+                    const addedCount = addedImages.length;
 
                     if (addedCount > 0) {
                       setInfoDialog({
