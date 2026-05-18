@@ -4,6 +4,7 @@ import android.content.ContentResolver
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
+import android.util.Log
 import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.module.annotations.ReactModule
@@ -28,6 +29,7 @@ class ImageResizeModule(reactContext: ReactApplicationContext) :
     override fun getName(): String = NativeImageResizeSpec.NAME
 
     override fun resizeImage(uri: String, destPath: String, promise: Promise) {
+        Log.d("ImageResizeModule", "resizeImage uri=$uri destPath=$destPath")
         try {
             val parsedUri = Uri.parse(uri)
             val resolver: ContentResolver = reactApplicationContext.contentResolver
@@ -80,7 +82,8 @@ class ImageResizeModule(reactContext: ReactApplicationContext) :
     private fun openStream(resolver: ContentResolver, uri: Uri) =
         when (uri.scheme) {
             ContentResolver.SCHEME_CONTENT -> resolver.openInputStream(uri)
-            ContentResolver.SCHEME_FILE    -> File(uri.path!!).inputStream()
+            ContentResolver.SCHEME_FILE    -> uri.path?.let { File(it).inputStream() }
+                                             ?: resolver.openInputStream(uri)
             else                           -> File(uri.toString()).inputStream()
         }
 
